@@ -1,0 +1,47 @@
+<div class="navbar bg-primary text-primary-content">
+  <button class="btn btn-ghost text-xl">daisyUI</button>
+</div>
+<div class="container mx-auto p-5 fixed inset-0 flex justify-center mt-10">
+  <div class="flex flex-col h-full w-full max-w-3xl max-h-1xl p-4 chat-container">
+    <div class="flex-grow p-2 bg-base-100 overflow-y-auto">
+
+        <div *ngIf="messages.length === 0" class="text-center text-gray-500 h-full justify-center items-center flex flex-col initial-title">
+            <h2 class="text-6xl bold">Bienvenido al Chat.</h2>
+            <h2 class="text-1xl bold text-red-500">Comienza enviando un mensaje.</h2>
+        </div>
+        
+      <div *ngFor="let msg of messages" class="chat" [ngClass]="{'chat-start': msg.sender === 'bot', 'chat-end': msg.sender === 'user'}">
+        <div class="chat-image avatar">
+          <div class="w-8 rounded-full">
+            <img
+              alt="Tailwind CSS chat bubble component"
+              [src]="msg.sender === 'user' ? 'https://img.daisyui.com/images/profile/demo/anakeen@192.webp' : 'https://www.shutterstock.com/image-vector/chat-bot-icon-virtual-smart-600nw-2478937555.jpg'"
+            />
+          </div>
+        </div>
+        <div class="chat-bubble" [ngClass]="{'chat-bubble-primary': msg.sender === 'user', 'chat-bubble-secondary': msg.sender === 'bot'}">
+          {{ msg.text }}
+        </div>
+        <div class="chat-footer opacity-50 text-xs">
+          {{ msg.timestamp }}
+        </div>
+      </div>
+      <div *ngIf="isLoadingBotResponse" class="chat chat-start">
+        <div class="chat-image avatar">
+          <div class="w-8 rounded-full">
+            <img
+              alt="Tailwind CSS chat bubble component"
+              src="https://www.shutterstock.com/image-vector/chat-bot-icon-virtual-smart-600nw-2478937555.jpg"
+            />
+          </div>
+        </div>
+        <div class="chat-bubble chat-bubble-secondary">
+          <span class="loading loading-dots loading-md"></span> </div>
+      </div>
+    </div>
+
+    <div class="p-2 bg-base-100 rounded-b-lg shadow-sm">
+      <app-input-chat (messageSent)="addMessage($event)"></app-input-chat>
+    </div>
+  </div>
+</div>

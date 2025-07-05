@@ -1,0 +1,7 @@
+.initial-title{
+animation:initial-title 0.4s} 
+@keyframes initial-title
+{
+    0% {transform:scaleY(.2)}
+    100% {transform:scaleY(1)}
+}

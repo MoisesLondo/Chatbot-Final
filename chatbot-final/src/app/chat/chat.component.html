@@ -1,4 +1,4 @@
-<div class="navbar bg-primary text-primary-content">
+<div class="navbar bg-secondary text-secondary-content">
   <button class="btn btn-ghost text-xl">daisyUI</button>
 </div>
 <div class="container mx-auto p-5 fixed inset-0 flex justify-center mt-10">
@@ -19,7 +19,7 @@
             />
           </div>
         </div>
-        <div class="chat-bubble" [ngClass]="{'chat-bubble-primary': msg.sender === 'user', 'chat-bubble-secondary': msg.sender === 'bot'}">
+        <div class="chat-bubble" [ngClass]="{'chat-bubble-secondary': msg.sender === 'user', 'chat-bubble-primary': msg.sender === 'bot'}">
           {{ msg.text }}
         </div>
         <div class="chat-footer opacity-50 text-xs">
@@ -35,12 +35,12 @@
             />
           </div>
         </div>
-        <div class="chat-bubble chat-bubble-secondary">
+        <div class="chat-bubble chat-bubble-primary">
           <span class="loading loading-dots loading-md"></span> </div>
       </div>
     </div>
 
-    <div class="p-2 bg-base-100 rounded-b-lg shadow-sm">
+    <div class="p-2 bg-primary rounded-b-lg shadow-sm">
       <app-input-chat (messageSent)="addMessage($event)"></app-input-chat>
     </div>
   </div>

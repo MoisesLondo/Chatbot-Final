@@ -1,3 +1,39 @@
 /* You can add global styles to this file, and also import other style files */
 @import "tailwindcss";
 @plugin "daisyui";
+@plugin "daisyui/theme" {
+  name: "megahierro";
+  default: true;
+  prefersdark: false;
+  color-scheme: light;
+
+  /* Colores Base */
+  --color-base-100: #e1dfe6;
+  --color-base-200: #d3d1d8; /* Versión ligeramente más oscura de base-100 */
+  --color-base-300: #c5c3ca; /* Versión más oscura aún de base-100 */
+  --color-base-content: #232375; /* Texto principal en azul oscuro */
+
+  /* Colores Principales de Marca */
+  --color-primary: #fc7070; /* Tu rojo salmón */
+  --color-primary-content: #000000; /* Blanco para mejor contraste */
+
+  --color-secondary: #232375; /* Tu azul oscuro */
+  --color-secondary-content: #e1dfe6; /* Gris claro para contraste */
+
+  --color-accent: #fc7070; /* Mismo que primary para mantener consistencia */
+  --color-accent-content: #ffffff; /* Blanco para contraste */
+
+  --color-neutral: #232375; /* Azul oscuro como neutral */
+  --color-neutral-content: #e1dfe6; /* Gris claro sobre neutral */
+
+  /* Colores de Estado - adaptados a tu paleta limitada */
+  --color-info: #232375; /* Azul oscuro para info */
+  --color-info-content: #e1dfe6;
+  --color-success: #70fc70; /* Verde derivado de tu rojo (#fc7070 -> #70fc70) */
+  --color-success-content: #232375;
+  --color-warning: #fcf470; /* Amarillo derivado de tu rojo (#fc7070 -> #fcf470) */
+  --color-warning-content: #232375;
+  --color-error: #fc7070; /* Tu rojo original para errores */
+  --color-error-content: #ffffff;
+  --color-primary-transparent: transparent;
+}

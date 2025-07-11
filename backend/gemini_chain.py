@@ -1,26 +1,27 @@
+# gemini_chain.py
+
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain.chains import ConversationChain
-from langchain.memory import ConversationSummaryBufferMemory
+from langchain.prompts import PromptTemplate
 from langchain_postgres import PostgresChatMessageHistory
+from langchain_core.runnables.history import RunnableWithMessageHistory
+
 import psycopg
 import os
 from dotenv import load_dotenv
 from config import GOOGLE_API_KEY
+from typing import Dict, Any
+
 load_dotenv()
 
 def get_gemini_llm():
-    llm = ChatGoogleGenerativeAI(
+    return ChatGoogleGenerativeAI(
         model="gemini-2.0-flash",
         temperature=0.2,
         max_retries=2,
         api_key=GOOGLE_API_KEY
     )
-    return llm
 
-def get_gemini_chain_with_memory(session_id: str):
-    llm = get_gemini_llm()
-    summary_llm = get_gemini_llm()
-
+def get_session_history(session_id: str) -> PostgresChatMessageHistory:
     sync_connection = psycopg.connect(
         dbname=os.getenv("DB_NAME"),
         user=os.getenv("DB_USER"),
@@ -28,23 +29,47 @@ def get_gemini_chain_with_memory(session_id: str):
         host=os.getenv("DB_HOST"),
         port=os.getenv("DB_PORT")
     )
-
-    history = PostgresChatMessageHistory(
+    return PostgresChatMessageHistory(
         "chat_history",
-        session_id, 
+        session_id,
         sync_connection=sync_connection
     )
 
-    memory = ConversationSummaryBufferMemory(
-        llm=summary_llm,
-        chat_memory=history,
-        max_token_limit=200,
-        return_messages=True
+def get_gemini_chain_with_memory(session_id: str):
+    llm = get_gemini_llm()
+    prompt = PromptTemplate(
+        input_variables=["chat_history", "input"],
+        template="""
+Eres un asistente útil. Aquí está el historial de la conversación:
+{chat_history}
+
+Usuario: {input}
+Asistente:"""
     )
 
-    conversation_chain = ConversationChain(
-        llm=llm,
-        memory=memory,
-        verbose=True
+    chain = prompt | llm
+
+    chain_with_history = RunnableWithMessageHistory(
+        chain,
+        get_session_history,
+        input_messages_key="input",
+        history_messages_key="chat_history",
     )
-    return conversation_chain
+
+    return chain_with_history
+
+def get_chat_history(session_id: str) -> Dict[str, Any]:
+    try:
+        history = get_session_history(session_id)
+        messages = [{
+            "type": message.type,
+            "content": message.content,
+        } for message in history.messages]
+
+        return {
+            "session_id": session_id,
+            "history": messages
+        }
+    except Exception as e:
+        print(f"Error getting chat history: {e}")
+        return {"error": str(e)}

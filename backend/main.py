@@ -1,8 +1,10 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
 from gemini_chain import get_gemini_chain_with_memory, get_chat_history
 from typing import Dict, Any
 from fastapi.middleware.cors import CORSMiddleware
+
+from models.question import Question
+from models.sessionId import SessionID
 
 
 app = FastAPI()
@@ -22,12 +24,7 @@ app.add_middleware(
     allow_headers=["*"],  # Permitir todos los encabezados
 )
 
-class Question(BaseModel):
-    query: str
-    session_id: str
 
-class SessionID(BaseModel):
-    session_id: str
 
 @app.post("/ask")
 def ask_question(q: Question):

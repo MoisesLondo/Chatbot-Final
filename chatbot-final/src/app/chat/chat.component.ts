@@ -1,7 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InputChatComponent } from '../input-chat/input-chat.component';
+import { AskPayload, HistoryEntry } from '../models';
+import { ChatService } from '../services';
+
 
 interface Message {
   text: string;
@@ -16,28 +19,65 @@ interface Message {
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css']
 })
-export class ChatComponent {
-  newMessage: string = '';
+export class ChatComponent implements OnInit {
+  
   isLoadingBotResponse: boolean = false;
-  messages: Message[] = [
-  ];
+  messages: Message[] = [];
+  private sessionId: string
 
-  addMessage(message: string): void {
-    this.messages.push({
-      text: message,
-      sender: 'user',
-      timestamp: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
-    });
+  constructor(private chat: ChatService) {
 
+    this.sessionId = localStorage.getItem('session_id') ?? crypto.randomUUID();
+    localStorage.setItem('session_id', this.sessionId);
+   }
+
+  ngOnInit(): void {
+    this.loadHistory();
+  }
+
+  addMessage(userText: string): void {
+    this.messages.push(this.buildMsg(userText, 'user'));
     this.isLoadingBotResponse = true;
 
-    setTimeout(() => {
-      this.messages.push({
-        text: 'Gracias por tu mensaje. Estoy aquí para ayudarte.',
-        sender: 'bot',
-        timestamp: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
-      });
-      this.isLoadingBotResponse = false;
-    }, 3000);
+    const payload: AskPayload = { query: userText, session_id: this.sessionId };
+
+
+    this.chat.askToBot(payload).subscribe({
+      next: res => {
+        this.messages.push(this.buildMsg(res.content, 'bot'));
+        this.isLoadingBotResponse = false;
+
+        this.loadHistory();
+      },
+      error: err => {
+        console.error(err);
+        this.isLoadingBotResponse = false;
+      }
+    });
+  }
+
+  private loadHistory(): void {
+    this.chat.getHistory(this.sessionId).subscribe({
+      next: h => {
+        this.messages = h.history.map(this.historyEntryToMsg);
+      },
+      error: err => console.error(err)
+    });
+  }
+
+  private historyEntryToMsg = (e: HistoryEntry): Message => {
+    const sender = e.type === 'human' ? 'user' : 'bot';
+    return this.buildMsg(e.content, sender);
+  };
+
+  private buildMsg(text: string, sender: 'user' | 'bot'): Message {
+    return {
+      text,
+      sender,
+      timestamp: new Date().toLocaleTimeString('es-ES', {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    };
   }
 }

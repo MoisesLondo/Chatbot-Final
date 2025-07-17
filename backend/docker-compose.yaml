@@ -7,9 +7,9 @@ services:
     ports:
       - 5432:5432
     environment:
-      POSTGRES_USER: langchain_user
-      POSTGRES_PASSWORD: langchain_pass
-      POSTGRES_DB: langchain_db
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     volumes:
       - "./docker/volumes/postgresql:/var/lib/postgresql/data"
 

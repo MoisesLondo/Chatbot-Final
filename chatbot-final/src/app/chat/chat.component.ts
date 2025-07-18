@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, ChangeDetectorRef} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InputChatComponent } from '../input-chat/input-chat.component';
@@ -19,13 +19,13 @@ interface Message {
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css']
 })
-export class ChatComponent implements OnInit {
-  
+export class ChatComponent implements OnInit, AfterViewInit {
+  @ViewChild('chatContainer') private chatContainer!: ElementRef;
   isLoadingBotResponse: boolean = false;
   messages: Message[] = [];
   private sessionId: string
 
-  constructor(private chat: ChatService) {
+  constructor(private chat: ChatService, private cdr: ChangeDetectorRef) {
 
     this.sessionId = localStorage.getItem('session_id') ?? crypto.randomUUID();
     localStorage.setItem('session_id', this.sessionId);
@@ -35,9 +35,14 @@ export class ChatComponent implements OnInit {
     this.loadHistory();
   }
 
+    ngAfterViewInit(): void {
+    setTimeout(() => this.scrollToBottom(), 0);
+  }
+
   addMessage(userText: string): void {
     this.messages.push(this.buildMsg(userText, 'user'));
     this.isLoadingBotResponse = true;
+    setTimeout(() => this.scrollToBottom(), 0);
 
     const payload: AskPayload = { query: userText, session_id: this.sessionId };
 
@@ -60,6 +65,8 @@ export class ChatComponent implements OnInit {
     this.chat.getHistory(this.sessionId).subscribe({
       next: h => {
         this.messages = h.history.map(this.historyEntryToMsg);
+        this.cdr.detectChanges();
+        setTimeout(() => this.scrollToBottom(), 0);
       },
       error: err => console.error(err)
     });
@@ -79,5 +86,11 @@ export class ChatComponent implements OnInit {
         minute: '2-digit'
       })
     };
+  }
+
+  private scrollToBottom(): void {
+    try {
+      this.chatContainer.nativeElement.scrollTop = this.chatContainer.nativeElement.scrollHeight;
+    } catch (err) {}
   }
 }

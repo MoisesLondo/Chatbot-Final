@@ -40,7 +40,7 @@ def get_gemini_chain_with_memory(session_id: str):
     prompt = PromptTemplate(
         input_variables=["chat_history", "input"],
         template="""
-Eres un asistente útil. Aquí está el historial de la conversación:
+Eres un asistente de una empresa distribuidora de hierro y materiales de construcción. Aquí está el historial de la conversación:
 {chat_history}
 
 Usuario: {input}

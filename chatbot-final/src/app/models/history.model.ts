@@ -2,7 +2,7 @@
 export interface HistoryEntry{ 
     type: 'human' | 'ai'; 
     content: string; 
-    timestamp?: string; 
+    // timestamp?: string; 
 }
 export interface HistoryResp { 
     session_id: string; 

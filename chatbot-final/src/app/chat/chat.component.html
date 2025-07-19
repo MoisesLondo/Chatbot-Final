@@ -22,9 +22,9 @@
         <div class="chat-bubble" [ngClass]="{'chat-bubble-secondary': msg.sender === 'user', 'chat-bubble-primary': msg.sender === 'bot'}">
           {{ msg.text }}
         </div>
-        <div class="chat-footer opacity-50 text-xs">
+        <!-- <div class="chat-footer opacity-50 text-xs">
           {{ msg.timestamp }}
-        </div>
+        </div> -->
       </div>
       <div *ngIf="isLoadingBotResponse" class="chat chat-start">
         <div class="chat-image avatar">

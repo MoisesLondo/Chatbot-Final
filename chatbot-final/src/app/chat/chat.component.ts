@@ -9,7 +9,7 @@ import { ChatService } from '../services';
 interface Message {
   text: string;
   sender: 'user' | 'bot';
-  timestamp: string;
+  // timestamp: string;
 }
 
 @Component({
@@ -50,6 +50,7 @@ export class ChatComponent implements OnInit, AfterViewInit {
     this.chat.askToBot(payload).subscribe({
       next: res => {
         this.messages.push(this.buildMsg(res.content, 'bot'));
+        setTimeout(() => this.scrollToBottom(), 0);
         this.isLoadingBotResponse = false;
 
         this.loadHistory();
@@ -80,11 +81,11 @@ export class ChatComponent implements OnInit, AfterViewInit {
   private buildMsg(text: string, sender: 'user' | 'bot'): Message {
     return {
       text,
-      sender,
-      timestamp: new Date().toLocaleTimeString('es-ES', {
-        hour: '2-digit',
-        minute: '2-digit'
-      })
+      sender
+      // timestamp: new Date().toLocaleTimeString('es-ES', {
+      //   hour: '2-digit',
+      //   minute: '2-digit'
+      // })
     };
   }
 

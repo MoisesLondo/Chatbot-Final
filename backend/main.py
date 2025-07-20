@@ -1,10 +1,8 @@
 from fastapi import FastAPI
-from gemini_chain import get_gemini_chain_with_memory, get_chat_history
-from typing import Dict, Any
-from fastapi.middleware.cors import CORSMiddleware
 
-from models.question import Question
-from models.sessionId import SessionID
+from fastapi.middleware.cors import CORSMiddleware
+from routes.question_routes import router as question_router
+
 
 
 app = FastAPI()
@@ -16,6 +14,7 @@ origins = [
     "http://127.0.0.1:3000"
 ]
 
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,  # Permitir estos orígenes
@@ -24,35 +23,6 @@ app.add_middleware(
     allow_headers=["*"],  # Permitir todos los encabezados
 )
 
+# Incluir las rutas de preguntas
+app.include_router(question_router)
 
-
-@app.post("/ask")
-def ask_question(q: Question):
-    try:
-        chain = get_gemini_chain_with_memory(q.session_id)
-
-        response = chain.invoke(
-            {"input": q.query},
-            {"configurable": {"session_id": q.session_id}}
-        )
-
-        final_response = response["text"] if isinstance(response, dict) and "text" in response else response
-        return {
-            "input": q.query,
-            "response": final_response.content
-        }
-
-    except Exception as e:
-        print(f"Error: {e}")
-        return {"error": str(e)}
-
-@app.post("/history")
-def get_history(session: SessionID) -> Dict[str, Any]:
-    try:
-        history = get_chat_history(session.session_id)
-        return {
-            "history": history['history']
-        }
-    except Exception as e:
-        print(f"Error getting history: {e}")
-        return {"error": str(e)}

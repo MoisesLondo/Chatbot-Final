@@ -2,7 +2,7 @@ POST http://127.0.0.1:8000/ask
 Content-Type: application/json
 
 {
-  "query": "¿Quien eres?",
+  "query": "¿Quien es pablo?",
   "session_id": "f47ac10b-58cc-4372-a567-0e02b2c3d478"
 }
 
@@ -11,5 +11,5 @@ POST http://127.0.0.1:8000/history
 Content-Type: application/json
 
 {
-  "session_id": "f47ac10b-58cc-4372-a567-0e02b2c3d470"
+  "session_id": "f47ac10b-58cc-4372-a567-0e02b2c3d478"
 }

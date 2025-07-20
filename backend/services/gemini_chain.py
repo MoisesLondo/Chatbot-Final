@@ -1,4 +1,5 @@
-# gemini_chain.py
+# Archivo movido desde backend/gemini_chain.py
+# Copia aquí el contenido original de gemini_chain.py
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.prompts import PromptTemplate
@@ -73,3 +74,5 @@ def get_chat_history(session_id: str) -> Dict[str, Any]:
     except Exception as e:
         print(f"Error getting chat history: {e}")
         return {"error": str(e)}
+# Archivo movido desde backend/gemini_chain.py
+# Copia aquí el contenido original de gemini_chain.py

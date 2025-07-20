@@ -62,18 +62,3 @@ def generar_cotizacion_pdf(datos: dict) -> str:
     except Exception as e:
         print(f"Error al convertir a PDF: {e}")
         return temp_docx  # Devuelve el DOCX si falla la conversión
-
-# Ejemplo de uso:
-datos = {
-    "idCot": "COT-001",
-    "cxName": "Juan Pérez",
-    "cxId": "JPR123",
-    "cxAddress": "Calle Falsa 123",
-    "creatDate": "2025-07-19",
-    "expDate": "2025-07-31",
-    "products": [
-        {"pCod": "A001", "prodName": "Varilla", "qty": 10, "uPrice": 100},
-        {"pCod": "B002", "prodName": "Cemento", "qty": 5, "uPrice": 200}
-    ]
-}
-ruta_pdf = generar_cotizacion_pdf(datos)

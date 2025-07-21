@@ -81,16 +81,17 @@ export class ChatComponent implements OnInit, AfterViewInit {
     return this.buildMsg(e.content, sender, sender === 'bot');
   };
 
-  private buildMsg(text: string, sender: 'user' | 'bot', withHtml: boolean = false): Message {
+  private buildMsg(text: string | undefined, sender: 'user' | 'bot', withHtml: boolean = false): Message {
+    const safeText = text || '';
     if (withHtml && sender === 'bot') {
       return {
-        text,
+        text: safeText,
         sender,
-        htmlText: text.replace(/\n/g, '<br>')
+        htmlText: safeText.replace(/\n/g, '<br>')
       };
     }
     return {
-      text,
+      text: safeText,
       sender
     };
   }

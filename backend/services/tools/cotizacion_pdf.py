@@ -1,8 +1,28 @@
 # cotizacion_pdf.py
-
 from docxtpl import DocxTemplate
 import uuid
 import os
+
+
+def generar_id_cotizacion():
+    """
+    Genera un ID único para la cotización.
+    """
+    return str(uuid.uuid4())
+
+def generar_creation_date():
+    """
+    Genera la fecha de creación de la cotización.
+    """
+    from datetime import datetime
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+def generar_expiration_date():
+    """
+    Genera la fecha de expiración de la cotización (30 días después de la creación).
+    """
+    from datetime import datetime, timedelta
+    return (datetime.now() + timedelta(days=15)).strftime("%Y-%m-%d %H:%M:%S")
 
 def generar_cotizacion_pdf(datos: dict) -> str:
     """
@@ -32,12 +52,12 @@ def generar_cotizacion_pdf(datos: dict) -> str:
 
     # Contexto para la plantilla
     context = {
-        "idCot": datos["idCot"],
+        "idCot": generar_id_cotizacion(),
         "cxName": datos["cxName"],
         "cxId": datos["cxId"],
         "cxAddress": datos["cxAddress"],
-        "creatDate": datos["creatDate"],
-        "expDate": datos["expDate"],
+        "creatDate": generar_creation_date(),
+        "expDate": generar_expiration_date(),
         "products": productos,
         "sumAll": f"{sumAll:.2f}",
         "iva": f"{iva:.2f}",

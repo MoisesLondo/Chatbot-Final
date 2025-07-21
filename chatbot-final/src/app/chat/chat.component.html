@@ -21,7 +21,7 @@
         </div>
         <div class="chat-bubble" [ngClass]="{'chat-bubble-secondary': msg.sender === 'user', 'chat-bubble-primary': msg.sender === 'bot'}">
           <ng-container *ngIf="msg.sender === 'bot'">
-            <markdown [data]="msg.text"></markdown>
+            <span [innerHTML]="msg.htmlText || msg.text"></span>
           </ng-container>
           <ng-container *ngIf="msg.sender === 'user'">
             {{ msg.text }}

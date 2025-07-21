@@ -10,6 +10,7 @@ interface Message {
   text: string;
   sender: 'user' | 'bot';
   // timestamp: string;
+  htmlText?: string; // para mostrar saltos de línea
 }
 
 @Component({
@@ -52,7 +53,7 @@ export class ChatComponent implements OnInit, AfterViewInit {
 
     this.chat.askToBot(payload).subscribe({
       next: res => {
-        this.messages.push(this.buildMsg(res.content, 'bot'));
+        this.messages.push(this.buildMsg(res.content, 'bot', true));
         setTimeout(() => this.scrollToBottom(), 0);
         this.isLoadingBotResponse = false;
         this.loadHistory();
@@ -77,17 +78,20 @@ export class ChatComponent implements OnInit, AfterViewInit {
 
   private historyEntryToMsg = (e: HistoryEntry): Message => {
     const sender = e.type === 'human' ? 'user' : 'bot';
-    return this.buildMsg(e.content, sender);
+    return this.buildMsg(e.content, sender, sender === 'bot');
   };
 
-  private buildMsg(text: string, sender: 'user' | 'bot'): Message {
+  private buildMsg(text: string, sender: 'user' | 'bot', withHtml: boolean = false): Message {
+    if (withHtml && sender === 'bot') {
+      return {
+        text,
+        sender,
+        htmlText: text.replace(/\n/g, '<br>')
+      };
+    }
     return {
       text,
       sender
-      // timestamp: new Date().toLocaleTimeString('es-ES', {
-      //   hour: '2-digit',
-      //   minute: '2-digit'
-      // })
     };
   }
 

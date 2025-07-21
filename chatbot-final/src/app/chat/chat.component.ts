@@ -32,8 +32,8 @@ export class ChatComponent implements OnInit, AfterViewInit {
   private sessionId: string
 
   constructor(private chat: ChatService, private cdr: ChangeDetectorRef) {
-    this.sessionId = localStorage.getItem('session_id') ?? crypto.randomUUID();
-    localStorage.setItem('session_id', this.sessionId);
+    this.sessionId = sessionStorage.getItem('session_id') ?? crypto.randomUUID();
+    sessionStorage.setItem('session_id', this.sessionId);
   }
 
   ngOnInit(): void {
@@ -45,25 +45,30 @@ export class ChatComponent implements OnInit, AfterViewInit {
   }
 
   addMessage(userText: string): void {
-    this.messages.push(this.buildMsg(userText, 'user'));
-    this.isLoadingBotResponse = true;
+  this.messages.push(this.buildMsg(userText, 'user'));
+  this.isLoadingBotResponse = true;
+  setTimeout(() => this.scrollToBottom(), 0);
+
+  const payload: AskPayload = { query: userText, session_id: this.sessionId };
+
+  this.chat.askToBot(payload).subscribe({
+  next: res => {
+    console.log('Respuesta del backend:', res); // <-- Agrega esto
+    if (res.content) {
+      this.messages.push(this.buildMsg(res.content, 'bot', true));
+    } else {
+      this.messages.push(this.buildMsg('No se recibió respuesta del bot.', 'bot'));
+    }
     setTimeout(() => this.scrollToBottom(), 0);
-
-    const payload: AskPayload = { query: userText, session_id: this.sessionId };
-
-    this.chat.askToBot(payload).subscribe({
-      next: res => {
-        this.messages.push(this.buildMsg(res.content, 'bot', true));
-        setTimeout(() => this.scrollToBottom(), 0);
-        this.isLoadingBotResponse = false;
-        this.loadHistory();
-      },
-      error: err => {
-        console.error(err);
-        this.isLoadingBotResponse = false;
-      }
-    });
+    this.isLoadingBotResponse = false;
+  },
+  error: err => {
+    console.error(err);
+    this.messages.push(this.buildMsg('Error al obtener respuesta del bot.', 'bot'));
+    this.isLoadingBotResponse = false;
   }
+});
+}
 
   private loadHistory(): void {
     this.chat.getHistory(this.sessionId).subscribe({

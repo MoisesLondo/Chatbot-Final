@@ -5,5 +5,5 @@ export interface AskPayload {
 
 export interface AskResponse {
   input: string;
-  content: string;
+  response: string;
 }

@@ -54,8 +54,8 @@ export class ChatComponent implements OnInit, AfterViewInit {
   this.chat.askToBot(payload).subscribe({
   next: res => {
     console.log('Respuesta del backend:', res); // <-- Agrega esto
-    if (res.content) {
-      this.messages.push(this.buildMsg(res.content, 'bot', true));
+    if (res.response) {
+      this.messages.push(this.buildMsg(res.response, 'bot', true));
     } else {
       this.messages.push(this.buildMsg('No se recibió respuesta del bot.', 'bot'));
     }

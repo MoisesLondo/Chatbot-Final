@@ -15,7 +15,7 @@ DB_CONFIG = {
     "port": os.getenv("DB_PORT")
 }
 
-def search_similar_documents(query: str, top_k: int = 10):
+def search(query: str, top_k: int = 10):
     co = cohere.Client(COHERE_API_KEY)
     embedding_response = co.embed(
         texts=[query],

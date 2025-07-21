@@ -1,10 +1,10 @@
-from services.gemini_chain import get_gemini_chain_with_memory, get_chat_history
+from services.gemini_agent import get_gemini_agent_with_memory, get_chat_history
 
 # Lógica para manejar preguntas
 
 def ask_question_controller(q):
     try:
-        chain = get_gemini_chain_with_memory(q.session_id)
+        chain = get_gemini_agent_with_memory(q.session_id)
         response = chain.invoke(
             {"input": q.query},
             {"configurable": {"session_id": q.session_id}}
@@ -12,7 +12,7 @@ def ask_question_controller(q):
         final_response = response["text"] if isinstance(response, dict) and "text" in response else response
         return {
             "input": q.query,
-            "response": final_response.content
+            "response": final_response["output"]
         }
     except Exception as e:
         print(f"Error: {e}")

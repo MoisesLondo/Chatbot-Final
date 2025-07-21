@@ -5,11 +5,11 @@
   <div class="flex flex-col h-full w-full max-w-3xl max-h-1xl p-4 chat-container">
     <div class="flex-grow p-2 bg-base-100 overflow-y-auto" #chatContainer>
 
-        <div *ngIf="messages.length === 0" class="text-center text-gray-500 h-full justify-center items-center flex flex-col initial-title">
-            <h2 class="text-6xl bold">Bienvenido al Chat.</h2>
-            <h2 class="text-1xl bold text-red-500">Comienza enviando un mensaje.</h2>
-        </div>
-        
+      <div *ngIf="messages.length === 0" class="text-center text-gray-500 h-full justify-center items-center flex flex-col initial-title">
+          <h2 class="text-6xl bold">Bienvenido al Chat.</h2>
+          <h2 class="text-1xl bold text-red-500">Comienza enviando un mensaje.</h2>
+      </div>
+
       <div *ngFor="let msg of messages" class="chat" [ngClass]="{'chat-start': msg.sender === 'bot', 'chat-end': msg.sender === 'user'}">
         <div class="chat-image avatar">
           <div class="w-8 rounded-full">
@@ -20,12 +20,14 @@
           </div>
         </div>
         <div class="chat-bubble" [ngClass]="{'chat-bubble-secondary': msg.sender === 'user', 'chat-bubble-primary': msg.sender === 'bot'}">
-          {{ msg.text }}
+          <ng-container *ngIf="msg.sender === 'bot'">
+            <markdown [data]="msg.text"></markdown>
+          </ng-container>
+          <ng-container *ngIf="msg.sender === 'user'">
+            {{ msg.text }}
+          </ng-container>
         </div>
-        <!-- <div class="chat-footer opacity-50 text-xs">
-          {{ msg.timestamp }}
-        </div> -->
-      </div>
+        </div>
       <div *ngIf="isLoadingBotResponse" class="chat chat-start">
         <div class="chat-image avatar">
           <div class="w-8 rounded-full">

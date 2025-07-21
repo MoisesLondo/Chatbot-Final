@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { InputChatComponent } from '../input-chat/input-chat.component';
 import { AskPayload, HistoryEntry } from '../models';
 import { ChatService } from '../services';
-
+import { MarkdownModule } from 'ngx-markdown';
 
 interface Message {
   text: string;
@@ -15,7 +15,12 @@ interface Message {
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [CommonModule, FormsModule, InputChatComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    InputChatComponent,
+    MarkdownModule // Add MarkdownModule here
+  ],
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css']
 })
@@ -26,16 +31,15 @@ export class ChatComponent implements OnInit, AfterViewInit {
   private sessionId: string
 
   constructor(private chat: ChatService, private cdr: ChangeDetectorRef) {
-
     this.sessionId = localStorage.getItem('session_id') ?? crypto.randomUUID();
     localStorage.setItem('session_id', this.sessionId);
-   }
+  }
 
   ngOnInit(): void {
     this.loadHistory();
   }
 
-    ngAfterViewInit(): void {
+  ngAfterViewInit(): void {
     setTimeout(() => this.scrollToBottom(), 0);
   }
 
@@ -46,13 +50,11 @@ export class ChatComponent implements OnInit, AfterViewInit {
 
     const payload: AskPayload = { query: userText, session_id: this.sessionId };
 
-
     this.chat.askToBot(payload).subscribe({
       next: res => {
         this.messages.push(this.buildMsg(res.content, 'bot'));
         setTimeout(() => this.scrollToBottom(), 0);
         this.isLoadingBotResponse = false;
-
         this.loadHistory();
       },
       error: err => {

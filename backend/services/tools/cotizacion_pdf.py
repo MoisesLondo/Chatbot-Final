@@ -66,7 +66,7 @@ def generar_cotizacion_pdf(datos: dict) -> str:
 
     # Renderizar y guardar DOCX temporal
     temp_id = str(uuid.uuid4())
-    temp_dir = "temp"
+    temp_dir = "static/temp"
     os.makedirs(temp_dir, exist_ok=True)
     temp_docx = os.path.join(temp_dir, f"{temp_id}.docx")
     temp_pdf = os.path.join(temp_dir, f"{temp_id}.pdf")
@@ -78,7 +78,7 @@ def generar_cotizacion_pdf(datos: dict) -> str:
     try:
         from docx2pdf import convert
         convert(temp_docx, temp_pdf)
-        return temp_pdf
+        return f"http://localhost:8000/static/temp/{temp_id}.pdf"
     except Exception as e:
         print(f"Error al convertir a PDF: {e}")
-        return temp_docx  # Devuelve el DOCX si falla la conversión
+        return f"http://localhost:8000/static/temp/{temp_id}.docx"  # Devuelve el DOCX si falla la conversión

@@ -21,8 +21,15 @@
         </div>
         <div class="chat-bubble" [ngClass]="{'chat-bubble-secondary': msg.sender === 'user', 'chat-bubble-primary': msg.sender === 'bot'}">
           <ng-container *ngIf="msg.sender === 'bot'">
-            <span [innerHTML]="msg.htmlText || msg.text"></span>
-          </ng-container>
+            <span *ngIf="msg.text.includes('/static/temp/')">
+              <a [href]="getStaticTempUrl(msg.text)" target="_blank">
+                Descargar cotización
+              </a>
+            </span>
+            <span *ngIf="!msg.text.includes('/static/temp/')">
+              {{ msg.text }}
+            </span>
+            </ng-container>
           <ng-container *ngIf="msg.sender === 'user'">
             {{ msg.text }}
           </ng-container>

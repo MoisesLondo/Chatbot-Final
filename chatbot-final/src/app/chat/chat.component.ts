@@ -45,30 +45,30 @@ export class ChatComponent implements OnInit, AfterViewInit {
   }
 
   addMessage(userText: string): void {
-  this.messages.push(this.buildMsg(userText, 'user'));
-  this.isLoadingBotResponse = true;
-  setTimeout(() => this.scrollToBottom(), 0);
-
-  const payload: AskPayload = { query: userText, session_id: this.sessionId };
-
-  this.chat.askToBot(payload).subscribe({
-  next: res => {
-    console.log('Respuesta del backend:', res); // <-- Agrega esto
-    if (res.response) {
-      this.messages.push(this.buildMsg(res.response, 'bot', true));
-    } else {
-      this.messages.push(this.buildMsg('No se recibió respuesta del bot.', 'bot'));
-    }
+    this.messages.push(this.buildMsg(userText, 'user'));
+    this.isLoadingBotResponse = true;
     setTimeout(() => this.scrollToBottom(), 0);
-    this.isLoadingBotResponse = false;
-  },
-  error: err => {
-    console.error(err);
-    this.messages.push(this.buildMsg('Error al obtener respuesta del bot.', 'bot'));
-    this.isLoadingBotResponse = false;
+
+    const payload: AskPayload = { query: userText, session_id: this.sessionId };
+
+    this.chat.askToBot(payload).subscribe({
+      next: res => {
+        console.log('Respuesta del backend:', res); // <-- Agrega esto
+        if (res.response) {
+          this.messages.push(this.buildMsg(res.response, 'bot', true));
+        } else {
+          this.messages.push(this.buildMsg('No se recibió respuesta del bot.', 'bot'));
+        }
+        setTimeout(() => this.scrollToBottom(), 0);
+        this.isLoadingBotResponse = false;
+      },
+      error: err => {
+        console.error(err);
+        this.messages.push(this.buildMsg('Error al obtener respuesta del bot.', 'bot'));
+        this.isLoadingBotResponse = false;
+      }
+    });
   }
-});
-}
 
   private loadHistory(): void {
     this.chat.getHistory(this.sessionId).subscribe({
@@ -105,5 +105,19 @@ export class ChatComponent implements OnInit, AfterViewInit {
     try {
       this.chatContainer.nativeElement.scrollTop = this.chatContainer.nativeElement.scrollHeight;
     } catch (err) {}
+  }
+
+  /**
+   * Extracts and constructs the full URL for static temporary files.
+   * This method is used in the template to avoid regex parsing issues.
+   * @param text The message text from the bot.
+   * @returns The full URL if a match is found, otherwise null.
+   */
+  getStaticTempUrl(text: string): string | null {
+    const match = text.match(/\/static\/temp\/[^\s]+/);
+    if (match && match[0]) {
+      return 'http://localhost:8000' + match[0];
+    }
+    return null;
   }
 }

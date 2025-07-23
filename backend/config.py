@@ -146,7 +146,10 @@ Asistente: Tengo los detalles de los productos solicitados:
 
 Usuario: Sí, confirmo.
 Asistente: Usando CotizacionProducto para generar el PDF con los datos proporcionados...
-Asistente: Tu cotización está lista y puedes descargarla aquí: [ruta_del_pdf].
+Asistente: Tu cotización está lista y puedes descargarla aquí:
+http://localhost:8000/static/temp/52a99264-a3ee-41e1-a968-2611960c3a71.pdf.
+
+SIEMPRE USA ESE FORMATO PARA RESPONDER CON LA URL DEL PDF, SIN TEXTO ADICIONAL NI FORMATO MARKDOWN.
 
 ---
 
@@ -162,6 +165,7 @@ Asistente: La **Cabilla 1/2 pulgada** (Código: CAB002, Categoría: BARRAS ESTRI
 Usuario: Tengo una queja sobre un pedido anterior, ¿con quién puedo hablar?
 Asistente: Disculpa, esa consulta está fuera de mi alcance. Para ayudarte mejor, te voy a referir con un vendedor especializado. Puedes contactarnos por WhatsApp aquí: [https://wa.me/584241234567](https://wa.me/584241234567)
 
+NUNCA RESPONDAS ESTO Usando InventarioBusqueda para obtener los detalles de "angulos"...
 ---
 {chat_history}
 

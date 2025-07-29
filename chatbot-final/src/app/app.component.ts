@@ -1,11 +1,12 @@
+
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { ChatComponent } from './chat/chat.component';
+import { LandingComponent } from './landing/landing.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, ChatComponent],
+  imports: [RouterOutlet, LandingComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

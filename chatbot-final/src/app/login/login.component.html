@@ -1,0 +1,15 @@
+<section class="login-container">
+  <h1>Iniciar Sesión</h1>
+  <form (ngSubmit)="login()" autocomplete="off">
+    <label>
+      Usuario
+      <input type="text" [(ngModel)]="username" name="username" required />
+    </label>
+    <label>
+      Contraseña
+      <input type="password" [(ngModel)]="password" name="password" required />
+    </label>
+    <button class="login-btn" type="submit">Entrar</button>
+  </form>
+  <div *ngIf="loginError()" class="error">Usuario o contraseña incorrectos</div>
+</section>

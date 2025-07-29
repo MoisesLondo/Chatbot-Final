@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from routes.question_routes import router as question_router
+from routes import login
 
 
 
@@ -25,6 +26,8 @@ app.add_middleware(
 
 # Incluir las rutas de preguntas
 app.include_router(question_router)
+
+app.include_router(login.router)
 
 # Montar el directorio de archivos estáticos
 app.mount("/static", StaticFiles(directory="static"), name="static")

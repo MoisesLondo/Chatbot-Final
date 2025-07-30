@@ -1,0 +1,15 @@
+.dashboard-container {
+  min-height: 100vh;
+  background: linear-gradient(120deg, #f3f4f6 0%, #e0e7ef 100%);
+  padding: 0;
+}
+
+main {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 2rem 1rem 3rem 1rem;
+}

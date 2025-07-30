@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -16,16 +17,17 @@ export class LoginComponent {
   protected password = '';
   protected readonly error = signal(false);
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private authService: AuthService) {}
 
   login() {
-    // Demo: usuario: admin, contraseña: 1234
-    if (this.username === 'admin' && this.password === '1234') {
-      this.error.set(false);
-      this.router.navigate(['/']);
-    } else {
-      this.error.set(true);
-    }
+    this.authService.login(this.username, this.password).subscribe((res) => {
+      if (res) {
+        this.error.set(false);
+        this.router.navigate(['/dashboard']); // o ruta protegida
+      } else {
+        this.error.set(true);
+      }
+    });
   }
 
   loginError() {

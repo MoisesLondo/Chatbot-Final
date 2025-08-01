@@ -10,6 +10,11 @@ import { CommonModule } from '@angular/common'
   styleUrl: './input-chat.component.css'
 })
 export class InputChatComponent {
+  @Output() resetChat = new EventEmitter<void>();
+  // ...existing code...
+  resetChatHistory(): void {
+    this.resetChat.emit();
+  }
   @Output() messageSent = new EventEmitter<string>();
 
   message: string = '';

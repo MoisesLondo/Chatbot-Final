@@ -1,12 +1,9 @@
-import cohere
 import psycopg
-import json
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-COHERE_API_KEY = os.getenv("COHERE_API_KEY")
 DB_CONFIG = {
     "host": os.getenv("DB_HOST"),
     "dbname": os.getenv("DB_NAME"),
@@ -15,41 +12,83 @@ DB_CONFIG = {
     "port": os.getenv("DB_PORT")
 }
 
-def search(query: str, top_k: int = 10):
-    co = cohere.Client(COHERE_API_KEY)
-    embedding_response = co.embed(
-        texts=[query],
-        input_type="search_query"
-    )
-    query_embedding = embedding_response.embeddings[0][:1024]
-    query_embedding_str = "[" + ",".join(str(x) for x in query_embedding) + "]"
-
+def search(query: str, top_k: int = 10, mas_baratos: bool = False, mas_caros: bool = False):
+    if mas_baratos and mas_caros:
+        raise ValueError("No puedes usar mas_baratos=True y mas_caros=True al mismo tiempo.")
     conn = psycopg.connect(**DB_CONFIG)
     cur = conn.cursor()
-    cur.execute("""
-        SELECT id, content, metadata, similarity
-        FROM match_documents(%s, 10);
-    """, (query_embedding_str,))
-    results = cur.fetchall()
 
     query_lower = query.lower()
-    if any(word in query_lower for word in ["barato", "económico", "precio", "menor precio"]):
-        def get_precio(r):
-            meta = r[2]
-            if isinstance(meta, str):
-                meta = json.loads(meta)
-            return float(meta.get("precio_minorista", 1e9))
-        results = sorted(results, key=get_precio)[:top_k]
+    categorias_conocidas = [
+        "laminas galvanizadas",
+        "tubo redondo ventilacion",
+        "pletinas",
+        "rieles perfiles y rejillas",
+        "alambron",
+        "cerchas",
+        "angulos",
+        "barras",
+        "barras estriadas",
+        "tubos hierro pulido",
+        "mallas",
+        "laminas hierro negro",
+        "vigas",
+        "tubos hierro negro",
+        "base para anclaje",
+        "laminas para techo",
+        "laminas hierro pulido"
+    ]
+
+    # Detectar palabras de categoría en el query
+    palabras_categoria = []
+    for cat in categorias_conocidas:
+        for palabra in cat.split():
+            if palabra in query_lower:
+                palabras_categoria.append(palabra)
+
+    # Construir filtro SQL
+    params = [f"%{query}%", f"%{query}%"]
+    where_clauses = [
+        "(unaccent(lower(nombre)) LIKE %s OR unaccent(lower(categoria)) LIKE %s)"
+    ]
+    if palabras_categoria:
+        where_clauses.append(
+            "(" + " OR ".join(["unaccent(lower(categoria)) LIKE %s" for _ in palabras_categoria]) + ")"
+        )
+        for p in palabras_categoria:
+            params.append(f"%{p}%")
+
+    where_sql = " AND ".join(where_clauses)
+
+    # Ordenar según los argumentos
+    if mas_baratos:
+        order_by = " ORDER BY precio_minorista ASC "
+    elif mas_caros:
+        order_by = " ORDER BY precio_minorista DESC "
     else:
-        results = results[:top_k]
+        order_by = ""
+
+    params.append(top_k)
+    sql = f"""
+        SELECT id, codigo, nombre, categoria, precio_minorista, cantidad_disponible
+        FROM "Inventario"
+        WHERE {where_sql}
+        {order_by}
+        LIMIT %s;
+    """
+    cur.execute(sql, tuple(params))
+    results = cur.fetchall()
 
     cur.close()
     conn.close()
+
     return [
         {
             "id": r[0],
-            "content": r[1],
-            "metadata": r[2],
-            "similarity": round(r[3], 4)
+            "codigo": r[1],
+            "nombre": r[2],
+            "categoria": r[3],
+            "precio_minorista": r[4],
+            "cantidad_disponible": r[5]
         } for r in results
     ]

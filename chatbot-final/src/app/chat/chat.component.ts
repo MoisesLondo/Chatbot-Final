@@ -29,6 +29,14 @@ export class ChatComponent implements OnInit, AfterViewInit {
   @ViewChild('chatContainer') private chatContainer!: ElementRef;
   isLoadingBotResponse: boolean = false;
   messages: Message[] = [];
+  /**
+   * Reinicia el historial del chat (borra todos los mensajes y genera un nuevo sessionId)
+   */
+  resetChatHistory(): void {
+    this.messages = [];
+    this.sessionId = crypto.randomUUID();
+    sessionStorage.setItem('session_id', this.sessionId);
+  }
   private sessionId: string
 
   constructor(private chat: ChatService, private cdr: ChangeDetectorRef) {
@@ -120,4 +128,5 @@ export class ChatComponent implements OnInit, AfterViewInit {
     }
     return null;
   }
+
 }

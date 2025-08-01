@@ -7,7 +7,7 @@ tools = [
     Tool(
         name="InventarioBusqueda",
         func=search,
-        description="Devuelve el inventario disponible de un producto. Úsala siempre que el usuario pregunte por stock, disponibilidad o productos. Espera el nombre del producto como entrada en forma de string."
+        description="Devuelve el inventario disponible de un producto. Úsala siempre que el usuario pregunte por stock, disponibilidad o productos. Espera el nombre del producto como entrada en forma de string. También acepta los argumentos opcionales 'mas_baratos' (bool) y 'mas_caros' (bool) para ordenar los resultados por precio de menor a mayor o de mayor a menor, respectivamente. Nunca deben ser ambos True al mismo tiempo. Ejemplo de uso: search('tubos', mas_baratos=True) o search('tubos', mas_caros=True)."
     ),
     StructuredTool.from_function(
         name="CotizacionProducto",

@@ -2,6 +2,7 @@
   <button class="btn btn-ghost text-xl">daisyUI</button>
 </div>
 <div class="container mx-auto p-5 fixed inset-0 flex justify-center mt-10">
+  <!-- Botón de nueva conversación ahora está en el input-chat -->
   <div class="flex flex-col h-full w-full max-w-3xl max-h-1xl p-4 chat-container">
     <div class="flex-grow p-2 bg-base-100 overflow-y-auto" #chatContainer>
 
@@ -26,9 +27,8 @@
                 Descargar cotización
               </a>
             </span>
-            <span *ngIf="!msg.text.includes('/static/temp/')">
-              {{ msg.text }}
-            </span>
+            <span *ngIf="!msg.text.includes('/static/temp/')" [innerHTML]="(msg.text)">
+      </span>
             </ng-container>
           <ng-container *ngIf="msg.sender === 'user'">
             {{ msg.text }}
@@ -50,7 +50,7 @@
     </div>
 
     <div class="p-2 bg-primary rounded-b-lg shadow-sm">
-      <app-input-chat (messageSent)="addMessage($event)"></app-input-chat>
+      <app-input-chat (messageSent)="addMessage($event)" (resetChat)="resetChatHistory()"></app-input-chat>
     </div>
   </div>
 </div>

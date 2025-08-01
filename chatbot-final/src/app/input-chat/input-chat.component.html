@@ -18,4 +18,12 @@
   >
     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
   </button>
+  <button
+    class="w-12 h-12 bg-gradient-to-r from-primary to-blue-500 hover:from-blue-700 hover:to-primary text-white rounded-full flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg ml-2"
+    (click)="resetChatHistory()"
+    [disabled]="disabled"
+    title="Nueva conversación"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582M20 20v-5h-.581M5.582 9A7.001 7.001 0 0012 19a7.001 7.001 0 006.418-4M18.418 15A7.001 7.001 0 0012 5a7.001 7.001 0 00-6.418 4" /></svg>
+  </button>
 </div>

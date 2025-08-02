@@ -2,12 +2,18 @@ from langchain_core.tools import Tool
 from langchain_core.tools import StructuredTool
 from .product_search import search
 from .cotizacion_pdf import generar_cotizacion_pdf
+from .tips import get_response
 
 tools = [
     Tool(
         name="InventarioBusqueda",
         func=search,
         description="Devuelve el inventario disponible de un producto. Úsala siempre que el usuario pregunte por stock, disponibilidad o productos. Espera el nombre del producto como entrada en forma de string. También acepta los argumentos opcionales 'mas_baratos' (bool) y 'mas_caros' (bool) para ordenar los resultados por precio de menor a mayor o de mayor a menor, respectivamente. Nunca deben ser ambos True al mismo tiempo. Ejemplo de uso: search('tubos', mas_baratos=True) o search('tubos', mas_caros=True)."
+    ),
+    Tool(
+        name="ProductoConsejos",
+        func=get_response,
+        description="Devuelve consejos y precauciones sobre un producto. Úsala siempre que el usuario pregunte por recomendaciones o advertencias relacionadas con un producto. Espera el nombre del producto como entrada en forma de string."
     ),
     StructuredTool.from_function(
         name="CotizacionProducto",

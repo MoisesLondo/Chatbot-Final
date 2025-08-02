@@ -51,7 +51,6 @@ def get_response(query: str):
     if not sql_query:
         return "No se encontraron productos relacionados con tu consulta."
     llm = get_gemini_llm()
-    # Tomar hasta 5 descripciones
     descripciones = [prod['descripcion'] for prod in sql_query[:5]]
     user_message = (
         f"Producto consultado: {query}\n"
@@ -60,7 +59,7 @@ def get_response(query: str):
     system_prompt = (
         "Eres un experto en materiales de construcción. "
         "Te llegará el nombre de un producto y varias descripciones relacionadas. "
-        "Responde con un solo párrafo breve, directo y completo, dando los consejos y precauciones más importantes sobre ese producto, usando solo la información de las descripciones. No uses listas ni enumeraciones, solo texto corrido. No respondas nada más."
+        "Responde con un solo párrafo de extensión media, completo y directo, dando los consejos, precauciones y usos más importantes sobre ese producto, usando solo la información de las descripciones. No uses listas ni enumeraciones, solo texto corrido. No respondas nada más."
     )
     messages = [
         SystemMessage(content=system_prompt),

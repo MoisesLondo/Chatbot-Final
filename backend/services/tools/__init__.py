@@ -1,6 +1,6 @@
 from langchain_core.tools import Tool
 from langchain_core.tools import StructuredTool
-from .cohere_search import search
+from .product_search import search
 from .cotizacion_pdf import generar_cotizacion_pdf
 
 tools = [

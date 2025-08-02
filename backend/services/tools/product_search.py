@@ -18,7 +18,23 @@ def search(query: str, top_k: int = 10, mas_baratos: bool = False, mas_caros: bo
     conn = psycopg.connect(**DB_CONFIG)
     cur = conn.cursor()
 
-    query_lower = query.lower()
+
+    import unicodedata
+
+    def normalize(text):
+        if not text:
+            return ""
+        text = text.lower()
+        text = unicodedata.normalize('NFD', text)
+        text = ''.join([c for c in text if unicodedata.category(c) != 'Mn'])
+        return text
+
+
+    # Palabras irrelevantes a ignorar
+    stopwords = {"de", "para", "el", "la", "los", "las", "y", "en", "del", "al", "un", "una", "unos", "unas", "por", "con", "a"}
+    query_norm = normalize(query)
+    query_words = [w for w in query_norm.split() if w not in stopwords]
+
     categorias_conocidas = [
         "laminas galvanizadas",
         "tubo redondo ventilacion",
@@ -39,24 +55,51 @@ def search(query: str, top_k: int = 10, mas_baratos: bool = False, mas_caros: bo
         "laminas hierro pulido"
     ]
 
-    # Detectar palabras de categoría en el query
-    palabras_categoria = []
+    # Buscar coincidencias exactas y parciales en categorías conocidas
+    palabras_categoria = set()
     for cat in categorias_conocidas:
-        for palabra in cat.split():
-            if palabra in query_lower:
-                palabras_categoria.append(palabra)
+        cat_norm = normalize(cat)
+        cat_words = cat_norm.split()
+        # Si todas las palabras del query están en la categoría, agregar la categoría completa
+        if all(qw in cat_words for qw in query_words):
+            palabras_categoria.add(cat_norm)
+        # Si alguna palabra del query está en la categoría, agregar esa palabra
+        for qw in query_words:
+            if qw in cat_words:
+                palabras_categoria.add(qw)
+        # También agregar singular/plural
+        for qw in query_words:
+            if qw.endswith('s') and qw[:-1] in cat_words:
+                palabras_categoria.add(qw[:-1])
+            if not qw.endswith('s') and (qw + 's') in cat_words:
+                palabras_categoria.add(qw + 's')
 
-    # Construir filtro SQL
-    params = [f"%{query}%", f"%{query}%"]
-    where_clauses = [
-        "(unaccent(lower(nombre)) LIKE %s OR unaccent(lower(categoria)) LIKE %s)"
-    ]
+
+    # Filtro: el producto debe contener todas las palabras relevantes en nombre o categoría
+    word_clauses = []
+    word_params = []
+    for w in query_words:
+        word_clauses.append("(unaccent(lower(nombre)) LIKE %s OR unaccent(lower(categoria)) LIKE %s)")
+        word_params.append(f"%{w}%")
+        word_params.append(f"%{w}%")
+
+    # Además, mantener el filtro de categorías conocidas
+    params = []
+    where_clauses = []
+    if word_clauses:
+        where_clauses.append(" AND ".join(word_clauses))
+        params.extend(word_params)
     if palabras_categoria:
         where_clauses.append(
             "(" + " OR ".join(["unaccent(lower(categoria)) LIKE %s" for _ in palabras_categoria]) + ")"
         )
         for p in palabras_categoria:
             params.append(f"%{p}%")
+
+    if not where_clauses:
+        # fallback: buscar por el string completo
+        where_clauses = ["(unaccent(lower(nombre)) LIKE %s OR unaccent(lower(categoria)) LIKE %s)"]
+        params = [f"%{query_norm}%", f"%{query_norm}%"]
 
     where_sql = " AND ".join(where_clauses)
 

@@ -16,7 +16,9 @@ tools = [
      **Esta herramienta espera un único argumento: una estructura de datos tipo diccionario NO UN STRING 'datos_cotizacion'** que debe contener la siguiente estructura con los datos del cliente y los productos, extraídos del historial de la conversación, cuyos campos son: 
                         - 'cxName': Nombre completo del cliente (string). 
                         - 'cxId': Cédula de identidad o RIF del cliente (string). 
-                        - 'cxAddress': Dirección completa del cliente (string). 
+                        - 'cxAddress': Dirección completa del cliente (string).
+                        - 'email': Correo electrónico del cliente (string).
+                        - 'tel': Teléfono del cliente (string).
                         - 'products': Una lista (array) de diccionarios, donde cada diccionario representa un producto. "
                          Cada producto en la lista 'products' debe tener las claves: 
                          - 'pCod': Código del producto (string). 

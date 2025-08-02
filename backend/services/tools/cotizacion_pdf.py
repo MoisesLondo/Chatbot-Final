@@ -1,14 +1,61 @@
 # cotizacion_pdf.py
 from docxtpl import DocxTemplate
-import uuid
 import os
+from services.cotizacion_bd import guardar_cotizacion, obtener_o_crear_cliente  # Asegúrate de tener esta función implementada
+from models.cotizacion import Cliente, Cotizacion, DetalleCotizacion
 
+def armar_modelo_cotizacion(datos: dict) -> Cotizacion:
+    # Calcular totales
+    subtotal = sum(prod["qty"] * prod["uPrice"] for prod in datos["products"])
+    iva = round(subtotal * 0.16, 2)
+    total = round(subtotal + iva, 2)
 
-def generar_id_cotizacion():
-    """
-    Genera un ID único para la cotización.
-    """
-    return str(uuid.uuid4())
+    # Transformar productos al modelo DetalleCotizacion
+    detalles = [
+        DetalleCotizacion(
+            codigo_producto=prod["pCod"],
+            nombre_producto=prod["prodName"],
+            cantidad=prod["qty"],
+            precio_unitario=prod["uPrice"],
+            total=prod["qty"] * prod["uPrice"]
+        )
+        for prod in datos["products"]
+    ]
+
+    try:
+        # Crear el cliente si no existe
+        cliente = Cliente(
+            razon_social=datos["cxName"],
+            cedula_rif=datos["cxId"],
+            direccion_fiscal=datos["cxAddress"],
+            email=datos["email"],
+            telefono=datos["tel"]
+        )
+        # Guardar cliente en la base de datos
+        cliente_id = obtener_o_crear_cliente(cliente)
+        print(f"Cliente guardado con ID: {cliente_id}")
+        cliente.id = cliente_id  # Asignar el ID de la base de datos al modelo
+    except Exception as e:
+        print(f"Error al obtener o crear el cliente: {e}")
+        raise
+
+    # Crear el modelo Cotizacion
+    cotizacion = Cotizacion(
+        cliente_id=cliente_id,
+        nombre_cliente=datos["cxName"],
+        cedula_rif=datos["cxId"],
+        direccion=datos["cxAddress"],
+        subtotal=subtotal,
+        iva=iva,
+        total=total,
+        detalles=detalles,
+        created_by="chatbot",  # O "vendedor" si aplica
+        cliente_email=datos.get("email"),
+        cliente_telefono=datos.get("tel")
+    )
+
+    return cotizacion
+
 
 def generar_creation_date():
     """
@@ -26,59 +73,77 @@ def generar_expiration_date():
 
 def generar_cotizacion_pdf(datos: dict) -> str:
     """
-    Llena la plantilla de cotización con los datos y devuelve la ruta del PDF generado.
+    Guarda la cotización en la base de datos, llena la plantilla de cotización con los datos y devuelve la ruta del PDF generado.
     """
-    # Cargar plantilla
-    plantilla_path = "static/cotizacion-template.docx"
-    doc = DocxTemplate(plantilla_path)
-
-    # Calcular totales y preparar productos
-    productos = []
-    sumAll = 0
-    for i, prod in enumerate(datos["products"], start=1):
-        total_producto = prod["qty"] * prod["uPrice"]
-        sumAll += total_producto
-        productos.append({
-            "n": i,
-            "pCod": prod["pCod"],
-            "prodName": prod["prodName"],
-            "qty": prod["qty"],
-            "uPrice": f"{prod['uPrice']:.2f}",
-            "pTotal": f"{total_producto:.2f}"
-        })
-
-    iva = round(sumAll * 0.16, 2)
-    total = round(sumAll + iva, 2)
-
-    # Contexto para la plantilla
-    context = {
-        "idCot": generar_id_cotizacion(),
-        "cxName": datos["cxName"],
-        "cxId": datos["cxId"],
-        "cxAddress": datos["cxAddress"],
-        "creatDate": generar_creation_date(),
-        "expDate": generar_expiration_date(),
-        "products": productos,
-        "sumAll": f"{sumAll:.2f}",
-        "iva": f"{iva:.2f}",
-        "total": f"{total:.2f}"
-    }
-
-    # Renderizar y guardar DOCX temporal
-    temp_id = str(uuid.uuid4())
-    temp_dir = "static/temp"
-    os.makedirs(temp_dir, exist_ok=True)
-    temp_docx = os.path.join(temp_dir, f"{temp_id}.docx")
-    temp_pdf = os.path.join(temp_dir, f"{temp_id}.pdf")
-
-    doc.render(context)
-    doc.save(temp_docx)
-
-    # Convertir a PDF (requiere docx2pdf y MS Word en Windows)
     try:
-        from docx2pdf import convert
-        convert(temp_docx, temp_pdf)
-        return f"http://localhost:8000/static/temp/{temp_id}.pdf"
+        try:
+            # Transformar el diccionario en un modelo Cotizacion
+            cotizacion = armar_modelo_cotizacion(datos)
+        except Exception as e:
+            print(f"Error al armar el modelo de cotización: {e}")
+            raise
+
+        # Guardar cotización en la base de datos
+        try:
+            cotizacion_id = guardar_cotizacion(cotizacion)
+            print(f"Cotización guardada con ID: {cotizacion_id}")
+        except Exception as e:
+            print(f"Error al guardar la cotización: {e}")
+            raise
+
+        # Cargar plantilla
+        plantilla_path = "static/cotizacion-template.docx"
+        doc = DocxTemplate(plantilla_path)
+
+        # Calcular totales y preparar productos para la plantilla
+        productos = []
+        for i, detalle in enumerate(cotizacion.detalles, start=1):
+            productos.append({
+                "n": i,
+                "pCod": detalle.codigo_producto,
+                "prodName": detalle.nombre_producto,
+                "qty": detalle.cantidad,
+                "uPrice": f"{detalle.precio_unitario:.2f}",
+                "pTotal": f"{detalle.total:.2f}"
+            })
+
+
+
+        # Contexto para la plantilla
+        context = {
+            "idCot": cotizacion_id,
+            "cxName": cotizacion.nombre_cliente,
+            "cxId": cotizacion.cedula_rif,
+            "cxAddress": cotizacion.direccion,
+            "email": cotizacion.cliente_email,
+            "tel": cotizacion.cliente_telefono,
+            "creatDate": generar_creation_date(),
+            "expDate": generar_expiration_date(),
+            "products": productos,
+            "sumAll": f"{cotizacion.subtotal:.2f}",
+            "iva": f"{cotizacion.iva:.2f}",
+            "total": f"{cotizacion.total:.2f}"
+        }
+
+        # Renderizar y guardar DOCX temporal
+        temp_id = str(cotizacion_id)  # Usar el ID de la cotización
+        temp_dir = "static/temp"
+        os.makedirs(temp_dir, exist_ok=True)
+        temp_docx = os.path.join(temp_dir, f"{temp_id}.docx")
+        temp_pdf = os.path.join(temp_dir, f"{temp_id}.pdf")
+
+        doc.render(context)
+        doc.save(temp_docx)
+
+        # Convertir a PDF (requiere docx2pdf y MS Word en Windows)
+        try:
+            from docx2pdf import convert
+            convert(temp_docx, temp_pdf)
+            return f"http://localhost:8000/static/temp/{temp_id}.pdf"
+        except Exception as e:
+            print(f"Error al convertir a PDF: {e}")
+            return f"http://localhost:8000/static/temp/{temp_id}.docx"  # Devuelve el DOCX si falla la conversión
+
     except Exception as e:
-        print(f"Error al convertir a PDF: {e}")
-        return f"http://localhost:8000/static/temp/{temp_id}.docx"  # Devuelve el DOCX si falla la conversión
+        print(f"Error al guardar la cotización o generar el PDF: {e}")
+        raise

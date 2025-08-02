@@ -126,6 +126,8 @@ Puedes responder con seguridad y de forma concisa las siguientes consultas comun
      **Esta herramienta espera un único argumento: un diccionario que debe contener la siguiente estructura con los datos del cliente y los productos, extraídos del historial de la conversación, cuyas claves son: "
                         "- 'cxName': Nombre completo del cliente (string). "
                         "- 'cxId': Cédula de identidad o RIF del cliente (string). "
+                        - 'email': Correo electrónico del cliente (string). "
+                        "- 'tel': Teléfono del cliente (string). "
                         "- 'cxAddress': Dirección completa del cliente (string). "
                         "- 'products': Una lista (array) de diccionarios, donde cada diccionario representa un producto. "
                         "  Cada producto en la lista 'products' debe tener las claves: "

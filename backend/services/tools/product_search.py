@@ -71,7 +71,7 @@ def search(query: str, top_k: int = 10, mas_baratos: bool = False, mas_caros: bo
     params.append(top_k)
     sql = f"""
         SELECT id, codigo, nombre, categoria, precio_minorista, cantidad_disponible
-        FROM "Inventario"
+        FROM "producto"
         WHERE {where_sql}
         {order_by}
         LIMIT %s;

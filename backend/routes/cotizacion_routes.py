@@ -15,26 +15,27 @@ def crear_cotizacion(cotizacion: Cotizacion):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/cotizacion/{cotizacion_id}")
-def obtener_cotizacion(cotizacion_id: str):
-    try:
-        conn = get_connection()
-        if not conn:
-            raise HTTPException(status_code=500, detail="Error al conectar a la base de datos")
-        with conn.cursor() as cur:
-            # Obtener cotización
-            cur.execute("""
-                SELECT * FROM cotizacion WHERE id = %s
-            """, (cotizacion_id,))
-            cotizacion = cur.fetchone()
-            if not cotizacion:
-                raise HTTPException(status_code=404, detail="Cotización no encontrada")
+def obtener_cotizacion(cotizacion_id: int):
+    conn = get_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="Error al conectar a la base de datos")
 
-            # Obtener detalles
-            cur.execute("""
-                SELECT * FROM detalle_cotizacion WHERE cotizacion_id = %s
-            """, (cotizacion_id,))
+    try:
+        with conn.cursor() as cur:
+            # Ejecutar consulta para obtener la cotización
+            cur.execute("SELECT * FROM cotizacion WHERE id = %s", (str(cotizacion_id),))
+            cotizacion = cur.fetchone()
+
+            # Verificar si existe la cotización
+            if cotizacion is None:
+                raise HTTPException(status_code=404, detail=f"Cotización con ID {cotizacion_id} no encontrada")
+
+            # Obtener detalles en una nueva consulta
+            cur.execute("SELECT * FROM detalle_cotizacion WHERE cotizacion_id = %s", (cotizacion_id,))
             detalles = cur.fetchall()
 
+            # Convertir los resultados en diccionarios si estás usando psycopg2
+            # (Opcional) Si no usas DictCursor, esto devuelve tuplas.
             return {
                 "cotizacion": cotizacion,
                 "detalles": detalles

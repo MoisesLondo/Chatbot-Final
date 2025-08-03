@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import OAuth2PasswordRequestForm
-from services.db import get_connection
+from services.db import get_connection_login
 from services.auth import verify_password, create_access_token
 from pydantic import BaseModel
 
@@ -12,7 +12,7 @@ router = APIRouter()
 
 @router.post("/login")
 def login(data: LoginRequest):
-    conn = get_connection()
+    conn = get_connection_login()
     cursor = conn.cursor()
     
     cursor.execute("SELECT id, username, password_hash, role, is_active FROM auth_users WHERE username = %s", (data.username,))

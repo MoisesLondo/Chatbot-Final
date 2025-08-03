@@ -15,3 +15,6 @@ DB_CONFIG = {
 
 def get_connection():
     return psycopg2.connect(**DB_CONFIG, cursor_factory=RealDictCursor)
+
+def get_connection_login():
+    return psycopg2.connect(**DB_CONFIG)

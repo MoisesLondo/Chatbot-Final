@@ -19,19 +19,17 @@ tools = [
         name="CotizacionProducto",
         func=generar_cotizacion_pdf,
         description="""Genera un PDF de cotización formal. Usa esta herramienta **ÚNICAMENTE** después de que todos los datos esenciales del cliente (Nombre, Cédula/RIF, Dirección, Productos con cantidades **y sus `pCod` y `uPrice` obtenidos de `InventarioBusqueda`**) hayan sido recolectados, y el cliente haya confirmado explícitamente que está listo para la cotización.
-     **Esta herramienta espera un único argumento: una estructura de datos tipo diccionario NO UN STRING 'datos_cotizacion'** que debe contener la siguiente estructura con los datos del cliente y los productos, extraídos del historial de la conversación, cuyos campos son: 
-                        - 'cxName': Nombre completo del cliente (string). 
-                        - 'cxId': Cédula de identidad o RIF del cliente (string). 
-                        - 'cxAddress': Dirección completa del cliente (string).
-                        - 'email': Correo electrónico del cliente (string).
-                        - 'tel': Teléfono del cliente (string).
-                        - 'products': Una lista (array) de diccionarios, donde cada diccionario representa un producto. "
-                         Cada producto en la lista 'products' debe tener las claves: 
-                         - 'pCod': Código del producto (string). 
-                        - 'prodName': Nombre del producto (string). 
-                         - 'qty': Cantidad del producto (entero). 
-                         - 'uPrice': Precio unitario del producto (número flotante).
-                        El agente DEBE extraer estos datos del historial de la conversación y pasarlos en el formato de diccionario Python adecuado como el argumento 'datos_cotizacion'. 
-                        Solo invoca esta herramienta cuando TODOS los datos de la cotización están completos y confirmados por el usuario, incluyendo los códigos y precios unitarios de los productos."""
+        Esta herramienta espera los siguientes argumentos por separado:
+        - cxName: Nombre completo del cliente (string)
+        - cxId: Cédula de identidad o RIF del cliente (string)
+        - cxAddress: Dirección completa del cliente (string)
+        - email: Correo electrónico del cliente (string)
+        - tel: Teléfono del cliente (string)
+        - products: Una lista (array) de objetos con la siguiente estructura:
+            - pCod: Código del producto (string)
+            - prodName: Nombre del producto (string)
+            - qty: Cantidad del producto (entero)
+            - uPrice: Precio unitario del producto (número flotante)
+        El agente DEBE extraer estos datos del historial de la conversación y pasarlos como argumentos separados. Solo invoca esta herramienta cuando TODOS los datos de la cotización están completos y confirmados por el usuario, incluyendo los códigos y precios unitarios de los productos."""
     )
 ]

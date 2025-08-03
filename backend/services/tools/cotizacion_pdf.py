@@ -3,6 +3,7 @@ from docxtpl import DocxTemplate
 import os
 from services.cotizacion_bd import guardar_cotizacion, obtener_o_crear_cliente  # Asegúrate de tener esta función implementada
 from models.cotizacion import Cliente, Cotizacion, DetalleCotizacion
+from typing import Any
 
 def armar_modelo_cotizacion(datos: dict) -> Cotizacion:
     # Calcular totales
@@ -17,7 +18,7 @@ def armar_modelo_cotizacion(datos: dict) -> Cotizacion:
             nombre_producto=prod["prodName"],
             cantidad=prod["qty"],
             precio_unitario=prod["uPrice"],
-            total=prod["qty"] * prod["uPrice"]
+            total=prod["qty"] * prod["uPrice"],
         )
         for prod in datos["products"]
     ]
@@ -71,25 +72,42 @@ def generar_expiration_date():
     from datetime import datetime, timedelta
     return (datetime.now() + timedelta(days=15)).strftime("%Y-%m-%d %H:%M:%S")
 
-def generar_cotizacion_pdf(datos: dict) -> str:
+from typing import List, Dict, Any
+from pydantic import BaseModel
+
+class ProductoCotizacion(BaseModel):
+    pCod: str
+    prodName: str
+    qty: int
+    uPrice: float
+
+def generar_cotizacion_pdf(
+    cxName: str,
+    cxId: str,
+    cxAddress: str,
+    email: str,
+    tel: str,
+    products: List[ProductoCotizacion]
+) -> str:
     """
     Guarda la cotización en la base de datos, llena la plantilla de cotización con los datos y devuelve la ruta del PDF generado.
     """
     try:
-        try:
-            # Transformar el diccionario en un modelo Cotizacion
-            cotizacion = armar_modelo_cotizacion(datos)
-        except Exception as e:
-            print(f"Error al armar el modelo de cotización: {e}")
-            raise
+        # Si los productos son modelos Pydantic, convertir a dict para armar_modelo_cotizacion
+        productos_dict = [p.dict() if hasattr(p, 'dict') else p for p in products]
+        datos = {
+            "cxName": cxName,
+            "cxId": cxId,
+            "cxAddress": cxAddress,
+            "email": email,
+            "tel": tel,
+            "products": productos_dict
+        }
+        cotizacion = armar_modelo_cotizacion(datos)
 
         # Guardar cotización en la base de datos
-        try:
-            cotizacion_id = guardar_cotizacion(cotizacion)
-            print(f"Cotización guardada con ID: {cotizacion_id}")
-        except Exception as e:
-            print(f"Error al guardar la cotización: {e}")
-            raise
+        cotizacion_id = guardar_cotizacion(cotizacion)
+        print(f"Cotización guardada con ID: {cotizacion_id}")
 
         # Cargar plantilla
         plantilla_path = "static/cotizacion-template.docx"
@@ -106,8 +124,6 @@ def generar_cotizacion_pdf(datos: dict) -> str:
                 "uPrice": f"{detalle.precio_unitario:.2f}",
                 "pTotal": f"{detalle.total:.2f}"
             })
-
-
 
         # Contexto para la plantilla
         context = {

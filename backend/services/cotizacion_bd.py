@@ -1,6 +1,7 @@
 from datetime import datetime
 from models.cotizacion import Cotizacion, DetalleCotizacion, Cliente
 from services.db import get_connection
+import traceback
 
 def obtener_o_crear_cliente(cliente: Cliente) -> int:
     """
@@ -20,22 +21,40 @@ def obtener_o_crear_cliente(cliente: Cliente) -> int:
             resultado = cur.fetchone()
 
             if resultado:
-                # Si el cliente existe, retornar su ID
-                cliente_id = resultado[0]
+                if isinstance(resultado, (tuple, list)):
+                    cliente_id = resultado[0]
+                elif isinstance(resultado, dict):
+                    cliente_id = resultado.get('id')
+                    if cliente_id is None:
+                        raise Exception(f"El resultado del SELECT es un dict pero no contiene 'id': {resultado}")
+                else:
+                    raise Exception(f"Tipo inesperado para el resultado del SELECT: {type(resultado)} - valor: {resultado}")
                 print(f"Cliente ya existe con ID: {cliente_id}")
                 return cliente_id
 
-            # Si el cliente no existe, crearlo
             cur.execute("""
                 INSERT INTO clientes (razon_social, cedula_rif, direccion_fiscal, email, telefono)
                 VALUES (%s, %s, %s, %s, %s) RETURNING id
             """, (cliente.razon_social, cliente.cedula_rif, cliente.direccion_fiscal, cliente.email, cliente.telefono))
-            cliente_id = cur.fetchone()[0]
+            insert_result = cur.fetchone()
+            if insert_result is None:
+                raise Exception("No se pudo crear el cliente: el INSERT no devolvió ningún id. Verifica la tabla y los constraints.")
+            # Soportar tupla, dict o lista
+            if isinstance(insert_result, (tuple, list)):
+                cliente_id = insert_result[0]
+            elif isinstance(insert_result, dict):
+                cliente_id = insert_result.get('id')
+                if cliente_id is None:
+                    raise Exception(f"El resultado del INSERT es un dict pero no contiene 'id': {insert_result}")
+            else:
+                raise Exception(f"Tipo inesperado para el resultado del INSERT: {type(insert_result)} - valor: {insert_result}")
             conn.commit()
             print(f"Cliente creado con ID: {cliente_id}")
             return cliente_id
     except Exception as e:
+        
         print(f"Error al obtener o crear el cliente: {e}")
+        traceback.print_exc()
         raise
     finally:
         conn.close()
@@ -58,7 +77,17 @@ def guardar_cotizacion(cotizacion: Cotizacion):
                 cotizacion.subtotal, cotizacion.iva, cotizacion.total, datetime.now(),
                 cotizacion.created_by, cotizacion.created_by_vendedor_id, cotizacion.cliente_email, cotizacion.cliente_telefono
             ))
-            cotizacion_id = cur.fetchone()[0]
+            cotizacion_result = cur.fetchone()
+            if cotizacion_result is None:
+                raise Exception("No se pudo crear la cotización: el INSERT no devolvió ningún id. Verifica la tabla y los constraints.")
+            if isinstance(cotizacion_result, (tuple, list)):
+                cotizacion_id = cotizacion_result[0]
+            elif isinstance(cotizacion_result, dict):
+                cotizacion_id = cotizacion_result.get('id')
+                if cotizacion_id is None:
+                    raise Exception(f"El resultado del INSERT de cotización es un dict pero no contiene 'id': {cotizacion_result}")
+            else:
+                raise Exception(f"Tipo inesperado para el resultado del INSERT de cotización: {type(cotizacion_result)} - valor: {cotizacion_result}")
 
             # Insertar detalles de la cotización
             for detalle in cotizacion.detalles:
@@ -77,6 +106,7 @@ def guardar_cotizacion(cotizacion: Cotizacion):
             return cotizacion_id
     except Exception as e:
         print(f"Error al guardar la cotización: {e}")
+        traceback.print_exc()
         raise
     finally:
         conn.close()

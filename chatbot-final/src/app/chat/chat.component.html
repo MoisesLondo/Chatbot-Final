@@ -1,15 +1,24 @@
+<app-cotizacion-modal
+  [show]="showCotizacionModal"
+  [productosHtml]="productosHtml"
+  (close)="closeCotizacionModal(true)"
+  (submit)="onCotizacionSubmit($event)">
+</app-cotizacion-modal>
 <div class="navbar bg-secondary text-secondary-content">
   <button class="btn btn-ghost text-xl">daisyUI</button>
 </div>
 <div class="container mx-auto p-5 fixed inset-0 flex justify-center mt-10">
-  <!-- Botón de nueva conversación ahora está en el input-chat -->
   <div class="flex flex-col h-full w-full max-w-3xl max-h-1xl p-4 chat-container">
     <div class="flex-grow p-2 bg-base-100 overflow-y-auto" #chatContainer>
 
-      <div *ngIf="messages.length === 0" class="text-center text-gray-500 h-full justify-center items-center flex flex-col initial-title">
-          <h2 class="text-6xl bold">Bienvenido al Chat.</h2>
-          <h2 class="text-1xl bold text-red-500">Comienza enviando un mensaje.</h2>
-      </div>
+      <div *ngIf="messages.length === 0" class="text-center h-full justify-center items-center flex flex-col initial-title">
+    <h2 class="text-5xl md:text-7xl lg:text-8xl font-bold bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 bg-clip-text text-transparent mb-4 tracking-tight leading-tight animate-fade-in">
+        Bienvenido al Chat.
+    </h2>
+    <h2 class="text-lg md:text-xl lg:text-2xl font-semibold text-red-500 opacity-90 tracking-wide animate-pulse">
+        Comienza enviando un mensaje.
+    </h2>
+</div>
 
       <div *ngFor="let msg of messages" class="chat" [ngClass]="{'chat-start': msg.sender === 'bot', 'chat-end': msg.sender === 'user'}">
         <div class="chat-image avatar">
@@ -27,9 +36,13 @@
                 Descargar cotización
               </a>
             </span>
-            <span *ngIf="!msg.text.includes('/static/temp/')" [innerHTML]="(msg.text)">
-      </span>
-            </ng-container>
+            <span *ngIf="msg.text.includes('[ABRIR_FORMULARIO_COTIZACION]'); else normalBotMsg">
+              <p>Por favor, completa el formulario de cotización.</p>
+            </span>
+            <ng-template #normalBotMsg>
+              <span *ngIf="!msg.text.includes('/static/temp/')" [innerHTML]="msg.text"></span>
+            </ng-template>
+          </ng-container>
           <ng-container *ngIf="msg.sender === 'user'">
             {{ msg.text }}
           </ng-container>

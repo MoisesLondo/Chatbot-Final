@@ -138,5 +138,3 @@ def get_response(query: str):
     ]
     response = llm.invoke(messages)
     return response.content
-
-print(get_response("tubo"))  # Ejemplo de uso

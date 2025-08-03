@@ -1,4 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, ChangeDetectorRef} from '@angular/core';
+import { CotizacionModalComponent } from '../cotizacion-modal/cotizacion-modal.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InputChatComponent } from '../input-chat/input-chat.component';
@@ -20,8 +21,10 @@ interface Message {
     CommonModule,
     FormsModule,
     InputChatComponent,
-    MarkdownModule // Add MarkdownModule here
+    CotizacionModalComponent,
+    MarkdownModule
   ],
+  
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css']
 })
@@ -29,9 +32,36 @@ export class ChatComponent implements OnInit, AfterViewInit {
   @ViewChild('chatContainer') private chatContainer!: ElementRef;
   isLoadingBotResponse: boolean = false;
   messages: Message[] = [];
-  /**
-   * Reinicia el historial del chat (borra todos los mensajes y genera un nuevo sessionId)
-   */
+   showCotizacionModal = false;
+   productosHtml: string = '';
+
+
+  openCotizacionModal(productosHtml: string) {
+    this.productosHtml = productosHtml;
+    this.showCotizacionModal = true;
+  }
+
+
+  closeCotizacionModal(cancelado: boolean = false) {
+    this.showCotizacionModal = false;
+    this.productosHtml = '';
+    if (cancelado) {
+      this.messages.push(this.buildMsg('Formulario cancelado por el usuario.', 'bot'));
+    }
+  }
+
+
+  onCotizacionSubmit(data: any) {
+    if (data && typeof data === 'object' && 'isTrusted' in data) {
+      return;
+    }
+  
+    const mensaje: string = `[FORMULARIO-ENVIADO]${JSON.stringify({ ...data, productosHtml: this.productosHtml }, null, 2)}`;
+    
+    this.addMessage(mensaje);
+    this.closeCotizacionModal(false);
+  }
+
   resetChatHistory(): void {
     this.messages = [];
     this.sessionId = crypto.randomUUID();
@@ -61,8 +91,17 @@ export class ChatComponent implements OnInit, AfterViewInit {
 
     this.chat.askToBot(payload).subscribe({
       next: res => {
-        console.log('Respuesta del backend:', res); // <-- Agrega esto
         if (res.response) {
+          const safeResponse = res.response || '';
+          if (safeResponse.includes('[ABRIR_FORMULARIO_COTIZACION]')) {
+            const match = safeResponse.match(/\[ABRIR_FORMULARIO_COTIZACION\]([\s\S]*)/i);
+            const productosHtml = match ? match[1].trim() : '';
+            this.messages.push(this.buildMsg('Por favor, completa el formulario de cotización.', 'bot'));
+            this.openCotizacionModal(productosHtml);
+            this.scrollToBottom();
+            this.isLoadingBotResponse = false;
+            return;
+          }
           this.messages.push(this.buildMsg(res.response, 'bot', true));
         } else {
           this.messages.push(this.buildMsg('No se recibió respuesta del bot.', 'bot'));
@@ -115,12 +154,6 @@ export class ChatComponent implements OnInit, AfterViewInit {
     } catch (err) {}
   }
 
-  /**
-   * Extracts and constructs the full URL for static temporary files.
-   * This method is used in the template to avoid regex parsing issues.
-   * @param text The message text from the bot.
-   * @returns The full URL if a match is found, otherwise null.
-   */
   getStaticTempUrl(text: string): string | null {
     const match = text.match(/\/static\/temp\/[^\s]+/);
     if (match && match[0]) {

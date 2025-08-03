@@ -37,3 +37,10 @@
   --color-error-content: #ffffff;
   --color-primary-transparent: transparent;
 }
+
+.bg-primary { background-color: #F01D27; }
+.bg-primary-dark { background-color: #A41E24; }
+.bg-secondary { background-color: #A41E24; }
+.text-primary { color: #F01D27; }
+.font-montserrat { font-family: 'Montserrat', sans-serif; }
+.font-noto-sans { font-family: 'Noto Sans', sans-serif; }

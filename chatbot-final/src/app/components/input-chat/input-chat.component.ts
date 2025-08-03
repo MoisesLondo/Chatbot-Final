@@ -27,9 +27,23 @@ export class InputChatComponent {
     this.message = ''; 
   }
 
-  handleKeyPress(event: KeyboardEvent): void {
-    if (event.key === 'Enter') {
+  handleKeyDown(event: KeyboardEvent): void {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
       this.handleSend();
+    }
+    // Shift+Space: permite espacio normal, no hace nada especial
+    // Shift+Enter: permite salto de línea
+  }
+
+  autoGrow(event: Event): void {
+    const textarea = event.target as HTMLTextAreaElement;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      const lineHeight = 24; // px, ajusta si tu textarea usa otro tamaño
+      const maxLines = 6;
+      const maxHeight = lineHeight * maxLines;
+      textarea.style.height = Math.min(textarea.scrollHeight, maxHeight) + 'px';
     }
   }
 }

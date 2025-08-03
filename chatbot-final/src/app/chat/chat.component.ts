@@ -83,16 +83,15 @@ export class ChatComponent implements OnInit, AfterViewInit {
 
   addMessage(userText: string): void {
     if (userText.includes('[FORMULARIO-ENVIADO]')) {
-      // Mostrar solo 'hola' en el chat para el usuario
-      this.messages.push(this.buildMsg('hola', 'user'));
+      // Mostrar solo 'Mensaje Enviado' en el chat para el usuario y NO mostrar el JSON
+      this.messages.push(this.buildMsg('Mensaje Enviado', 'user'));
       this.isLoadingBotResponse = true;
       setTimeout(() => this.scrollToBottom(), 0);
-      return;
+    } else {
+      this.messages.push(this.buildMsg(userText, 'user'));
+      this.isLoadingBotResponse = true;
+      setTimeout(() => this.scrollToBottom(), 0);
     }
-
-    this.messages.push(this.buildMsg(userText, 'user'));
-    this.isLoadingBotResponse = true;
-    setTimeout(() => this.scrollToBottom(), 0);
 
     const payload: AskPayload = { query: userText, session_id: this.sessionId };
 

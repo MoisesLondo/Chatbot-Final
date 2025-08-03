@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { CurrencyPipe, CommonModule } from '@angular/common';
@@ -16,7 +16,7 @@ import { FormsModule } from '@angular/forms';
 export class QuoteComponent {
   protected readonly cotizacionId = signal('');
   protected readonly cotizacion = signal<any | null>(null);
-  protected readonly detalles = computed(() => this.cotizacion()?.detalles || []);
+  protected readonly detalles = signal<any[]>([]); // Cambiar computed a signal para permitir asignaciones directas
 
   private readonly http = inject(HttpClient);
 
@@ -24,13 +24,15 @@ export class QuoteComponent {
     const id = this.cotizacionId();
     if (!id) return;
 
-    this.http.get(`http://127.0.0.1:8000/cotizacion/${id}`).subscribe({
-      next: (response: any) => {
-        this.cotizacion.set(response);
+    this.http.get<{ cotizacion: any; detalles: any[] }>(`http://127.0.0.1:8000/cotizacion/${id}`).subscribe({
+      next: (response) => {
+        this.cotizacion.set(response.cotizacion);
+        this.detalles.set(response.detalles);
       },
       error: (err) => {
         console.error('Error fetching cotización:', err);
         this.cotizacion.set(null);
+        this.detalles.set([]);
       },
     });
   }

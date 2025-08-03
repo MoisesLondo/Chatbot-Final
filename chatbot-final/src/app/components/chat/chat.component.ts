@@ -95,6 +95,8 @@ export class ChatComponent implements OnInit, AfterViewInit {
 
     const payload: AskPayload = { query: userText, session_id: this.sessionId };
 
+    console.log('Enviando payload al bot:', payload);
+
     this.chat.askToBot(payload).subscribe({
       next: res => {
         if (res.response) {

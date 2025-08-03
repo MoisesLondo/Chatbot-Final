@@ -18,18 +18,17 @@ tools = [
     StructuredTool.from_function(
         name="CotizacionProducto",
         func=generar_cotizacion_pdf,
-        description="""Genera un PDF de cotización formal. Usa esta herramienta **ÚNICAMENTE** después de que todos los datos esenciales del cliente (Nombre, Cédula/RIF, Dirección, Productos con cantidades **y sus `pCod` y `uPrice` obtenidos de `InventarioBusqueda`**) hayan sido recolectados, y el cliente haya confirmado explícitamente que está listo para la cotización.
-        Esta herramienta espera los siguientes argumentos por separado:
-        - cxName: Nombre completo del cliente (string)
-        - cxId: Cédula de identidad o RIF del cliente (string)
-        - cxAddress: Dirección completa del cliente (string)
-        - email: Correo electrónico del cliente (string)
-        - tel: Teléfono del cliente (string)
-        - products: Una lista (array) de objetos con la siguiente estructura:
-            - pCod: Código del producto (string)
+        description="""Genera un PDF de cotización formal. Usa esta herramienta cuando recibas todos los datos esenciales del cliente (nombre, cédula/RIF, dirección, email, teléfono y productos con cantidades). Si los datos llegan desde el formulario (por ejemplo, en un mensaje que comienza con [FORMULARIO-ENVIADO]), debes mapear los campos recibidos a los argumentos requeridos:
+        - cxName: nombre
+        - cxId: cedula
+        - cxAddress: direccion
+        - email: email
+        - tel: telefono
+        - products: una lista de productos, cada uno con:
+            - pCod: Código del producto (string, obtenido usando InventarioBusqueda)
             - prodName: Nombre del producto (string)
             - qty: Cantidad del producto (entero)
-            - uPrice: Precio unitario del producto (número flotante)
-        El agente DEBE extraer estos datos del historial de la conversación y pasarlos como argumentos separados. Solo invoca esta herramienta cuando TODOS los datos de la cotización están completos y confirmados por el usuario, incluyendo los códigos y precios unitarios de los productos."""
+            - uPrice: Precio unitario del producto (número flotante, obtenido usando InventarioBusqueda)
+        El agente debe extraer estos datos, mapearlos correctamente y pasarlos como argumentos separados. Nunca muestres el JSON ni los datos internos al usuario, solo responde con el enlace al PDF generado o un mensaje de éxito. Solo invoca esta herramienta cuando todos los datos estén completos y confirmados."""
     )
 ]

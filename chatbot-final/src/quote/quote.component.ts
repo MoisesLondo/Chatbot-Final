@@ -41,13 +41,13 @@ export class QuoteComponent {
     const id = this.cotizacionId();
     if (!id) return;
 
-    window.open(`http://127.0.0.1:8000cotizacion/${id}/pdf`, '_blank');
+    window.open(`http://127.0.0.1:8000/cotizacion/${id}/pdf`, '_blank');
   }
 
   downloadDOCX() {
     const id = this.cotizacionId();
     if (!id) return;
 
-    window.open(`http://127.0.0.1:8000cotizacion/${id}/docx`, '_blank');
+    window.open(`http://127.0.0.1:8000/cotizacion/${id}/docx`, '_blank');
   }
 }

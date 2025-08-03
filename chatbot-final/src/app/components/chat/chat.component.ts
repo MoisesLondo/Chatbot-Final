@@ -3,8 +3,8 @@ import { CotizacionModalComponent } from '../cotizacion-modal/cotizacion-modal.c
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InputChatComponent } from '../input-chat/input-chat.component';
-import { AskPayload, HistoryEntry } from '../models';
-import { ChatService } from '../services';
+import { AskPayload, HistoryEntry } from '../../models';
+import { ChatService } from '../../services';
 import { MarkdownModule } from 'ngx-markdown';
 
 interface Message {

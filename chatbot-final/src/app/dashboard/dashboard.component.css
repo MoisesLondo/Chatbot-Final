@@ -13,3 +13,23 @@ main {
   width: 100%;
   padding: 2rem 1rem 3rem 1rem;
 }
+
+.sidebar {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar li {
+  margin-bottom: 1rem;
+}
+
+.sidebar .btn-link {
+  text-decoration: none;
+  color: #007bff;
+  font-weight: bold;
+}
+
+.sidebar .btn-link:hover {
+  text-decoration: underline;
+}

@@ -147,3 +147,90 @@ def generar_cotizacion_pdf(datos: dict) -> str:
     except Exception as e:
         print(f"Error al guardar la cotización o generar el PDF: {e}")
         raise
+
+def generar_ruta_docx(cotizacion: Cotizacion) -> str:
+    """
+    Genera un archivo DOCX para una cotización existente y devuelve la ruta del archivo.
+    Si el archivo ya existe, simplemente devuelve la ruta.
+    """
+    try:
+        temp_dir = "static/temp"
+        os.makedirs(temp_dir, exist_ok=True)
+        temp_docx = os.path.join(temp_dir, f"{cotizacion.id}.docx")
+
+        # Verificar si el archivo ya existe
+        if os.path.exists(temp_docx):
+            return f"http://localhost:8000/static/temp/{cotizacion.id}.docx"
+
+        # Cargar plantilla
+        plantilla_path = "static/cotizacion-template.docx"
+        doc = DocxTemplate(plantilla_path)
+
+        # Preparar productos para la plantilla
+        productos = []
+        for i, detalle in enumerate(cotizacion.detalles, start=1):
+            productos.append({
+                "n": i,
+                "pCod": detalle.codigo_producto,
+                "prodName": detalle.nombre_producto,
+                "qty": detalle.cantidad,
+                "uPrice": f"{detalle.precio_unitario:.2f}",
+                "pTotal": f"{detalle.total:.2f}"
+            })
+
+        # Contexto para la plantilla
+        context = {
+            "idCot": cotizacion.id,
+            "cxName": cotizacion.nombre_cliente,
+            "cxId": cotizacion.cedula_rif,
+            "cxAddress": cotizacion.direccion,
+            "email": cotizacion.cliente_email,
+            "tel": cotizacion.cliente_telefono,
+            "creatDate": generar_creation_date(),
+            "expDate": generar_expiration_date(),
+            "products": productos,
+            "sumAll": f"{cotizacion.subtotal:.2f}",
+            "iva": f"{cotizacion.iva:.2f}",
+            "total": f"{cotizacion.total:.2f}"
+        }
+
+        # Renderizar y guardar DOCX
+        doc.render(context)
+        doc.save(temp_docx)
+
+        return f"http://localhost:8000/static/temp/{cotizacion.id}.docx"
+
+    except Exception as e:
+        print(f"Error al generar el archivo DOCX: {e}")
+        raise
+
+
+def generar_ruta_pdf(cotizacion: Cotizacion) -> str:
+    """
+    Genera un archivo PDF para una cotización existente y devuelve la ruta del archivo.
+    Si el archivo ya existe, simplemente devuelve la ruta.
+    """
+    try:
+        temp_dir = "static/temp"
+        os.makedirs(temp_dir, exist_ok=True)
+        temp_pdf = os.path.join(temp_dir, f"{cotizacion.id}.pdf")
+
+        # Verificar si el archivo ya existe
+        if os.path.exists(temp_pdf):
+            return f"http://localhost:8000/static/temp/{cotizacion.id}.pdf"
+
+        # Generar el archivo DOCX primero
+        temp_docx = generar_ruta_docx(cotizacion).replace("http://localhost:8000", "")
+
+        # Convertir a PDF (requiere docx2pdf y MS Word en Windows)
+        try:
+            from docx2pdf import convert
+            convert(temp_docx, temp_pdf)
+            return f"http://localhost:8000/static/temp/{cotizacion.id}.pdf"
+        except Exception as e:
+            print(f"Error al convertir a PDF: {e}")
+            return f"http://localhost:8000{temp_docx}"  # Devuelve el DOCX si falla la conversión
+
+    except Exception as e:
+        print(f"Error al generar el archivo PDF: {e}")
+        raise

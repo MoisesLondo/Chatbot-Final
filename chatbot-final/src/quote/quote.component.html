@@ -1,0 +1,53 @@
+<section class="quote-container">
+  <div class="input-container">
+    <label for="cotizacion-id" class="label">ID de Cotización:</label>
+    <input
+      id="cotizacion-id"
+      type="text"
+      class="input"
+      [(ngModel)]="cotizacionId"
+      placeholder="Introduce el ID de la cotización"
+    />
+    <button class="btn btn-primary" (click)="fetchCotizacion()">Buscar</button>
+  </div>
+
+  <div *ngIf="cotizacion() as cot" class="cotizacion-details">
+    <h2 class="title">Cotización #{{ cot.id }}</h2>
+    <p><strong>Cliente:</strong> {{ cot.nombre_cliente }}</p>
+    <p><strong>Cédula/RIF:</strong> {{ cot.cedula_rif }}</p>
+    <p><strong>Dirección:</strong> {{ cot.direccion }}</p>
+    <p><strong>Email:</strong> {{ cot.cliente_email }}</p>
+    <p><strong>Teléfono:</strong> {{ cot.cliente_telefono }}</p>
+    <p><strong>Subtotal:</strong> {{ cot.subtotal | currency }}</p>
+    <p><strong>IVA:</strong> {{ cot.iva | currency }}</p>
+    <p><strong>Total:</strong> {{ cot.total | currency }}</p>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Código</th>
+          <th>Producto</th>
+          <th>Cantidad</th>
+          <th>Precio Unitario</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let detalle of detalles(); let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ detalle.codigo_producto }}</td>
+          <td>{{ detalle.nombre_producto }}</td>
+          <td>{{ detalle.cantidad }}</td>
+          <td>{{ detalle.precio_unitario | currency }}</td>
+          <td>{{ detalle.total | currency }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="actions">
+      <button class="btn btn-success" (click)="downloadPDF()">Descargar PDF</button>
+      <button class="btn btn-secondary" (click)="downloadDOCX()">Descargar DOCX</button>
+    </div>
+  </div>
+</section>

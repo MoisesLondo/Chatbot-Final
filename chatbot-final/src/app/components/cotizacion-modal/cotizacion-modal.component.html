@@ -1,35 +1,92 @@
-<div *ngIf="show" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-  <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
+<div *ngIf="show" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-[6px] transition-all duration-300">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative animate-fade-in">
     <button type="button" (click)="close.emit()" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
     <h2 class="text-2xl font-bold mb-4 text-blue-700">Datos para cotización</h2>
     <form (ngSubmit)="onSubmit()" autocomplete="off">
-      <div class="mb-3">
-        <label class="block text-gray-700 font-semibold mb-1">Nombre completo</label>
-        <input [(ngModel)]="nombre" name="nombre" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" />
+      <!-- Paso 1: Datos personales -->
+      <div *ngIf="step === 1">
+        <div class="flex gap-3 mb-3">
+          <div class="w-1/2">
+            <label class="block text-gray-700 font-semibold mb-1">Nombre</label>
+            <input [(ngModel)]="nombre" name="nombre" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" />
+          </div>
+          <div class="w-1/2">
+            <label class="block text-gray-700 font-semibold mb-1">Apellido</label>
+            <input [(ngModel)]="apellido" name="apellido" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" />
+          </div>
+        </div>
+        <div class="flex gap-3 mb-3">
+          <div class="w-1/2 flex items-center gap-2">
+            <label class="block text-gray-700 font-semibold mb-1 w-full">Cédula de identidad o RIF</label>
+            <select [(ngModel)]="tipoDocumento" name="tipoCedula" class="border rounded px-1 py-1 w-12 text-sm focus:outline-none focus:ring focus:border-blue-400">
+              <option value="V">V</option>
+              <option value="J">J</option>
+            </select>
+            <input [(ngModel)]="cedula" name="cedula" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400 ml-2" placeholder="Número" />
+          </div>
+          <div class="w-1/2">
+            <label class="block text-gray-700 font-semibold mb-1">Número de teléfono</label>
+            <input [(ngModel)]="telefono" name="telefono" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" />
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="block text-gray-700 font-semibold mb-1">Correo electrónico</label>
+          <input [(ngModel)]="email" name="email" type="email" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" />
+        </div>
+        <div class="flex justify-end mt-6 gap-2">
+          <button type="button" (click)="close.emit()" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700">Cancelar</button>
+          <button type="button" (click)="step = 2" [disabled]="!nombre || !apellido || !cedula || !email || !telefono" class="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-semibold">Siguiente</button>
+        </div>
       </div>
-      <div class="mb-3">
-        <label class="block text-gray-700 font-semibold mb-1">Cédula de identidad o RIF</label>
-        <input [(ngModel)]="cedula" name="cedula" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" />
+
+      <!-- Paso 2: Dirección -->
+      <div *ngIf="step === 2">
+        <div class="mb-3">
+          <label class="block text-gray-700 font-semibold mb-1">Calle / Avenida</label>
+          <input [(ngModel)]="calle" name="calle" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" />
+        </div>
+        <div class="mb-3">
+          <label class="block text-gray-700 font-semibold mb-1">Urbanización / Sector</label>
+          <input [(ngModel)]="urbanizacion" name="urbanizacion" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" />
+        </div>
+        <div class="mb-3">
+
+          <div class="flex gap-2">
+            <div class="w-1/2">
+              <label class="block text-gray-700 font-semibold mb-1">Estado</label>
+              <select [(ngModel)]="estado" name="estado" (change)="onEstadoChange()" required class="w-full border rounded px-2 py-1 text-sm focus:outline-none focus:ring focus:border-blue-400">
+                <option value="" disabled selected>Selecciona un estado</option>
+                <option *ngFor="let est of estados" [value]="est">{{ est }}</option>
+              </select>
+            </div>
+            <div class="w-1/2">
+              <label class="block text-gray-700 font-semibold mb-1">Ciudad</label>
+              <select [(ngModel)]="ciudad" name="ciudad" required [disabled]="!estado || ciudades.length === 0" class="w-full border rounded px-2 py-1 text-sm focus:outline-none focus:ring focus:border-blue-400">
+                <option value="" disabled selected>Selecciona una ciudad</option>
+                <option *ngFor="let c of ciudades" [value]="c">{{ c }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="mb-3">
+          <!-- Eliminado input duplicado de Estado, solo queda el select arriba -->
+        </div>
+        <div class="flex justify-end mt-6 gap-2">
+          <button type="button" (click)="step = 1" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700">Atrás</button>
+          <button type="button" (click)="step = 3" [disabled]="!calle || !urbanizacion || !ciudad || !estado" class="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-semibold">Siguiente</button>
+        </div>
       </div>
-      <div class="mb-3">
-        <label class="block text-gray-700 font-semibold mb-1">Dirección completa</label>
-        <textarea [(ngModel)]="direccion" name="direccion" required rows="2" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400"></textarea>
-      </div>
-      <div class="mb-3">
-        <label class="block text-gray-700 font-semibold mb-1">Correo electrónico</label>
-        <input [(ngModel)]="email" name="email" type="email" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" />
-      </div>
-      <div class="mb-3">
-        <label class="block text-gray-700 font-semibold mb-1">Número de teléfono</label>
-        <input [(ngModel)]="telefono" name="telefono" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" />
-      </div>
-      <div class="mb-3">
-        <label class="block text-gray-700 font-semibold mb-1">Productos a cotizar</label>
-        <div [innerHTML]="productosHtml" class="border rounded px-3 py-2 bg-gray-50"></div>
-      </div>
-      <div class="flex justify-end mt-6 gap-2">
-        <button type="button" (click)="close.emit()" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700">Cancelar</button>
-        <button type="submit" class="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-semibold">Enviar</button>
+
+      <!-- Paso 3: Productos -->
+      <div *ngIf="step === 3">
+        <div class="mb-3">
+          <label class="block text-gray-700 font-semibold mb-1">Productos a cotizar</label>
+          <div [innerHTML]="productosHtml" class="border rounded px-3 py-2 bg-gray-50"></div>
+        </div>
+        <div class="flex justify-end mt-6 gap-2">
+          <button type="button" (click)="step = 2" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700">Atrás</button>
+          <button type="submit" class="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-semibold">Enviar</button>
+        </div>
       </div>
     </form>
   </div>

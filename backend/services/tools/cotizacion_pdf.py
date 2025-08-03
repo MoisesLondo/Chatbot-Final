@@ -4,6 +4,8 @@ import os
 from services.cotizacion_bd import guardar_cotizacion, obtener_o_crear_cliente  # Asegúrate de tener esta función implementada
 from models.cotizacion import Cliente, Cotizacion, DetalleCotizacion
 from typing import Any
+import pythoncom
+from docx2pdf import convert
 
 def armar_modelo_cotizacion(datos: dict) -> Cotizacion:
     # Calcular totales
@@ -56,7 +58,6 @@ def armar_modelo_cotizacion(datos: dict) -> Cotizacion:
     )
 
     return cotizacion
-
 
 def generar_creation_date():
     """
@@ -153,7 +154,8 @@ def generar_cotizacion_pdf(
 
         # Convertir a PDF (requiere docx2pdf y MS Word en Windows)
         try:
-            from docx2pdf import convert
+            pythoncom.CoInitialize()
+            
             convert(temp_docx, temp_pdf)
             return f"http://localhost:8000/static/temp/{temp_id}.pdf"
         except Exception as e:
@@ -240,7 +242,6 @@ def generar_ruta_pdf(cotizacion: Cotizacion) -> str:
 
         # Convertir a PDF (requiere docx2pdf y MS Word en Windows)
         try:
-            from docx2pdf import convert
             convert(temp_docx, temp_pdf)
             return f"http://localhost:8000/static/temp/{cotizacion.id}.pdf"
         except Exception as e:

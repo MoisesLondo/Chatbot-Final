@@ -57,7 +57,6 @@ export class ChatComponent implements OnInit, AfterViewInit {
     }
   
     const mensaje: string = `[FORMULARIO-ENVIADO]${JSON.stringify({ ...data, productosHtml: this.productosHtml }, null, 2)}`;
-    
     this.addMessage(mensaje);
     this.closeCotizacionModal(false);
   }
@@ -83,6 +82,14 @@ export class ChatComponent implements OnInit, AfterViewInit {
   }
 
   addMessage(userText: string): void {
+    if (userText.includes('[FORMULARIO-ENVIADO]')) {
+      // Mostrar solo 'hola' en el chat para el usuario
+      this.messages.push(this.buildMsg('hola', 'user'));
+      this.isLoadingBotResponse = true;
+      setTimeout(() => this.scrollToBottom(), 0);
+      return;
+    }
+
     this.messages.push(this.buildMsg(userText, 'user'));
     this.isLoadingBotResponse = true;
     setTimeout(() => this.scrollToBottom(), 0);
@@ -130,6 +137,9 @@ export class ChatComponent implements OnInit, AfterViewInit {
 
   private historyEntryToMsg = (e: HistoryEntry): Message => {
     const sender = e.type === 'human' ? 'user' : 'bot';
+    if (sender === 'user' && e.content.includes('[FORMULARIO-ENVIADO]')) {
+      return this.buildMsg('Mensaje Enviado', 'user');
+    }
     return this.buildMsg(e.content, sender, sender === 'bot');
   };
 

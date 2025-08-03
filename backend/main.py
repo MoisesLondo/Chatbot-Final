@@ -3,7 +3,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from routes.question_routes import router as question_router
 from routes import login
-from routes import cotizacion_routes
+from routes import cotizacion_routes, user_routes
+
 
 
 
@@ -31,6 +32,8 @@ app.include_router(question_router)
 app.include_router(login.router)
 
 app.include_router(cotizacion_routes.router)
+
+app.include_router(user_routes.router)
 
 # Montar el directorio de archivos estáticos
 app.mount("/static", StaticFiles(directory="static"), name="static")

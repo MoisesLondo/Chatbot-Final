@@ -15,6 +15,6 @@ export class LandingComponent {
 
   goToChatbot() {
     this.ctaClicked.set(true);
-    this.router.navigate(['/chat']);
+    window.open('/chat', '_blank');
   }
 }

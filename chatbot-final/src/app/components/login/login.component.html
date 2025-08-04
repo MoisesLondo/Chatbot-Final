@@ -13,9 +13,12 @@
       Contraseña
       <input type="password" [(ngModel)]="password" name="password" required />
     </label>
+    <div *ngIf="loginError()" class="error">Usuario o contraseña incorrectos</div>
+  <p class="text-gray-600 text-center">¿Olvidaste tus credenciales?</p>
     <button class="login-btn" type="submit">Entrar</button>
+    
   </form>
-  <div *ngIf="loginError()" class="error">Usuario o contraseña incorrectos</div>
+  
 </section>
 </html>
 

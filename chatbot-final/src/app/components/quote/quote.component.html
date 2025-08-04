@@ -376,9 +376,25 @@
               <h2 class="font-montserrat font-bold text-2xl text-gray-900 mb-2">
                 Cotización #{{ cotizacion()!.id }}
               </h2>
-              <div class="badge badge-primary font-noto-sans">
-                {{ cotizacion()!.fecha_creacion | date:'medium' }}
-              </div>
+<!-- <div class="flex items-center space-x-2">
+
+  <div class="badge badge-primary font-noto-sans">
+    {{ cotizacion()?.fecha_creacion ? (cotizacion()?.fecha_creacion | date:'medium') : 'Fecha no disponible' }}
+  </div>
+
+
+  <div 
+    class="badge font-noto-sans"
+    [ngClass]="{
+      'badge-warning': cotizacion()?.estado === 'en_espera',
+      'badge-success': cotizacion()?.estado === 'convertido',
+      'badge-error': cotizacion()?.estado === 'perdido'
+    }"
+  >
+    {{ cotizacion()?.estado ? getStatusLabel(cotizacion()?.estado) : 'Estado no disponible' }}
+  </div>
+</div> -->
+              
             </div>
             <div class="actions flex gap-3">
               <button 

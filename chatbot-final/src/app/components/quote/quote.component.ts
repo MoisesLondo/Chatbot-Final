@@ -81,24 +81,33 @@ export class QuoteComponent {
   }
 
   // Original single quote search (unchanged)
-  fetchCotizacion() {
-    const id = this.cotizacionId();
-    if (!id) return;
+fetchCotizacion() {
+  const id = this.cotizacionId();
+  if (!id) return;
 
-    this.http.get<{ cotizacion: any; detalles: any[] }>(`http://127.0.0.1:8000/cotizacion/${id}`).subscribe({
-      next: (response) => {
-        this.cotizacion.set(response.cotizacion);
-        this.detalles.set(response.detalles);
-        this.hasSearched.set(true);
-      },
-      error: (err) => {
-        console.error('Error fetching cotización:', err);
+  this.http.get<{ cotizacion: any; detalles: any[] }>(`http://127.0.0.1:8000/cotizacion/${id}`).subscribe({
+    next: (response) => {
+      if (response.cotizacion) {
+        // Asegurarse de que los datos necesarios existan
+        this.cotizacion.set({
+          ...response.cotizacion,
+          fecha_creacion: response.cotizacion.fecha_creacion || null,
+          estado: response.cotizacion.estado || 'Estado no disponible',
+        });
+      } else {
         this.cotizacion.set(null);
-        this.detalles.set([]);
-        this.hasSearched.set(true);
-      },
-    });
-  }
+      }
+      this.detalles.set(response.detalles || []);
+      this.hasSearched.set(true);
+    },
+    error: (err) => {
+      console.error('Error fetching cotización:', err);
+      this.cotizacion.set(null);
+      this.detalles.set([]);
+      this.hasSearched.set(true);
+    },
+  });
+}
 
   // New multiple criteria search
   searchByCriteria() {

@@ -93,7 +93,7 @@
     </div>
 
     <!-- Filters and Search -->
-    <div class="card bg-base-100 shadow-xl mb-8">
+    <!-- <div class="card bg-base-100 shadow-xl mb-8">
       <div class="card-body">
         <div class="flex flex-col lg:flex-row gap-4 items-end">
           <div class="form-control flex-1">
@@ -150,10 +150,10 @@
           </button>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <!-- Users Table -->
-    <div class="card bg-base-100 shadow-xl">
+    <div class="card bg-base-100 shadow-xl text-gray-900">
       <div class="card-body">
         <div class="flex justify-between items-center mb-4">
           <h2 class="card-title font-montserrat text-xl text-gray-900">
@@ -164,7 +164,7 @@
         <div class="overflow-x-auto">
           <table class="table table-zebra w-full">
             <thead>
-              <tr class="font-montserrat">
+              <tr class="font-montserrat text-gray-900">
                 <th>Usuario</th>
                 <th>Información Personal</th>
                 <th>Contacto</th>
@@ -290,7 +290,7 @@
   </div>
 
   <!-- Create/Edit User Modal -->
-  <div class="modal" [class.modal-open]="showUserModal()">
+  <div class="modal text-gray-900" [class.modal-open]="showUserModal()">
     <div class="modal-box w-11/12 max-w-2xl">
       <h3 class="font-montserrat font-bold text-lg mb-4">
         {{ isEditMode() ? 'Editar Usuario' : 'Crear Nuevo Usuario' }}
@@ -399,10 +399,10 @@
               <span class="label-text font-noto-sans font-medium">Estado</span>
             </label>
             <div class="form-control">
-              <label class="label cursor-pointer justify-start space-x-3">
+              <label class="label cursor-pointer justify-start space-x-3 text-gray-900">
                 <input
                   type="checkbox"
-                  class="toggle toggle-primary"
+                  class="toggle toggle-primary text-gray-900"
                   [(ngModel)]="currentUser.is_active"
                   name="isActive"
                 />
@@ -438,13 +438,13 @@
   <!-- View User Modal -->
   <div class="modal" [class.modal-open]="showViewModal()">
     <div class="modal-box w-11/12 max-w-lg">
-      <h3 class="font-montserrat font-bold text-lg mb-4">Detalles del Usuario</h3>
+      <h3 class="font-montserrat font-bold text-lg mb-4 text-gray-900">Detalles del Usuario</h3>
       
       <div *ngIf="selectedUser()" class="space-y-4">
-        <div class="flex items-center space-x-4 mb-6">
+        <div class="flex items-center space-x-4 mb-6 text-gray-900">
           <div class="avatar placeholder">
-            <div class="bg-primary text-white rounded-full w-16 h-16">
-              <span class="text-xl font-bold">
+            <div class="bg-primary text-white rounded-full w-16 h-16 ">
+              <span class="text-xl font-bold ">
                 {{ getInitials(selectedUser()?.profile?.full_name || selectedUser()?.username || '') }}
               </span>
             </div>
@@ -501,7 +501,7 @@
       </div>
 
       <div class="modal-action">
-        <button class="btn btn-ghost font-noto-sans" (click)="closeViewModal()">
+        <button class="btn btn-ghost font-noto-sans text-gray-900" (click)="closeViewModal()">
           Cerrar
         </button>
         <button 

@@ -44,3 +44,7 @@
 .text-primary { color: #F01D27; }
 .font-montserrat { font-family: 'Montserrat', sans-serif; }
 .font-noto-sans { font-family: 'Noto Sans', sans-serif; }
+
+html {
+  scroll-behavior: smooth;
+}

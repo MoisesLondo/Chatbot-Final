@@ -1,5 +1,9 @@
-<section class="login-container">
-  <h1>Iniciar Sesión</h1>
+<html>
+  <section class="login-container">
+    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+          <span class="text-white font-bold text-lg">M</span>
+        </div>
+    <h1 class="text-2xl font-bold text-gray-800 mt-4">Iniciar Sesión</h1>
   <form (ngSubmit)="login()" autocomplete="off">
     <label>
       Usuario
@@ -9,7 +13,12 @@
       Contraseña
       <input type="password" [(ngModel)]="password" name="password" required />
     </label>
+    <div *ngIf="loginError()" class="error">Usuario o contraseña incorrectos</div>
+  <p class="text-gray-600 text-center">¿Olvidaste tus credenciales?</p>
     <button class="login-btn" type="submit">Entrar</button>
+    
   </form>
-  <div *ngIf="loginError()" class="error">Usuario o contraseña incorrectos</div>
+  
 </section>
+</html>
+

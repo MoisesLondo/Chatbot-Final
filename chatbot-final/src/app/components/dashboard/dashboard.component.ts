@@ -9,7 +9,7 @@ interface Lead {
   name: string;
   email: string;
   phone: string;
-  status: 'Nuevo' | 'En proceso' | 'Convertido' | 'Perdido';
+  status: 'Nuevo' | 'En espera' | 'Convertido' | 'Perdido';
   date: Date;
 }
 
@@ -29,7 +29,7 @@ interface Stats {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardComponent implements OnInit{
-  userName: string = 'Juan Pérez'; // Esto vendría del servicio de autenticación
+  userName: string = 'Carlos Mendoza'; // Esto vendría del servicio de autenticación
   userRole: 'admin' | 'vendedor' = 'admin'; // Esto vendría del servicio de autenticación
 
   stats: Stats = {
@@ -40,22 +40,6 @@ export class DashboardComponent implements OnInit{
   };
 
   leads: Lead[] = [
-    {
-      id: 1,
-      name: 'Carlos Mendoza',
-      email: 'carlos@empresa.com',
-      phone: '+52 55 1234-5678',
-      status: 'Nuevo',
-      date: new Date('2024-01-15')
-    },
-    {
-      id: 2,
-      name: 'Ana García',
-      email: 'ana@construcciones.com',
-      phone: '+52 55 9876-5432',
-      status: 'En proceso',
-      date: new Date('2024-01-14')
-    },
     {
       id: 3,
       name: 'Roberto Silva',
@@ -69,7 +53,7 @@ export class DashboardComponent implements OnInit{
       name: 'María López',
       email: 'maria@proyectos.com',
       phone: '+52 55 7777-8888',
-      status: 'En proceso',
+      status: 'En espera',
       date: new Date('2024-01-12')
     },
     {

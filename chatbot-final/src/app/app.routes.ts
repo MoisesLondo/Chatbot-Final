@@ -1,8 +1,8 @@
-import { Routes } from '@angular/router';
-
+import { Routes, RouterModule } from '@angular/router';
+import { NgModule } from '@angular/core';
 import { LandingComponent } from './components/landing/landing.component';
 import { ChatComponent } from './components/chat/chat.component';
-
+import { MainLayoutComponent } from './components/main-layout/main.layout.component';
 import { LoginComponent } from './components/login/login.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { authGuard } from './guards/auth.guard';
@@ -13,8 +13,25 @@ export const routes: Routes = [
   { path: '', component: LandingComponent },
   { path: 'chat', component: ChatComponent },
   { path: 'login', component: LoginComponent },
-  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
-  { path: 'quote', component: QuoteComponent, canActivate: [authGuard] },
-  { path: 'users', component: UsersComponent, canActivate: [authGuard] },
+
+  // Rutas protegidas (con layout)
+  {
+    path: '',
+    component: MainLayoutComponent,
+    canActivate: [authGuard],
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: DashboardComponent },
+      { path: 'quote', component: QuoteComponent },
+      
+      // Rutas solo para admin
+      { 
+        path: 'users', component: UsersComponent,
+        // canActivate: [AdminGuard] // Descomenta cuando tengas el guard
+      },
+
+    ],
+  },
   { path: '**', redirectTo: '' }
+  
 ];

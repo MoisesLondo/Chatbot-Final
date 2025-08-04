@@ -46,7 +46,7 @@ export class DashboardComponent implements OnInit{
       email: 'roberto@obras.com',
       phone: '+52 55 5555-1234',
       status: 'Convertido',
-      date: new Date('2024-01-13')
+      date: new Date('2025-08-13')
     },
     {
       id: 4,
@@ -54,7 +54,7 @@ export class DashboardComponent implements OnInit{
       email: 'maria@proyectos.com',
       phone: '+52 55 7777-8888',
       status: 'En espera',
-      date: new Date('2024-01-12')
+      date: new Date('2025-08-12')
     },
     {
       id: 5,
@@ -62,7 +62,7 @@ export class DashboardComponent implements OnInit{
       email: 'diego@industrial.com',
       phone: '+52 55 3333-4444',
       status: 'Perdido',
-      date: new Date('2024-01-11')
+      date: new Date('2025-08-11')
     }
   ];
 

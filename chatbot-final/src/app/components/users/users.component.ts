@@ -165,19 +165,6 @@ export class UsersComponent implements OnInit {
         }
       },
       {
-        id: '550e8400-e29b-41d4-a716-446655440002',
-        username: 'carlos.mendoza',
-        role: 'vendedor',
-        is_active: true,
-        created_at: '2024-01-10T09:15:00Z',
-        profile: {
-          id: 2,
-          full_name: 'Carlos Mendoza',
-          email: 'carlos@mhierro.com',
-          tel: '+52 55 9876-5432'
-        }
-      },
-      {
         id: '550e8400-e29b-41d4-a716-446655440003',
         username: 'ana.garcia',
         role: 'vendedor',

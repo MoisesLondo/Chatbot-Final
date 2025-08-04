@@ -9,79 +9,88 @@
     <button class="btn btn-ghost text-xl">daisyUI</button>
   </div>
   <div class="flex flex-1 flex-row min-h-0">
-    <!-- Sidebar izquierdo -->
-    <aside class="w-64 bg-gradient-to-b from-blue-900 to-blue-600 text-white flex flex-col items-center py-8 shadow-lg z-40">
-      <div class="mb-8">
-        <img src="https://www.shutterstock.com/image-vector/chat-bot-icon-virtual-smart-600nw-2478937555.jpg" alt="Logo" class="w-16 h-16 rounded-full border-4 border-white shadow-md" />
-      </div>
-      <nav class="flex flex-col gap-4 w-full px-4">
-        <button class="w-full py-2 rounded bg-blue-800 hover:bg-blue-700 transition font-semibold">Inicio</button>
-        <button class="w-full py-2 rounded bg-blue-800 hover:bg-blue-700 transition font-semibold">Cotizaciones</button>
-        <button class="w-full py-2 rounded bg-blue-800 hover:bg-blue-700 transition font-semibold">Historial</button>
-        <button class="w-full py-2 rounded bg-blue-800 hover:bg-blue-700 transition font-semibold">Ayuda</button>
-      </nav>
-      <div class="mt-auto pt-8 text-xs text-blue-200">&copy; 2025 Chatbot Final</div>
-    </aside>
-    <!-- Chat principal ocupa todo el espacio -->
+    <!-- Chat principal ocupa todo el espacio, solo cambia el wrapper visual -->
     <main class="flex flex-col flex-1 h-full min-h-0 items-end">
-      <div class="flex flex-col flex-1 w-full p-0 chat-container min-h-0">
-        <div class="flex-grow min-h-0 bg-base-100 overflow-y-auto shadow-2xl" #chatContainer style="backdrop-filter: blur(2px);">
-
-          <div *ngIf="messages.length === 0" class="text-center h-full justify-center items-center flex flex-col initial-title">
-            <h2 class="text-5xl md:text-7xl lg:text-8xl font-bold bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 bg-clip-text text-transparent mb-4 tracking-tight leading-tight animate-fade-in">
-              Bienvenido al Chat.
-            </h2>
-            <h2 class="text-lg md:text-xl lg:text-2xl font-semibold text-red-500 opacity-90 tracking-wide animate-pulse">
-              Comienza enviando un mensaje.
-            </h2>
-          </div>
-
-          <div *ngFor="let msg of messages" class="chat" [ngClass]="{'chat-start': msg.sender === 'bot', 'chat-end': msg.sender === 'user'}">
-            <div class="chat-image avatar">
-              <div class="w-8 rounded-full">
-                <img
-                  alt="Tailwind CSS chat bubble component"
-                  [src]="msg.sender === 'user' ? 'https://img.daisyui.com/images/profile/demo/anakeen@192.webp' : 'https://www.shutterstock.com/image-vector/chat-bot-icon-virtual-smart-600nw-2478937555.jpg'"
-                />
+      <div class="flex flex-col flex-1 w-full p-6 min-h-0 items-center justify-center">
+        <!-- INICIO: Todo el contenido y lógica del chat, ahora sin cuadro -->
+        <div class="flex-col flex-1 w-full p-0 chat-container min-h-0 flex">
+            <div class="flex-grow min-h-0 bg-base-100 overflow-y-auto shadow-2xl p-6" #chatContainer style="backdrop-filter: blur(2px);">
+              <!-- ...existing code for chat messages, loading, etc... -->
+              <ng-container *ngIf="messages.length === 0">
+                <div class="text-center h-full justify-center items-center flex flex-col initial-title">
+                  <h2 class="text-5xl md:text-7xl lg:text-8xl font-bold bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 bg-clip-text text-transparent mb-4 tracking-tight leading-tight animate-fade-in">
+                    Bienvenido al Chat.
+                  </h2>
+                  <h2 class="text-lg md:text-xl lg:text-2xl font-semibold text-red-500 opacity-90 tracking-wide animate-pulse">
+                    Comienza enviando un mensaje.
+                  </h2>
+                </div>
+              </ng-container>
+              <ng-container *ngFor="let msg of messages">
+                <div class="chat" [ngClass]="{'chat-start': msg.sender === 'bot', 'chat-end': msg.sender === 'user'}">
+                  <div class="chat-image avatar">
+                    <div class="w-8 rounded-full">
+                      <img
+                        alt="Tailwind CSS chat bubble component"
+                        [src]="msg.sender === 'user' ? 'https://img.daisyui.com/images/profile/demo/anakeen@192.webp' : 'https://www.shutterstock.com/image-vector/chat-bot-icon-virtual-smart-600nw-2478937555.jpg'"
+                      />
+                    </div>
+                  </div>
+                  <div class="chat-bubble transition-all duration-300" 
+                       [ngClass]="{
+                         'chat-bubble-secondary': msg.sender === 'user', 
+                         'chat-bubble-primary': msg.sender === 'bot',
+                         'bg-transparent shadow-none border-none': msg.sender === 'bot' && extractVisualList(msg.text).items.length > 0
+                       }"
+                       [ngStyle]="msg.sender === 'bot' ? {'max-width': '900px', 'min-width': '48px', 'padding': '0.5rem 1rem', 'font-size': '1rem'} : {}">
+                    <ng-container *ngIf="msg.sender === 'bot'">
+                      <span *ngIf="msg.text.includes('/static/temp/')">
+                        <a [href]="getStaticTempUrl(msg.text)" target="_blank">
+                          Descargar cotización
+                        </a>
+                      </span>
+                      <span *ngIf="msg.text.includes('[ABRIR_FORMULARIO_COTIZACION]'); else normalBotMsg">
+                        <p>Por favor, completa el formulario de cotización.</p>
+                      </span>
+                      <ng-template #normalBotMsg>
+                        <!-- Si el mensaje contiene una lista de productos en JSON, renderiza el componente visual -->
+                        <ng-container *ngIf="extractVisualList(msg.text).items.length > 0; else defaultBotMsg">
+                          <app-product-list 
+                            [products]="extractVisualList(msg.text).items" 
+                            [title]="extractVisualList(msg.text).type === 'productos' ? 'Productos encontrados' : 'Categorías disponibles'"
+                            (addToQuote)="onAddToQuote($event)">
+                          </app-product-list>
+                        </ng-container>
+                        <ng-template #defaultBotMsg>
+                          <span *ngIf="!msg.text.includes('/static/temp/')" [innerHTML]="msg.text"></span>
+                        </ng-template>
+                      </ng-template>
+                    </ng-container>
+                    <ng-container *ngIf="msg.sender === 'user'">
+                      {{ msg.text }}
+                    </ng-container>
+                  </div>
+                </div>
+              </ng-container>
+              <div *ngIf="isLoadingBotResponse" class="chat chat-start">
+                <div class="chat-image avatar">
+                  <div class="w-8 rounded-full">
+                    <img
+                      alt="Tailwind CSS chat bubble component"
+                      src="https://www.shutterstock.com/image-vector/chat-bot-icon-virtual-smart-600nw-2478937555.jpg"
+                    />
+                  </div>
+                </div>
+                <div class="chat-bubble chat-bubble-primary">
+                  <span class="loading loading-dots loading-md"></span>
+                </div>
               </div>
             </div>
-            <div class="chat-bubble" [ngClass]="{'chat-bubble-secondary': msg.sender === 'user', 'chat-bubble-primary': msg.sender === 'bot'}">
-              <ng-container *ngIf="msg.sender === 'bot'">
-                <span *ngIf="msg.text.includes('/static/temp/')">
-                  <a [href]="getStaticTempUrl(msg.text)" target="_blank">
-                    Descargar cotización
-                  </a>
-                </span>
-                <span *ngIf="msg.text.includes('[ABRIR_FORMULARIO_COTIZACION]'); else normalBotMsg">
-                  <p>Por favor, completa el formulario de cotización.</p>
-                </span>
-                <ng-template #normalBotMsg>
-                  <span *ngIf="!msg.text.includes('/static/temp/')" [innerHTML]="msg.text"></span>
-                </ng-template>
-              </ng-container>
-              <ng-container *ngIf="msg.sender === 'user'">
-                {{ msg.text }}
-              </ng-container>
+            <div class="p-2 bg-primary rounded-b-3xl shadow-md border-t-2 border-blue-200">
+              <app-input-chat (messageSent)="addMessage($event)" (resetChat)="resetChatHistory()"></app-input-chat>
             </div>
           </div>
-          <div *ngIf="isLoadingBotResponse" class="chat chat-start">
-            <div class="chat-image avatar">
-              <div class="w-8 rounded-full">
-                <img
-                  alt="Tailwind CSS chat bubble component"
-                  src="https://www.shutterstock.com/image-vector/chat-bot-icon-virtual-smart-600nw-2478937555.jpg"
-                />
-              </div>
-            </div>
-            <div class="chat-bubble chat-bubble-primary">
-              <span class="loading loading-dots loading-md"></span>
-            </div>
-          </div>
-        </div>
-
-        <div class="p-2 bg-primary rounded-b-lg shadow-md border-t-2 border-blue-200">
-          <app-input-chat (messageSent)="addMessage($event)" (resetChat)="resetChatHistory()"></app-input-chat>
-        </div>
+        <!-- FIN: Todo el contenido y lógica del chat -->
       </div>
     </main>
   </div>

@@ -1,0 +1,53 @@
+<div *ngIf="title" class="mb-4 text-2xl font-bold text-blue-900 tracking-tight flex items-center gap-2">
+  <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7M16 3v4M8 3v4m-5 4h18"/></svg>
+  {{ title }}
+</div>
+<ul class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+  <li *ngFor="let prod of products" class="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden hover:scale-[1.01] hover:shadow-lg transition-all duration-200 p-4 flex flex-col gap-2">
+    <ng-container *ngIf="prod.precio !== undefined; else categoriaCard">
+      <div class="flex items-center gap-3">
+        <div class="flex-shrink-0">
+          <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center border-2 border-blue-200">
+            <div class="w-8 h-8 bg-blue-300 rounded text-white font-bold text-base flex items-center justify-center">
+              {{ prod.nombre ? prod.nombre.substring(0,2).toUpperCase() : '?' }}
+            </div>
+          </div>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="text-base font-bold text-slate-800 truncate">{{ prod.nombre }}</h3>
+            <span class="text-green-600 font-bold text-lg">${{ prod.precio }}</span>
+          </div>
+          <div class="flex items-center gap-2 text-xs text-slate-500 mb-1">
+            <span class="bg-slate-100 px-2 py-0.5 rounded font-medium">{{ prod.categoria }}</span>
+            <span class="font-mono bg-blue-50 px-2 py-0.5 rounded text-blue-700">{{ prod.codigo }}</span>
+          </div>
+          <div class="flex items-center gap-2 mt-1">
+            <span class="text-xs text-slate-500">Stock:</span>
+            <span class="font-semibold text-slate-800">{{ prod.stock }}</span>
+            <button *ngIf="!showQtyInput[prod.codigo]" class="ml-auto flex items-center gap-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors duration-200 text-xs z-10 cursor-pointer">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+              </svg>
+              Agregar
+            </button>
+            <div *ngIf="showQtyInput[prod.codigo]" class="flex items-center gap-2 ml-auto animate-fade-in">
+              <input type="number" min="1" [max]="prod.stock" [(ngModel)]="qty[prod.codigo]" class="w-16 px-2 py-1 border rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Cantidad" />
+              <button (click)="confirmAdd(prod)" class="px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs">OK</button>
+              <button (click)="closeQtyInput(prod)" class="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded text-xs">✕</button>
+            </div>
+            <div *ngIf="error[prod.codigo]" class="text-xs text-red-500 mt-1 ml-auto">{{ error[prod.codigo] }}</div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+    <ng-template #categoriaCard>
+      <div class="flex items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+        <div class="w-10 h-10 bg-gradient-to-br from-blue-200 to-purple-200 rounded flex items-center justify-center border-2 border-blue-100">
+          <span class="text-blue-700 font-bold text-lg">{{ prod.nombre ? prod.nombre.substring(0,2).toUpperCase() : '?' }}</span>
+        </div>
+        <span class="font-semibold text-slate-800 text-base truncate">{{ prod.nombre | titlecase }}</span>
+      </div>
+    </ng-template>
+  </li>
+</ul>

@@ -1,5 +1,6 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, ChangeDetectorRef} from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { CotizacionModalComponent } from '../cotizacion-modal/cotizacion-modal.component';
+import { ProductListComponent } from '../product-list/product-list.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InputChatComponent } from '../input-chat/input-chat.component';
@@ -10,8 +11,7 @@ import { MarkdownModule } from 'ngx-markdown';
 interface Message {
   text: string;
   sender: 'user' | 'bot';
-  // timestamp: string;
-  htmlText?: string; // para mostrar saltos de línea
+  htmlText?: string;
 }
 
 @Component({
@@ -22,18 +22,52 @@ interface Message {
     FormsModule,
     InputChatComponent,
     CotizacionModalComponent,
+    ProductListComponent,
     MarkdownModule
   ],
-  
   templateUrl: './chat.component.html',
-  styleUrls: ['./chat.component.css']
+  styleUrls: ['./chat.component.css'],
 })
 export class ChatComponent implements OnInit, AfterViewInit {
+  productosCotizar: { producto: any, cantidad: number }[] = [];
+  onAddToQuote(event: { producto: any, cantidad: number }) {
+    // Si ya está, suma la cantidad, si no, lo agrega
+    const idx = this.productosCotizar.findIndex(p => p.producto.codigo === event.producto.codigo);
+    if (idx >= 0) {
+      const nuevaCantidad = this.productosCotizar[idx].cantidad + event.cantidad;
+      if (nuevaCantidad > event.producto.stock) {
+        this.messages.push(this.buildMsg('No puedes agregar más de lo disponible en stock.', 'bot'));
+        return;
+      }
+      this.productosCotizar[idx].cantidad = nuevaCantidad;
+    } else {
+      this.productosCotizar.push(event);
+    }
+    this.messages.push(this.buildMsg(`Agregado: ${event.producto.nombre} (${event.cantidad}) a la cotización.`, 'bot'));
+  }
+  // Extrae el primer array JSON de productos de cualquier string
+  extractVisualList(text: string): { items: any[], type: 'productos' | 'categorias' | null } {
+    if (!text) return { items: [], type: null };
+    const match = text.match(/\[\s*{[\s\S]*?}\s*\]/);
+    if (match) {
+      try {
+        const arr = JSON.parse(match[0]);
+        if (Array.isArray(arr) && arr.length > 0) {
+          if (arr[0].nombre && arr[0].precio !== undefined) {
+            return { items: arr, type: 'productos' };
+          } else if (arr[0].nombre && arr[0].precio === undefined) {
+            return { items: arr, type: 'categorias' };
+          }
+        }
+      } catch {}
+    }
+    return { items: [], type: null };
+  }
   @ViewChild('chatContainer') private chatContainer!: ElementRef;
   isLoadingBotResponse: boolean = false;
   messages: Message[] = [];
-   showCotizacionModal = false;
-   productosHtml: string = '';
+  showCotizacionModal = false;
+  productosHtml: string = '';
 
 
   openCotizacionModal(productosHtml: string) {
@@ -95,7 +129,6 @@ export class ChatComponent implements OnInit, AfterViewInit {
 
     const payload: AskPayload = { query: userText, session_id: this.sessionId };
 
-
     this.chat.askToBot(payload).subscribe({
       next: res => {
         if (res.response) {
@@ -135,7 +168,7 @@ export class ChatComponent implements OnInit, AfterViewInit {
     });
   }
 
-  private historyEntryToMsg = (e: HistoryEntry): Message => {
+  historyEntryToMsg = (e: HistoryEntry): Message => {
     const sender = e.type === 'human' ? 'user' : 'bot';
     if (sender === 'user' && e.content.includes('[FORMULARIO-ENVIADO]')) {
       return this.buildMsg('Mensaje Enviado', 'user');

@@ -28,11 +28,11 @@
              (click)="setSearchType('criteria')">
             Búsqueda Avanzada
           </a>
-          <a class="tab font-noto-sans" 
+          <!-- <a class="tab font-noto-sans" 
              [class.tab-active]="searchType() === 'status'"
              (click)="setSearchType('status')">
             Buscar por Estado
-          </a>
+          </a> -->
         </div>
 
         <!-- Search by ID -->
@@ -71,7 +71,7 @@
         </div>
 
         <!-- Search by Status -->
-        <div *ngIf="searchType() === 'status'">
+        <!-- <div *ngIf="searchType() === 'status'">
           <h2 class="card-title font-montserrat text-xl text-gray-900 mb-4">
             <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -79,9 +79,9 @@
             Buscar Cotizaciones por Estado
           </h2>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6"> -->
             <!-- Estado -->
-            <div class="form-control">
+            <!-- <div class="form-control">
               <label class="label">
                 <span class="label-text font-noto-sans font-medium">Estado de la Cotización:</span>
               </label>
@@ -94,10 +94,10 @@
                 <option value="convertido">Convertido</option>
                 <option value="perdido">Perdido</option>
               </select>
-            </div>
+            </div> -->
 
             <!-- Fecha Desde -->
-            <div class="form-control">
+            <!-- <div class="form-control">
               <label class="label">
                 <span class="label-text font-noto-sans font-medium">Fecha Desde:</span>
               </label>
@@ -106,10 +106,10 @@
                 class="input input-bordered font-noto-sans"
                 [(ngModel)]="statusSearch.fecha_desde"
               />
-            </div>
+            </div> -->
 
             <!-- Fecha Hasta -->
-            <div class="form-control">
+            <!-- <div class="form-control">
               <label class="label">
                 <span class="label-text font-noto-sans font-medium">Fecha Hasta:</span>
               </label>
@@ -118,10 +118,10 @@
                 class="input input-bordered font-noto-sans"
                 [(ngModel)]="statusSearch.fecha_hasta"
               />
-            </div>
+            </div> -->
 
             <!-- Vendedor (opcional) -->
-            <div class="form-control">
+            <!-- <div class="form-control">
               <label class="label">
                 <span class="label-text font-noto-sans font-medium">Vendedor:</span>
               </label>
@@ -135,10 +135,10 @@
                 <option value="roberto.silva">Roberto Silva</option>
               </select>
             </div>
-          </div>
+          </div> -->
 
           <!-- Status Cards Preview -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <!-- <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div class="card bg-yellow-50 border border-yellow-200">
               <div class="card-body p-4">
                 <div class="flex items-center space-x-3">
@@ -209,7 +209,7 @@
               Buscar por Estado
             </button>
           </div>
-        </div>
+        </div> -->
 
         <!-- Advanced Search -->
         <div *ngIf="searchType() === 'criteria'">

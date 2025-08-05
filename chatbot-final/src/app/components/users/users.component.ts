@@ -121,9 +121,9 @@ export class UsersComponent implements OnInit {
       is_active: true,
       created_at: new Date().toISOString(),
       profile: {
-        full_name: 'Nombre Dummy',
+        full_name: 'Nombre',
         email: 'dummy@example.com',
-        tel: '1234567890'
+        tel: '0412 000-0000'
       }
     };
   }
@@ -156,12 +156,12 @@ export class UsersComponent implements OnInit {
         username: 'admin',
         role: 'admin',
         is_active: true,
-        created_at: '2024-01-15T10:30:00Z',
+        created_at: '2025-01-15T10:30:00Z',
         profile: {
           id: 1,
-          full_name: 'Administrador Principal',
+          full_name: 'Carlos Mendoza',
           email: 'admin@mhierro.com',
-          tel: '+52 55 1234-5678'
+          tel: '+58 412 123-5678'
         }
       },
       {
@@ -174,7 +174,7 @@ export class UsersComponent implements OnInit {
           id: 3,
           full_name: 'Ana García',
           email: 'ana@mhierro.com',
-          tel: '+52 55 5555-1234'
+          tel: '+58 412 555-1234'
         }
       },
       {
@@ -187,7 +187,7 @@ export class UsersComponent implements OnInit {
           id: 4,
           full_name: 'Roberto Silva',
           email: 'roberto@mhierro.com',
-          tel: '+52 55 7777-8888'
+          tel: '+58 412 777-8888'
         }
       }
     ];

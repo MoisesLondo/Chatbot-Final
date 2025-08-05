@@ -1,3 +1,4 @@
+import { Router } from '@angular/router';
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { CotizacionModalComponent } from '../cotizacion-modal/cotizacion-modal.component';
 import { ProductListComponent } from '../product-list/product-list.component';
@@ -6,13 +7,14 @@ import { FormsModule } from '@angular/forms';
 import { InputChatComponent } from '../input-chat/input-chat.component';
 import { AskPayload, HistoryEntry } from '../../models';
 import { ChatService } from '../../services';
-import { MarkdownModule } from 'ngx-markdown';
 
 interface Message {
   text: string;
   sender: 'user' | 'bot';
   htmlText?: string;
 }
+
+import { CartComponent } from '../cart/cart.component';
 
 @Component({
   selector: 'app-chat',
@@ -23,27 +25,45 @@ interface Message {
     InputChatComponent,
     CotizacionModalComponent,
     ProductListComponent,
-    MarkdownModule
+    CartComponent
   ],
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css'],
 })
 export class ChatComponent implements OnInit, AfterViewInit {
-  productosCotizar: { producto: any, cantidad: number }[] = [];
+  showCart = false;
+  private sessionId: string;
+  constructor(
+    private chat: ChatService,
+    private cdr: ChangeDetectorRef,
+    private router: Router
+  ) {
+    this.sessionId = sessionStorage.getItem('session_id') ?? crypto.randomUUID();
+    sessionStorage.setItem('session_id', this.sessionId);
+  }
+
+  goHome() {
+    this.router.navigate(['/']);
+  }
+  cartItems: { producto: any, cantidad: number }[] = [];
+  private addToCartHandler: ((event: { producto: any, cantidad: number }) => void) | null = null;
+
+  setAddToCartHandler(fn: (event: { producto: any, cantidad: number }) => void) {
+    this.addToCartHandler = fn;
+  }
+
   onAddToQuote(event: { producto: any, cantidad: number }) {
-    // Si ya está, suma la cantidad, si no, lo agrega
-    const idx = this.productosCotizar.findIndex(p => p.producto.codigo === event.producto.codigo);
-    if (idx >= 0) {
-      const nuevaCantidad = this.productosCotizar[idx].cantidad + event.cantidad;
-      if (nuevaCantidad > event.producto.stock) {
-        this.messages.push(this.buildMsg('No puedes agregar más de lo disponible en stock.', 'bot'));
-        return;
-      }
-      this.productosCotizar[idx].cantidad = nuevaCantidad;
+    if (this.addToCartHandler) {
+      this.addToCartHandler(event);
     } else {
-      this.productosCotizar.push(event);
+      // fallback local (solo para pruebas)
+      const idx = this.cartItems.findIndex(p => p.producto.codigo === event.producto.codigo);
+      if (idx >= 0) {
+        this.cartItems[idx].cantidad += event.cantidad;
+      } else {
+        this.cartItems.push(event);
+      }
     }
-    this.messages.push(this.buildMsg(`Agregado: ${event.producto.nombre} (${event.cantidad}) a la cotización.`, 'bot'));
   }
   // Extrae el primer array JSON de productos de cualquier string
   extractVisualList(text: string): { items: any[], type: 'productos' | 'categorias' | null } {
@@ -100,12 +120,7 @@ export class ChatComponent implements OnInit, AfterViewInit {
     this.sessionId = crypto.randomUUID();
     sessionStorage.setItem('session_id', this.sessionId);
   }
-  private sessionId: string
-
-  constructor(private chat: ChatService, private cdr: ChangeDetectorRef) {
-    this.sessionId = sessionStorage.getItem('session_id') ?? crypto.randomUUID();
-    sessionStorage.setItem('session_id', this.sessionId);
-  }
+  // ...existing code...
 
   ngOnInit(): void {
     this.loadHistory();

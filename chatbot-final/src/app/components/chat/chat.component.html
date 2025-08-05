@@ -5,9 +5,38 @@
   (submit)="onCotizacionSubmit($event)">
 </app-cotizacion-modal>
 <div class="flex flex-col h-screen">
-  <div class="navbar bg-secondary text-secondary-content z-50">
-    <button class="btn btn-ghost text-xl">daisyUI</button>
-  </div>
+  <header class="border-b border-gray-200 bg-white/95 backdrop-blur-sm sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <button (click)="goHome()" class="btn btn-primary bg-primary hover:bg-primary-dark text-white font-noto-sans flex items-center gap-2 px-4 py-2 rounded-lg shadow transition-all duration-150">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0,0,256,256" class="w-5 h-5">
+            <g fill="#ffffff" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.12,5.12)"><path d="M24.96094,1.10156c-0.20852,0.00805 -0.4093,0.08112 -0.57422,0.20898l-23,17.90039c-0.29773,0.21363 -0.45479,0.57298 -0.40934,0.93659c0.04544,0.36361 0.28611,0.67326 0.62726,0.80704c0.34115,0.13378 0.72815,0.07028 1.00865,-0.16551l1.38672,-1.08008v26.29102c0.00006,0.55226 0.44774,0.99994 1,1h13.83203c0.10799,0.01785 0.21818,0.01785 0.32617,0h11.67383c0.10799,0.01785 0.21818,0.01785 0.32617,0h13.8418c0.55226,-0.00006 0.99994,-0.44774 1,-1v-26.29102l1.38672,1.08008c0.2805,0.23579 0.6675,0.2993 1.00865,0.16551c0.34115,-0.13378 0.58181,-0.44343 0.62726,-0.80704c0.04544,-0.36362 -0.11161,-0.72297 -0.40935,-0.93659l-7.64453,-5.94922c0.02192,-0.08548 0.03243,-0.17348 0.03125,-0.26172v-6c-0.00006,-0.55226 -0.44774,-0.99994 -1,-1h-3.90039c-0.55226,0.00006 -0.99994,0.44774 -1,1v1.69336l-9.48633,-7.38281c-0.18607,-0.14428 -0.41707,-0.21828 -0.65234,-0.20898zM25,3.36719l19,14.78711v26.8457h-12v-18c-0.00006,-0.55226 -0.44774,-0.99994 -1,-1h-12c-0.29504,-0.00368 -0.57665,0.1231 -0.76947,0.34644c-0.19283,0.22333 -0.27719,0.52042 -0.23053,0.81177v17.8418h-12v-26.8457zM37.09961,8h1.90039v3.72852l-1.90039,-1.47852zM20,28h10v17h-10z"></path></g></g>
+          </svg>
+          Inicio
+        </button>
+        <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+          <span class="text-white font-bold text-lg">M</span>
+        </div>
+        <div>
+          <span class="font-montserrat font-bold text-2xl text-gray-900">M Hierro</span>
+          <p class="font-noto-sans text-xs text-gray-600 leading-none">Distribución de hierro</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button (click)="showCart = !showCart" class="relative flex items-center justify-center w-10 h-10 rounded-full bg-primary hover:bg-primary-dark text-white shadow transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary">
+          <span class="flex items-center justify-center w-full h-full">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mx-auto my-auto block">
+              <path d="M7.2998 5H22L20 12H8.37675M21 16H9L7 3H4M4 8H2M5 11H2M6 14H2M10 20C10 20.5523 9.55228 21 9 21C8.44772 21 8 20.5523 8 20C8 19.4477 8.44772 19 9 19C9.55228 19 10 19.4477 10 20ZM21 20C21 20.5523 20.5523 21 20 21C19.4477 21 19 20.5523 19 20C19 19.4477 19.4477 19 20 19C20.5523 19 21 19.4477 21 20Z" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span *ngIf="cartItems.length > 0" class="absolute -top-1 -right-1 bg-blue-600 text-white text-xs font-bold rounded-full px-1.5 py-0.5 shadow">{{ cartItems.length }}</span>
+        </button>
+        <div *ngIf="showCart" class="absolute right-4 top-16 z-50">
+          <app-cart [items]="cartItems"></app-cart>
+        </div>
+      </div>
+    </div>
+  </header>
   <div class="flex flex-1 flex-row min-h-0">
     <!-- Chat principal ocupa todo el espacio, solo cambia el wrapper visual -->
     <main class="flex flex-col flex-1 h-full min-h-0 items-end">
@@ -28,21 +57,20 @@
               </ng-container>
               <ng-container *ngFor="let msg of messages">
                 <div class="chat" [ngClass]="{'chat-start': msg.sender === 'bot', 'chat-end': msg.sender === 'user'}">
-                  <div class="chat-image avatar">
+                  <div *ngIf="msg.sender === 'bot'" class="chat-image avatar">
                     <div class="w-8 rounded-full">
                       <img
                         alt="Tailwind CSS chat bubble component"
-                        [src]="msg.sender === 'user' ? 'https://img.daisyui.com/images/profile/demo/anakeen@192.webp' : 'https://www.shutterstock.com/image-vector/chat-bot-icon-virtual-smart-600nw-2478937555.jpg'"
+                        src="avatar.jpg"
                       />
                     </div>
                   </div>
-                  <div class="chat-bubble transition-all duration-300" 
+                  <div class="chat-bubble transition-all duration-300"
                        [ngClass]="{
-                         'chat-bubble-secondary': msg.sender === 'user', 
-                         'chat-bubble-primary': msg.sender === 'bot',
-                         'bg-transparent shadow-none border-none': msg.sender === 'bot' && extractVisualList(msg.text).items.length > 0
+                         'chat-bubble-secondary bg-white text-[#1F2937] font-medium px-6 py-4 rounded-2xl shadow-md': msg.sender === 'user',
+                         'bg-white text-[#1F2937] font-medium px-6 py-4 rounded-2xl shadow-md': msg.sender === 'bot'
                        }"
-                       [ngStyle]="msg.sender === 'bot' ? {'max-width': '900px', 'min-width': '48px', 'padding': '0.5rem 1rem', 'font-size': '1rem'} : {}">
+                       [ngStyle]="{'max-width': '900px', 'min-width': '48px', 'font-size': '1rem'}">
                     <ng-container *ngIf="msg.sender === 'bot'">
                       <span *ngIf="msg.text.includes('/static/temp/')">
                         <a [href]="getStaticTempUrl(msg.text)" target="_blank">
@@ -74,14 +102,16 @@
               </ng-container>
               <div *ngIf="isLoadingBotResponse" class="chat chat-start">
                 <div class="chat-image avatar">
-                  <div class="w-8 rounded-full">
+                  <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                     <img
                       alt="Tailwind CSS chat bubble component"
-                      src="https://www.shutterstock.com/image-vector/chat-bot-icon-virtual-smart-600nw-2478937555.jpg"
+                      src="avatar.jpg"
+                      class="w-8 h-8 object-cover block"
+                      loading="eager"
                     />
                   </div>
                 </div>
-                <div class="chat-bubble chat-bubble-primary">
+                <div class="chat-bubble bg-transparent shadow-none border-none text-gray-900 transition-all duration-300">
                   <span class="loading loading-dots loading-md"></span>
                 </div>
               </div>

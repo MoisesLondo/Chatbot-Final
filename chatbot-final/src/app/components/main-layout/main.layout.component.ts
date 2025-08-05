@@ -12,21 +12,13 @@ import { RouterModule } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainLayoutComponent {
-  // Datos dummy del usuario (normalmente vendrían de un servicio de auth)
   protected userName = 'Carlos Mendoza';
-  protected userRole = 'admin'; // Cambiar a 'vendedor' para probar la vista de vendedor
-
+  protected userRole = 'admin';
   constructor(private router: Router) {}
 
   logout(): void {
-    // Lógica de logout
-    console.log('Cerrando sesión...');
-    
-    // Limpiar datos de sesión
     localStorage.removeItem('auth_token');
     sessionStorage.clear();
-    
-    // Redirigir al login
     this.router.navigate(['/login']);
   }
 }

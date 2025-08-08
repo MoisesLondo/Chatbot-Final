@@ -1,5 +1,4 @@
-import { Router } from '@angular/router';
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, ChangeDetectorRef} from '@angular/core';
 import { CotizacionModalComponent } from '../cotizacion-modal/cotizacion-modal.component';
 import { ProductListComponent } from '../product-list/product-list.component';
 import { CommonModule } from '@angular/common';
@@ -14,7 +13,7 @@ interface Message {
   htmlText?: string;
 }
 
-import { CartComponent } from '../cart/cart.component';
+import { CartComponent } from '../quote/cart.component';
 
 @Component({
   selector: 'app-chat',
@@ -40,6 +39,7 @@ export class ChatComponent implements OnInit, AfterViewInit {
   ) {
     this.sessionId = sessionStorage.getItem('session_id') ?? crypto.randomUUID();
     sessionStorage.setItem('session_id', this.sessionId);
+    console.log('Session ID:', this.sessionId);
   }
 
   goHome() {

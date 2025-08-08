@@ -8,11 +8,11 @@
         <div class="flex gap-3 mb-3">
           <div class="w-1/2">
             <label class="block text-gray-700 font-semibold mb-1">Nombre</label>
-            <input [(ngModel)]="nombre" name="nombre" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" />
+            <input [(ngModel)]="nombre" name="nombre" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" placeholder="Ej: Andrés" />
           </div>
           <div class="w-1/2">
             <label class="block text-gray-700 font-semibold mb-1">Apellido</label>
-            <input [(ngModel)]="apellido" name="apellido" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" />
+            <input [(ngModel)]="apellido" name="apellido" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" placeholder="Ej: Pérez" />
           </div>
         </div>
         <div class="flex gap-3 mb-3">
@@ -24,17 +24,26 @@
                 <option value="E">E</option>
                 <option value="J">J</option>
               </select>
-              <input [(ngModel)]="cedula" name="cedula" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400 ml-2" placeholder="Número" />
+              <input [(ngModel)]="cedula" name="cedula" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400 ml-2" placeholder="Ej: 29750712" />
             </div>
           </div>
           <div class="w-1/2">
             <label class="block text-gray-700 font-semibold mb-1">Número de teléfono</label>
-            <input [(ngModel)]="telefono" name="telefono" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" />
+            <div class="flex items-center gap-2">
+              <select [(ngModel)]="codigoTelefono" name="codigoTelefono" required class="border rounded px-1 py-1 w-20 text-sm focus:outline-none focus:ring focus:border-blue-400">
+                <option value="0424">0424</option>
+                <option value="0412">0412</option>
+                <option value="0414">0414</option>
+                <option value="0416">0416</option>
+                <option value="0426">0426</option>
+              </select>
+              <input [(ngModel)]="telefono" name="telefono" required pattern="[0-9]{7}" maxlength="7" minlength="7" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400 ml-2" placeholder="Ej: 1234567" />
+            </div>
           </div>
         </div>
         <div class="mb-3">
           <label class="block text-gray-700 font-semibold mb-1">Correo electrónico</label>
-          <input [(ngModel)]="email" name="email" type="email" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" />
+          <input [(ngModel)]="email" name="email" type="email" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" placeholder="Ej: correo@dominio.com" />
         </div>
         <div class="flex justify-end mt-6 gap-2">
           <button type="button" (click)="close.emit()" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700">Cancelar</button>
@@ -46,11 +55,11 @@
       <div *ngIf="step === 2">
         <div class="mb-3">
           <label class="block text-gray-700 font-semibold mb-1">Calle / Avenida</label>
-          <input [(ngModel)]="calle" name="calle" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" />
+          <input [(ngModel)]="calle" name="calle" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" placeholder="Ej: Av. Bolívar" />
         </div>
         <div class="mb-3">
           <label class="block text-gray-700 font-semibold mb-1">Urbanización / Sector</label>
-          <input [(ngModel)]="urbanizacion" name="urbanizacion" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" />
+          <input [(ngModel)]="urbanizacion" name="urbanizacion" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" placeholder="Ej: Urb. El Trigal" />
         </div>
         <div class="mb-3">
 

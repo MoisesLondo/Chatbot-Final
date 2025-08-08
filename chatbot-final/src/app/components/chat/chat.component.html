@@ -56,49 +56,48 @@
                 </div>
               </ng-container>
               <ng-container *ngFor="let msg of messages">
-                <div class="chat" [ngClass]="{'chat-start': msg.sender === 'bot', 'chat-end': msg.sender === 'user'}">
-                  <div *ngIf="msg.sender === 'bot'" class="chat-image avatar">
-                    <div class="w-8 rounded-full">
-                      <img
-                        alt="Tailwind CSS chat bubble component"
-                        src="avatar.jpg"
-                      />
+                <ng-container *ngIf="!(msg.sender === 'bot' && msg.text.includes('[ABRIR_FORMULARIO_COTIZACION]'))">
+                  <div class="chat" [ngClass]="{'chat-start': msg.sender === 'bot', 'chat-end': msg.sender === 'user'}">
+                    <div *ngIf="msg.sender === 'bot' && extractVisualList(msg.text).items.length === 0" class="chat-image avatar">
+                      <div class="w-8 rounded-full">
+                        <img
+                          alt="Tailwind CSS chat bubble component"
+                          src="avatar.jpg"
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div class="chat-bubble transition-all duration-300"
-                       [ngClass]="{
-                         'chat-bubble-secondary bg-white text-[#1F2937] font-medium px-6 py-4 rounded-2xl shadow-md': msg.sender === 'user',
-                         'bg-white text-[#1F2937] font-medium px-6 py-4 rounded-2xl shadow-md': msg.sender === 'bot'
-                       }"
-                       [ngStyle]="{'max-width': '900px', 'min-width': '48px', 'font-size': '1rem'}">
-                    <ng-container *ngIf="msg.sender === 'bot'">
-                      <span *ngIf="msg.text.includes('/static/temp/')">
-                        <a [href]="getStaticTempUrl(msg.text)" target="_blank">
-                          Descargar cotización
-                        </a>
-                      </span>
-                      <span *ngIf="msg.text.includes('[ABRIR_FORMULARIO_COTIZACION]'); else normalBotMsg">
-                        <p>Por favor, completa el formulario de cotización.</p>
-                      </span>
-                      <ng-template #normalBotMsg>
-                        <!-- Si el mensaje contiene una lista de productos en JSON, renderiza el componente visual -->
-                        <ng-container *ngIf="extractVisualList(msg.text).items.length > 0; else defaultBotMsg">
-                          <app-product-list 
-                            [products]="extractVisualList(msg.text).items" 
-                            [title]="extractVisualList(msg.text).type === 'productos' ? 'Productos encontrados' : 'Categorías disponibles'"
-                            (addToQuote)="onAddToQuote($event)">
-                          </app-product-list>
-                        </ng-container>
-                        <ng-template #defaultBotMsg>
+                    <div class="chat-bubble transition-all duration-300"
+                         [ngClass]="{
+                           'chat-bubble-secondary bg-white text-[#1F2937] font-medium px-6 py-4 rounded-2xl shadow-md': msg.sender === 'user',
+                           'bg-white text-[#1F2937] font-medium px-6 py-4 rounded-2xl shadow-md': msg.sender === 'bot',
+                           'invisible-bubble': msg.sender === 'bot' && extractVisualList(msg.text).items.length > 0
+                         }"
+                         [ngStyle]="{'max-width': '900px', 'min-width': '48px', 'font-size': '1rem'}">
+                      <ng-container *ngIf="msg.sender === 'bot'">
+                        <span *ngIf="msg.text.includes('/static/temp/')">
+                          <a [href]="getStaticTempUrl(msg.text)" target="_blank">
+                            Descargar cotización
+                          </a>
+                        </span>
+                        <span *ngIf="msg.text.includes('[ABRIR_FORMULARIO_COTIZACION]'); else normalBotMsg"></span>
+                        <ng-template #normalBotMsg>
                           <span *ngIf="!msg.text.includes('/static/temp/')" [innerHTML]="msg.text"></span>
                         </ng-template>
-                      </ng-template>
-                    </ng-container>
-                    <ng-container *ngIf="msg.sender === 'user'">
-                      {{ msg.text }}
+                      </ng-container>
+                      <ng-container *ngIf="msg.sender === 'user'">
+                        {{ msg.text }}
+                      </ng-container>
+                    </div>
+                    <!-- Si el mensaje es del bot y contiene un visual list, muestra el card visual debajo del bubble invisible -->
+                    <ng-container *ngIf="msg.sender === 'bot' && extractVisualList(msg.text).items.length > 0">
+                      <app-product-list 
+                        [products]="extractVisualList(msg.text).items" 
+                        [title]="extractVisualList(msg.text).type === 'productos' ? 'Productos encontrados' : 'Categorías disponibles'"
+                        (addToQuote)="onAddToQuote($event)">
+                      </app-product-list>
                     </ng-container>
                   </div>
-                </div>
+                </ng-container>
               </ng-container>
               <div *ngIf="isLoadingBotResponse" class="chat chat-start">
                 <div class="chat-image avatar">

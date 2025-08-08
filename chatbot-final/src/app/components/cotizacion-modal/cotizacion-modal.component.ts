@@ -29,6 +29,7 @@ export class CotizacionModalComponent {
   cedula = '';
   email = '';
   telefono = '';
+  codigoTelefono = '0424';
   
 
   ngOnInit() {
@@ -50,12 +51,13 @@ export class CotizacionModalComponent {
   onSubmit() {
     // Concatenar la dirección modular
     const direccion = `${this.calle}, ${this.urbanizacion}, ${this.ciudad}, ${this.estado}`;
+    const telefonoCompleto = `${this.codigoTelefono}-${this.telefono}`;
     this.submit.emit({
       nombre: `${this.nombre} ${this.apellido}`,
       cedula: this.cedula,
       direccion,
       email: this.email,
-      telefono: this.telefono,
+      telefono: telefonoCompleto,
     });
   }
 }

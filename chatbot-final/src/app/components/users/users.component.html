@@ -298,10 +298,10 @@
       
       <form (ngSubmit)="saveUser()" #userForm="ngForm">
         <div class="grid md:grid-cols-2 gap-4">
-          <!-- Username -->
+          <!-- Fila 1: Username y Nombre Completo -->
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-noto-sans font-medium">Username *</span>
+                <span class="label-text font-noto-sans font-medium text-gray-900">Username <span class="label-text font-noto-sans font-medium text-primary">*</span></span>
             </label>
             <input
               type="text"
@@ -313,43 +313,9 @@
               placeholder="Nombre de usuario"
             />
           </div>
-
-          <!-- Password (solo para crear) -->
-          <div class="form-control" *ngIf="!isEditMode()">
-            <label class="label">
-              <span class="label-text font-noto-sans font-medium">Contraseña *</span>
-            </label>
-            <input
-              type="password"
-              class="input input-bordered font-noto-sans"
-              [(ngModel)]="currentUser.password"
-              name="password"
-              required
-              placeholder="Contraseña"
-            />
-          </div>
-
-          <!-- Role -->
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-noto-sans font-medium">Rol *</span>
-            </label>
-            <select
-              class="select select-bordered font-noto-sans"
-              [(ngModel)]="currentUser.role"
-              name="role"
-              required
-            >
-              <option value="">Seleccionar rol</option>
-              <option value="admin">Administrador</option>
-              <option value="vendedor">Vendedor</option>
-            </select>
-          </div>
-
-          <!-- Full Name -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-noto-sans font-medium">Nombre Completo *</span>
+                <span class="label-text font-noto-sans font-medium text-gray-900">Nombre Completo <span class="label-text font-noto-sans font-medium text-primary">*</span></span>
             </label>
             <input
               type="text"
@@ -361,11 +327,10 @@
               *ngIf="currentUser.profile"
             />
           </div>
-
-          <!-- Email -->
+          <!-- Fila 2: Email y Rol -->
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-noto-sans font-medium">Email *</span>
+                <span class="label-text font-noto-sans font-medium text-gray-900">Email <span class="label-text font-noto-sans font-medium text-primary">*</span></span>
             </label>
             <input
               type="email"
@@ -377,44 +342,126 @@
               *ngIf="currentUser.profile"
             />
           </div>
-
-          <!-- Phone -->
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-noto-sans font-medium">Teléfono</span>
+                <span class="label-text font-noto-sans font-medium text-gray-900">Rol <span class="label-text font-noto-sans font-medium text-primary">*</span></span>
+            </label>
+            <select
+              class="select select-bordered font-noto-sans"
+              [(ngModel)]="currentUser.role"
+              name="role"
+              required
+            >
+              <option value="" selected>Seleccionar rol</option>
+              <option value="admin">Administrador</option>
+              <option value="vendedor">Vendedor</option>
+            </select>
+          </div>
+          <!-- Fila 3: Password y Confirmación (solo para crear) -->
+          <div class="form-control" *ngIf="!isEditMode()">
+            <label class="label">
+                <span class="label-text font-noto-sans font-medium text-gray-900">Contraseña <span class="label-text font-noto-sans font-medium text-primary">*</span></span>
             </label>
             <input
-              type="tel"
+              type="password"
               class="input input-bordered font-noto-sans"
-              [(ngModel)]="currentUser.profile.tel"
-              name="phone"
-              placeholder="+58 412 123-5678"
-              *ngIf="currentUser.profile"
+              [(ngModel)]="currentUser.password"
+              name="password"
+              required
+              placeholder="Contraseña"
             />
           </div>
-
-          <!-- Status -->
-          <div class="form-control" *ngIf="isEditMode()">
+          <div class="form-control" *ngIf="!isEditMode()">
             <label class="label">
-              <span class="label-text font-noto-sans font-medium">Estado</span>
+                <span class="label-text font-noto-sans font-medium text-gray-900">Confirmar Contraseña <span class="label-text font-noto-sans font-medium text-primary">*</span></span>
             </label>
-            <div class="form-control">
-              <label class="label cursor-pointer justify-start space-x-3 text-gray-900">
-                <input
-                  type="checkbox"
-                  class="toggle toggle-primary text-gray-900"
-                  [(ngModel)]="currentUser.is_active"
-                  name="isActive"
-                />
-                <span class="label-text font-noto-sans">
-                  {{ currentUser.is_active ? 'Usuario Activo' : 'Usuario Inactivo' }}
-                </span>
-              </label>
-            </div>
+            <input
+              type="password"
+              class="input input-bordered font-noto-sans"
+              [(ngModel)]="confirmPassword"
+              name="confirmPassword"
+              required
+              placeholder="Repite la contraseña"
+            />
+            <div *ngIf="currentUser.password && confirmPassword && currentUser.password !== confirmPassword" class="text-red-600 text-xs mt-1">Las contraseñas no coinciden</div>
           </div>
-        </div>
+          <!-- Fila 4: Teléfono centrado -->
+          <div class="form-control md:col-span-2" *ngIf="currentUser.profile && !isEditMode()">
+  <div class="max-w-xs mx-auto">
+    <label class="label mb-1 block">
+      <span class="label-text font-noto-sans font-medium text-gray-900">Teléfono</span>
+    </label>
+    <div class="flex items-center gap-2">
+      <select [(ngModel)]="codigoTelefono" name="codigoTelefono" class="select select-bordered font-noto-sans w-20">
+        <option value="0424">0424</option>
+        <option value="0412">0412</option>
+        <option value="0414">0414</option>
+        <option value="0416">0416</option>
+        <option value="0426">0426</option>
+      </select>
+      <input
+        type="tel"
+        class="input input-bordered font-noto-sans"
+        [(ngModel)]="telefono"
+        name="telefono"
+        pattern="[0-9]{7}"
+        maxlength="7"
+        minlength="7"
+        placeholder="Ej: 1234567"
+      />
+    </div>
+  </div>
+</div>
+
+<!-- Teléfono en columna normal (solo para editar usuario) -->
+<div class="form-control" *ngIf="currentUser.profile && isEditMode()">
+  <label class="label">
+    <span class="label-text font-noto-sans font-medium text-gray-900">Teléfono</span>
+  </label>
+  <div class="flex items-center gap-2">
+    <select [(ngModel)]="codigoTelefono" name="codigoTelefono" class="select select-bordered font-noto-sans w-20">
+      <option value="0424">0424</option>
+      <option value="0412">0412</option>
+      <option value="0414">0414</option>
+      <option value="0416">0416</option>
+      <option value="0426">0426</option>
+    </select>
+    <input
+      type="tel"
+      class="input input-bordered font-noto-sans flex-1"
+      [(ngModel)]="telefono"
+      name="telefono"
+      pattern="[0-9]{7}"
+      maxlength="7"
+      minlength="7"
+      placeholder="Ej: 1234567"
+    />
+  </div>
+</div>
+
+<div class="form-control" *ngIf="isEditMode()">
+  <label class="label">
+    <span class="label-text font-noto-sans font-medium text-gray-900">Estado</span>
+  </label>
+  <div class="flex items-center gap-2">
+    <input
+      type="checkbox"
+      class="toggle"
+      [ngClass]="currentUser.is_active ? 'toggle-success' : 'toggle-error'"
+      [(ngModel)]="currentUser.is_active"
+      name="isActive"
+    />
+    <span class="label-text font-noto-sans text-sm">
+      {{ currentUser.is_active ? 'Activo' : 'Inactivo' }}
+    </span>
+  </div>
+</div>
+</div>
 
         <div class="modal-action">
+        <div class="w-full text-left mb-2">
+          <span class="text-xs text-gray-500 font-noto-sans">Los campos marcados con <span class="text-primary">*</span> son obligatorios.</span>
+        </div>
           <button
             type="button"
             class="btn btn-ghost font-noto-sans"

@@ -42,6 +42,7 @@ interface CreateUserRequest {
 }
 
 @Component({
+  
   selector: 'app-users',
   standalone: true,
   imports: [RouterModule, CommonModule, FormsModule, DatePipe],
@@ -66,6 +67,10 @@ export class UsersComponent implements OnInit {
   protected readonly roleFilterSignal = signal('');
   protected readonly statusFilterSignal = signal('');
 
+  // Campos auxiliares para el formulario de usuario
+  confirmPassword = '';
+  codigoTelefono = '0424';
+  telefono = '';
   // Current user for create/edit
   protected currentUser: AuthUser = this.getEmptyUser();
 
@@ -208,6 +213,9 @@ export class UsersComponent implements OnInit {
 
   openCreateUserModal(): void {
     this.currentUser = this.getEmptyUser();
+    this.confirmPassword = '';
+    this.codigoTelefono = '0424';
+    this.telefono = '';
     this.isEditMode.set(false);
     this.showUserModal.set(true);
   }
@@ -222,6 +230,21 @@ export class UsersComponent implements OnInit {
         tel: user.profile?.tel ?? ''
       }
     };
+    this.confirmPassword = '';
+    // Separar el teléfono en código y número
+    if (this.currentUser.profile && this.currentUser.profile.tel) {
+      const match = this.currentUser.profile.tel.match(/^(04\d{2})-(\d{7})$/);
+      if (match) {
+        this.codigoTelefono = match[1];
+        this.telefono = match[2];
+      } else {
+        this.codigoTelefono = '0424';
+        this.telefono = '';
+      }
+    } else {
+      this.codigoTelefono = '0424';
+      this.telefono = '';
+    }
     this.isEditMode.set(true);
     this.showUserModal.set(true);
   }
@@ -250,6 +273,14 @@ export class UsersComponent implements OnInit {
   }
 
   saveUser(): void {
+    if (!this.isEditMode() && this.currentUser.password !== this.confirmPassword) {
+      this.error.set('Las contraseñas no coinciden');
+      return;
+    }
+    // Concatenar el teléfono
+    if (this.currentUser.profile) {
+      this.currentUser.profile.tel = this.codigoTelefono && this.telefono ? `${this.codigoTelefono}-${this.telefono}` : '';
+    }
     this.isLoading.set(true);
 
     if (this.isEditMode()) {

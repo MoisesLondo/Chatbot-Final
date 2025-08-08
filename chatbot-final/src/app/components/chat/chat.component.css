@@ -1,3 +1,8 @@
+/* Mantiene el bubble en el DOM pero lo hace invisible y sin interacción visual */
+.invisible-bubble {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
 .initial-title{
 animation:initial-title 0.4s} 
 @keyframes initial-title

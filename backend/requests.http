@@ -11,5 +11,5 @@ POST http://127.0.0.1:8000/history
 Content-Type: application/json
 
 {
-  "session_id": "f47ac10b-58cc-4372-a567-0e02b2c3d472"
+  "session_id": "b96c8d11-ffb3-47a0-9346-f79257f64844"
 }

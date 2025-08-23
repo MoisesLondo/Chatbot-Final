@@ -1,19 +1,21 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, ChangeDetectorRef} from '@angular/core';
-import { CotizacionModalComponent } from '../cotizacion-modal/cotizacion-modal.component';
+import { CotizacionModalComponent } from '../quote-modal/cotizacion-modal.component';
 import { ProductListComponent } from '../product-list/product-list.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InputChatComponent } from '../input-chat/input-chat.component';
 import { AskPayload, HistoryEntry } from '../../models';
 import { ChatService } from '../../services';
-
+import { Router } from '@angular/router';
+import { CartService, Product } from '../../services/cart.service';
+ 
 interface Message {
   text: string;
   sender: 'user' | 'bot';
   htmlText?: string;
 }
 
-import { CartComponent } from '../quote/cart.component';
+import { CartComponent } from '../cart/cart.component';
 
 @Component({
   selector: 'app-chat',
@@ -34,6 +36,7 @@ export class ChatComponent implements OnInit, AfterViewInit {
   private sessionId: string;
   constructor(
     private chat: ChatService,
+    private cartService: CartService,
     private cdr: ChangeDetectorRef,
     private router: Router
   ) {
@@ -148,6 +151,23 @@ export class ChatComponent implements OnInit, AfterViewInit {
       next: res => {
         if (res.response) {
           const safeResponse = res.response || '';
+
+          // Detectar [AÑADIR_AL_CARRITO] y extraer productos
+          if (safeResponse.includes('[AÑADIR_AL_CARRITO]')) {
+            const htmlMatch = safeResponse.match(/\[AÑADIR_AL_CARRITO\]([\s\S]*)/i);
+            const productosHtml = htmlMatch ? htmlMatch[1].trim() : '';
+            const productos = this.extractProductsFromHtml(productosHtml);
+            productos.forEach(prod => {
+              // Buscar el producto en la última lista visual del bot
+              const lastBotMsg = this.messages.filter(m => m.sender === 'bot').slice(-1)[0]?.text || '';
+              const visualList = this.extractVisualList(lastBotMsg).items;
+              const found = visualList.find((p: any) => p.nombre === prod.nombre);
+              if (found) {
+                this.cartService.addProduct(found, prod.cantidad);
+              }
+            });
+          }
+
           if (safeResponse.includes('[ABRIR_FORMULARIO_COTIZACION]')) {
             const match = safeResponse.match(/\[ABRIR_FORMULARIO_COTIZACION\]([\s\S]*)/i);
             const productosHtml = match ? match[1].trim() : '';
@@ -170,6 +190,17 @@ export class ChatComponent implements OnInit, AfterViewInit {
         this.isLoadingBotResponse = false;
       }
     });
+  }
+
+  // Extraer productos y cantidades del HTML generado por el bot
+  private extractProductsFromHtml(html: string): { nombre: string, cantidad: number }[] {
+    const regex = /<li>(.*?) \(Cantidad: (\d+)\)<\/li>/g;
+    const productos: { nombre: string, cantidad: number }[] = [];
+    let match;
+    while ((match = regex.exec(html)) !== null) {
+      productos.push({ nombre: match[1], cantidad: Number(match[2]) });
+    }
+    return productos;
   }
 
   private loadHistory(): void {

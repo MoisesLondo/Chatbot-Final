@@ -3,6 +3,7 @@ import { RouterModule, RouterLink } from '@angular/router';
 import { OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../services/auth.service';
 
 interface Lead {
   id: number;
@@ -23,14 +24,14 @@ interface Stats {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterModule, RouterLink, CommonModule],
+  imports: [RouterModule, CommonModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardComponent implements OnInit{
-  userName: string = 'Carlos Mendoza'; // Esto vendría del servicio de autenticación
-  userRole: 'admin' | 'vendedor' = 'admin'; // Esto vendría del servicio de autenticación
+  userName: string = '';
+  userRole: string = '';
 
   stats: Stats = {
     totalLeads: 156,
@@ -66,13 +67,21 @@ export class DashboardComponent implements OnInit{
     }
   ];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private authService: AuthService) {}
 
   ngOnInit(): void {
+    const user = this.authService.getUserData();
+    if (user) {
+      this.userName = user.sub.charAt(0).toUpperCase() + user.sub.slice(1);   
+      this.userRole = user.role;  
+    } else {
+      this.router.navigate(['/login']);
+    }
     // Aquí cargarías los datos del usuario y estadísticas desde tus servicios
     this.loadUserData();
     this.loadStats();
     this.loadLeads();
+
   }
 
   loadUserData(): void {

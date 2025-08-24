@@ -2,6 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BehaviorSubject, catchError, of, tap, throwError } from 'rxjs';
+import { jwtDecode } from 'jwt-decode';
+
+interface JwtPayload {
+  sub: string;   // username
+  role: string;  // admin | vendedor
+  user_id: string;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -49,5 +56,15 @@ login(username: string, password: string) {
     return !!this.getToken();
   }
 
+  getUserData(): JwtPayload | null {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+
+    try {
+      return jwtDecode<JwtPayload>(token);
+    } catch (e) {
+      return null;
+    }
+  }
   
 }

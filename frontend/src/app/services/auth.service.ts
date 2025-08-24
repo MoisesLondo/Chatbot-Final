@@ -7,7 +7,7 @@ import { BehaviorSubject, catchError, of, tap } from 'rxjs';
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly API_URL = 'http://localhost:8000/login'; // Cambia si tu backend tiene otra URL
+  private readonly API_URL = 'http://localhost:8000/login';
   private readonly isLoggedInSubject = new BehaviorSubject<boolean>(false);
 
   isLoggedIn$ = this.isLoggedInSubject.asObservable();
@@ -42,4 +42,6 @@ export class AuthService {
   isAuthenticated() {
     return !!this.getToken();
   }
+
+  
 }

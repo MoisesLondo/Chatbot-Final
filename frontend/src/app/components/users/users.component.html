@@ -250,7 +250,7 @@
                       </svg>
                     </button>
                     
-                    <button 
+                    <button *ngIf="user.role === 'vendedor'"
                       class="btn btn-ghost btn-xs"
                       [ngClass]="{
                         'text-green-600': !user.is_active,

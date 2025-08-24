@@ -14,7 +14,28 @@
       <input type="password" [(ngModel)]="password" name="password" required />
     </label>
     <div *ngIf="loginError()" class="error">Usuario o contraseña incorrectos</div>
-  <p class="text-gray-600 text-center">¿Olvidaste tus credenciales?</p>
+<p 
+  class="text-gray-600 text-center cursor-pointer hover:underline" 
+  onclick="document.getElementById('forgotModal').showModal()"
+>
+  ¿Olvidaste tus credenciales?
+</p>
+
+
+<dialog id="forgotModal" class="modal">
+  <div class="modal-box max-w-sm">
+    <h3 class="font-bold text-lg">Recuperar contraseña</h3>
+    <p class="py-4">
+      Dirígete con el administrador del sistema para recuperar tu contraseña.
+    </p>
+    <div class="modal-action">
+      <form method="dialog">
+        <button class="btn btn-sm btn-primary text-white">Entendido</button>
+      </form>
+    </div>
+  </div>
+</dialog>
+
     <button class="login-btn" type="submit">Entrar</button>
     
   </form>

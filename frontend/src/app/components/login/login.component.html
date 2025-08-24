@@ -13,7 +13,9 @@
       Contraseña
       <input type="password" [(ngModel)]="password" name="password" required />
     </label>
-    <div *ngIf="loginError()" class="error">Usuario o contraseña incorrectos</div>
+    <div *ngIf="errorMessage" class="error">
+  {{ errorMessage }}
+</div>
 <p 
   class="text-gray-600 text-center cursor-pointer hover:underline" 
   onclick="document.getElementById('forgotModal').showModal()"

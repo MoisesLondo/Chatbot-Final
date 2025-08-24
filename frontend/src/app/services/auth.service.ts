@@ -45,6 +45,7 @@ login(username: string, password: string) {
   logout() {
     localStorage.removeItem('token');
     this.isLoggedInSubject.next(false);
+    sessionStorage.clear();
     this.router.navigate(['/login']);
   }
 

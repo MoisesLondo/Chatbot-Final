@@ -15,7 +15,7 @@ import { AuthService } from '../../services/auth.service';
 export class MainLayoutComponent {
   protected userName = '';
   protected userRole = '';
-  constructor(private router: Router, private authService: AuthService) {}
+  constructor(private router: Router, public authService: AuthService) {}
 
   ngOnInit(): void {
     const user = this.authService.getUserData();
@@ -28,9 +28,4 @@ export class MainLayoutComponent {
 
   }
 
-  logout(): void {
-    localStorage.removeItem('auth_token');
-    sessionStorage.clear();
-    this.router.navigate(['/login']);
-  }
 }

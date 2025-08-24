@@ -11,30 +11,30 @@
   --color-base-100: #e1dfe6;
   --color-base-200: #d3d1d8; /* Versión ligeramente más oscura de base-100 */
   --color-base-300: #c5c3ca; /* Versión más oscura aún de base-100 */
-  --color-base-content: #232375; /* Texto principal en azul oscuro */
+  --color-base-content: #000000;
 
   /* Colores Principales de Marca */
-  --color-primary: #fc7070; /* Tu rojo salmón */
-  --color-primary-content: #000000; /* Blanco para mejor contraste */
+  --color-primary: #F01D27; 
+  --color-primary-content: #000000; 
 
-  --color-secondary: #232375; /* Tu azul oscuro */
+  --color-secondary: #000000; 
   --color-secondary-content: #e1dfe6; /* Gris claro para contraste */
 
   --color-accent: #fc7070; /* Mismo que primary para mantener consistencia */
-  --color-accent-content: #ffffff; /* Blanco para contraste */
+  --color-accent-content: #000000; 
 
-  --color-neutral: #232375; /* Azul oscuro como neutral */
+  --color-neutral: #FFFFFF; /* Azul oscuro como neutral */
   --color-neutral-content: #e1dfe6; /* Gris claro sobre neutral */
 
   /* Colores de Estado - adaptados a tu paleta limitada */
   --color-info: #232375; /* Azul oscuro para info */
   --color-info-content: #e1dfe6;
   --color-success: #70fc70; /* Verde derivado de tu rojo (#fc7070 -> #70fc70) */
-  --color-success-content: #232375;
+  --color-success-content: #000000; 
   --color-warning: #fcf470; /* Amarillo derivado de tu rojo (#fc7070 -> #fcf470) */
-  --color-warning-content: #232375;
+  --color-warning-content: #000000; 
   --color-error: #fc7070; /* Tu rojo original para errores */
-  --color-error-content: #ffffff;
+  --color-error-content: #000000; 
   --color-primary-transparent: transparent;
 }
 

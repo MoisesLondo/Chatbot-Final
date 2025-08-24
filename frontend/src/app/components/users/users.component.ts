@@ -147,58 +147,8 @@ export class UsersComponent implements OnInit {
         console.error('Error loading users:', err);
         this.error.set('Error al cargar los usuarios');
         this.isLoading.set(false);
-        
-        // Datos de ejemplo para desarrollo
-        this.loadMockData();
       },
     });
-  }
-
-  private loadMockData(): void {
-    const mockUsers: AuthUser[] = [
-      {
-        id: '550e8400-e29b-41d4-a716-446655440001',
-        username: 'admin',
-        role: 'admin',
-        is_active: true,
-        created_at: '2025-01-15T10:30:00Z',
-        profile: {
-          id: 1,
-          full_name: 'Carlos Mendoza',
-          email: 'admin@mhierro.com',
-          tel: '+58 412 123-5678'
-        }
-      },
-      {
-        id: '550e8400-e29b-41d4-a716-446655440003',
-        username: 'ana.garcia',
-        role: 'vendedor',
-        is_active: true,
-        created_at: '2024-01-08T14:20:00Z',
-        profile: {
-          id: 3,
-          full_name: 'Ana García',
-          email: 'ana@mhierro.com',
-          tel: '+58 412 555-1234'
-        }
-      },
-      {
-        id: '550e8400-e29b-41d4-a716-446655440004',
-        username: 'roberto.silva',
-        role: 'vendedor',
-        is_active: false,
-        created_at: '2024-01-05T11:45:00Z',
-        profile: {
-          id: 4,
-          full_name: 'Roberto Silva',
-          email: 'roberto@mhierro.com',
-          tel: '+58 412 777-8888'
-        }
-      }
-    ];
-    
-    this.users.set(mockUsers);
-    this.isLoading.set(false);
   }
 
   filterUsers(): void {

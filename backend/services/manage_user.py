@@ -7,35 +7,6 @@ from services.db import get_connection_login
 
 router = APIRouter()
 
-
-# def get_current_user():
-#     # Simula un usuario autenticado con rol "admin"
-#     return {"id": "785840b0-7d4e-45de-abb1-d6265b30bab8", "role": "admin"}
-
-# def verify_admin_role(current_user: dict = Depends(get_current_user)):
-#     """
-#     Verifica si el usuario actual tiene el rol de 'admin'.
-#     Consulta la base de datos para obtener el rol del usuario.
-#     """
-#     try:
-#         conn = get_connection_login()
-#         with conn.cursor() as cur:
-#             # Consulta para obtener el rol del usuario
-#             cur.execute("""
-#                 SELECT role FROM auth_users WHERE id = %s
-#             """, (current_user.get("id"),))
-#             result = cur.fetchone()
-
-#             if not result or result["role"] != "admin":
-#                 raise HTTPException(status_code=403, detail="No tienes permisos para realizar esta acción")
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"Error al verificar el rol: {e}")
-#     finally:
-#         conn.close()
-
-#     return current_user
-
-
 def register_user(user: UserCreate, profile: VendedorProfile):
     """
     Registra un nuevo vendedor en la base de datos.
@@ -83,3 +54,4 @@ def register_user(user: UserCreate, profile: VendedorProfile):
         raise HTTPException(status_code=500, detail=f"Error al registrar el vendedor: {e}")
     finally:
         conn.close()
+

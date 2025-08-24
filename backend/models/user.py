@@ -9,3 +9,6 @@ class VendedorProfile(BaseModel):
     full_name: str
     email: str
     tel: str
+
+class UserStatusUpdate(BaseModel):
+    is_active: bool

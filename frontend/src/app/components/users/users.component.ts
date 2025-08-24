@@ -324,12 +324,12 @@ export class UsersComponent implements OnInit {
         this.error.set('Error al cambiar el estado del usuario');
         
         // Simular cambio exitoso para desarrollo
-        const users = this.users();
-        const index = users.findIndex(u => u.id === user.id);
-        if (index !== -1) {
-          users[index].is_active = newStatus;
-          this.users.set([...users]);
-        }
+        // const users = this.users();
+        // const index = users.findIndex(u => u.id === user.id);
+        // if (index !== -1) {
+        //   users[index].is_active = newStatus;
+        //   this.users.set([...users]);
+        // }
       },
     });
   }

@@ -491,7 +491,7 @@
         <div class="flex items-center space-x-4 mb-6 text-gray-900">
           <div class="avatar placeholder">
             <div class="bg-primary text-white rounded-full w-16 h-16 ">
-              <span class="text-xl font-bold ">
+              <span class=" text-xl font-bold flex items-center justify-center mt-4">
                 {{ getInitials(selectedUser()?.profile?.full_name || selectedUser()?.username || '') }}
               </span>
             </div>
@@ -542,7 +542,7 @@
           
           <div>
             <label class="font-noto-sans font-medium text-gray-700">Fecha de Registro:</label>
-            <p class="font-noto-sans text-gray-900">{{ selectedUser()?.created_at | date:'full' }}</p>
+            <p class="font-noto-sans text-gray-900">{{ selectedUser()?.created_at | date:'short' }}</p>
           </div>
         </div>
       </div>

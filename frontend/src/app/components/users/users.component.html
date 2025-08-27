@@ -298,10 +298,12 @@
       
       <form (ngSubmit)="saveUser()" #userForm="ngForm">
         <div class="grid md:grid-cols-2 gap-4">
-          <!-- Fila 1: Username y Nombre Completo -->
+          <!-- Username -->
           <div class="form-control">
             <label class="label">
-                <span class="label-text font-noto-sans font-medium text-gray-900">Username <span class="label-text font-noto-sans font-medium text-primary">*</span></span>
+              <span class="label-text font-noto-sans font-medium text-gray-900">
+                Username <span class="label-text font-noto-sans font-medium text-primary">*</span>
+              </span>
             </label>
             <input
               type="text"
@@ -311,11 +313,23 @@
               required
               [disabled]="isEditMode()"
               placeholder="Nombre de usuario"
+              maxlength="15"
+              minlength="5"
+              #username="ngModel"
             />
+            <div *ngIf="username.invalid && username.touched" class="text-red-600 text-xs mt-1">
+              <div *ngIf="username.errors?.['required']">El username es obligatorio.</div>
+              <div *ngIf="username.errors?.['minlength']">Debe tener al menos 5 caracteres.</div>
+              <div *ngIf="username.errors?.['maxlength']">Máximo 15 caracteres.</div>
+            </div>
           </div>
+
+          <!-- Nombre completo -->
           <div class="form-control">
             <label class="label">
-                <span class="label-text font-noto-sans font-medium text-gray-900">Nombre Completo <span class="label-text font-noto-sans font-medium text-primary">*</span></span>
+              <span class="label-text font-noto-sans font-medium text-gray-900">
+                Nombre Completo <span class="label-text font-noto-sans font-medium text-primary">*</span>
+              </span>
             </label>
             <input
               type="text"
@@ -324,13 +338,25 @@
               name="fullName"
               required
               placeholder="Nombre completo"
-              *ngIf="currentUser.profile"
+              pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$"
+              maxlength="45"
+              minlength="2"
+              #fullName="ngModel"
             />
+            <div *ngIf="fullName.invalid && fullName.touched" class="text-red-600 text-xs mt-1">
+              <div *ngIf="fullName.errors?.['required']">El nombre completo es obligatorio.</div>
+              <div *ngIf="fullName.errors?.['pattern']">Solo se permiten letras y espacios.</div>
+              <div *ngIf="fullName.errors?.['minlength']">Mínimo 2 caracteres.</div>
+              <div *ngIf="fullName.errors?.['maxlength']">Máximo 45 caracteres.</div>
+            </div>
           </div>
-          <!-- Fila 2: Email y Rol -->
+
+          <!-- Email -->
           <div class="form-control">
             <label class="label">
-                <span class="label-text font-noto-sans font-medium text-gray-900">Email <span class="label-text font-noto-sans font-medium text-primary">*</span></span>
+              <span class="label-text font-noto-sans font-medium text-gray-900">
+                Email <span class="label-text font-noto-sans font-medium text-primary">*</span>
+              </span>
             </label>
             <input
               type="email"
@@ -338,29 +364,46 @@
               [(ngModel)]="currentUser.profile.email"
               name="email"
               required
-              placeholder="correo@ejemplo.com"
-              *ngIf="currentUser.profile"
+              placeholder="correo@gmail.com"
+              pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$"
+              #email="ngModel"
             />
+            <div *ngIf="email.invalid && email.touched" class="text-red-600 text-xs mt-1">
+              <div *ngIf="email.errors?.['required']">El email es obligatorio.</div>
+              <div *ngIf="email.errors?.['pattern']">Debe ser un correo válido de gmail.com.</div>
+            </div>
           </div>
+
+          <!-- Rol -->
           <div class="form-control">
             <label class="label">
-                <span class="label-text font-noto-sans font-medium text-gray-900">Rol <span class="label-text font-noto-sans font-medium text-primary">*</span></span>
+              <span class="label-text font-noto-sans font-medium text-gray-900">
+                Rol <span class="label-text font-noto-sans font-medium text-primary">*</span>
+              </span>
             </label>
             <select
               class="select select-bordered font-noto-sans"
               [(ngModel)]="currentUser.role"
               name="role"
               required
+              #role="ngModel"
             >
-              <option value="" selected>Seleccionar rol</option>
+              <option value="" disabled selected>Seleccionar rol</option>
               <option value="admin">Administrador</option>
               <option value="vendedor">Vendedor</option>
             </select>
+            <div *ngIf="role.invalid && role.touched" class="text-red-600 text-xs mt-1">
+              <div *ngIf="role.errors?.['required']">El rol es obligatorio.</div>
+            </div>
           </div>
-          <!-- Fila 3: Password y Confirmación (solo para crear) -->
+
+          <!-- Password (solo crear) -->
           <div class="form-control" *ngIf="!isEditMode()">
             <label class="label">
-                <span class="label-text font-noto-sans font-medium text-gray-900">Contraseña <span class="label-text font-noto-sans font-medium text-primary">*</span></span>
+              <span class="label-text font-noto-sans font-medium text-gray-900">
+                Contraseña <span class="label-text font-noto-sans font-medium text-primary">*</span>
+                <span class="label-text font-noto-sans text-xs">Mínimo 10 caracteres</span>
+              </span>
             </label>
             <input
               type="password"
@@ -369,11 +412,23 @@
               name="password"
               required
               placeholder="Contraseña"
+              maxlength="45"
+              minlength="10"
+              #password="ngModel"
             />
+            <div *ngIf="password.invalid && password.touched" class="text-red-600 text-xs mt-1">
+              <div *ngIf="password.errors?.['required']">La contraseña es obligatoria.</div>
+              <div *ngIf="password.errors?.['minlength']">Debe tener al menos 10 caracteres.</div>
+              <div *ngIf="password.errors?.['maxlength']">Máximo 45 caracteres.</div>
+            </div>
           </div>
+
+          <!-- Confirmar Password (solo crear) -->
           <div class="form-control" *ngIf="!isEditMode()">
             <label class="label">
-                <span class="label-text font-noto-sans font-medium text-gray-900">Confirmar Contraseña <span class="label-text font-noto-sans font-medium text-primary">*</span></span>
+              <span class="label-text font-noto-sans font-medium text-gray-900">
+                Confirmar Contraseña <span class="label-text font-noto-sans font-medium text-primary">*</span>
+              </span>
             </label>
             <input
               type="password"
@@ -382,97 +437,139 @@
               name="confirmPassword"
               required
               placeholder="Repite la contraseña"
+              maxlength="45"
+              minlength="10"
+              #confirmPass="ngModel"
             />
-            <div *ngIf="currentUser.password && confirmPassword && currentUser.password !== confirmPassword" class="text-red-600 text-xs mt-1">Las contraseñas no coinciden</div>
+            <div *ngIf="confirmPass.invalid && confirmPass.touched" class="text-red-600 text-xs mt-1">
+              <div *ngIf="confirmPass.errors?.['required']">La confirmación es obligatoria.</div>
+            </div>
+            <div *ngIf="currentUser.password && confirmPassword && currentUser.password !== confirmPassword" class="text-red-600 text-xs mt-1">
+              Las contraseñas no coinciden.
+            </div>
           </div>
-          <!-- Fila 4: Teléfono centrado -->
+
+          <!-- Teléfono -->
           <div class="form-control md:col-span-2" *ngIf="currentUser.profile && !isEditMode()">
-  <div class="max-w-xs mx-auto">
-    <label class="label mb-1 block">
-      <span class="label-text font-noto-sans font-medium text-gray-900">Teléfono</span>
-    </label>
-    <div class="flex items-center gap-2">
-      <select [(ngModel)]="codigoTelefono" name="codigoTelefono" class="select select-bordered font-noto-sans w-20">
-        <option value="0424">0424</option>
-        <option value="0412">0412</option>
-        <option value="0414">0414</option>
-        <option value="0416">0416</option>
-        <option value="0426">0426</option>
-      </select>
-      <input
-        type="tel"
-        class="input input-bordered font-noto-sans"
-        [(ngModel)]="telefono"
-        name="telefono"
-        pattern="[0-9]{7}"
-        maxlength="7"
-        minlength="7"
-        placeholder="Ej: 1234567"
-      />
-    </div>
-  </div>
-</div>
+            <div class="max-w-xs mx-auto">
+              <label class="label mb-1 block">
+                <span class="label-text font-noto-sans font-medium text-gray-900">
+                  Teléfono <span class="label-text font-noto-sans font-medium text-primary">*</span>
+                </span>
+              </label>
+              <div class="flex items-center gap-2">
+                <select [(ngModel)]="codigoTelefono" name="codigoTelefono" class="select select-bordered font-noto-sans w-20">
+                  <option value="0424">0424</option>
+                  <option value="0412">0412</option>
+                  <option value="0414">0414</option>
+                  <option value="0416">0416</option>
+                  <option value="0426">0426</option>
+                </select>
+                <input
+                  type="tel"
+                  class="input input-bordered font-noto-sans"
+                  [(ngModel)]="telefono"
+                  name="telefono"
+                  pattern="[0-9]{7}"
+                  maxlength="7"
+                  minlength="7"
+                  placeholder="Ej: 0000000"
+                  required
+                  #tel="ngModel"
+                />
+              </div>
+              <div *ngIf="tel.invalid && tel.touched" class="text-red-600 text-xs mt-1">
+                <div *ngIf="tel.errors?.['required']">El teléfono es obligatorio.</div>
+                <div *ngIf="tel.errors?.['pattern']">Debe contener exactamente 7 dígitos.</div>
+              </div>
+            </div>
+          </div>
 
-<!-- Teléfono en columna normal (solo para editar usuario) -->
-<div class="form-control" *ngIf="currentUser.profile && isEditMode()">
-  <label class="label">
-    <span class="label-text font-noto-sans font-medium text-gray-900">Teléfono</span>
-  </label>
-  <div class="flex items-center gap-2">
-    <select [(ngModel)]="codigoTelefono" name="codigoTelefono" class="select select-bordered font-noto-sans w-20">
-      <option value="0424">0424</option>
-      <option value="0412">0412</option>
-      <option value="0414">0414</option>
-      <option value="0416">0416</option>
-      <option value="0426">0426</option>
-    </select>
-    <input
-      type="tel"
-      class="input input-bordered font-noto-sans flex-1"
-      [(ngModel)]="telefono"
-      name="telefono"
-      pattern="[0-9]{7}"
-      maxlength="7"
-      minlength="7"
-      placeholder="Ej: 1234567"
-    />
-  </div>
-</div>
+          <!-- Teléfono (editar) -->
+          <div class="form-control" *ngIf="currentUser.profile && isEditMode()">
+            <label class="label">
+              <span class="label-text font-noto-sans font-medium text-gray-900">Teléfono</span>
+            </label>
+            <div class="flex items-center gap-2">
+              <select [(ngModel)]="codigoTelefono" name="codigoTelefono" class="select select-bordered font-noto-sans w-20">
+                <option value="0424">0424</option>
+                <option value="0412">0412</option>
+                <option value="0414">0414</option>
+                <option value="0416">0416</option>
+                <option value="0426">0426</option>
+              </select>
+              <input
+                type="tel"
+                class="input input-bordered font-noto-sans flex-1"
+                [(ngModel)]="telefono"
+                name="telefono"
+                pattern="[0-9]{7}"
+                maxlength="7"
+                minlength="7"
+                placeholder="Ej: 1234567"
+                #telEdit="ngModel"
+              />
+            </div>
+            <div *ngIf="telEdit.invalid && telEdit.touched" class="text-red-600 text-xs mt-1">
+              <div *ngIf="telEdit.errors?.['pattern']">Debe contener exactamente 7 dígitos.</div>
+            </div>
+          </div>
 
-<div class="form-control" *ngIf="isEditMode()">
-  <label class="label">
-    <span class="label-text font-noto-sans font-medium text-gray-900">Estado</span>
-  </label>
-  <div class="flex items-center gap-2">
-    <input
-      type="checkbox"
-      class="toggle"
-      [ngClass]="currentUser.is_active ? 'toggle-success' : 'toggle-error'"
-      [(ngModel)]="currentUser.is_active"
-      name="isActive"
-    />
-    <span class="label-text font-noto-sans text-sm">
-      {{ currentUser.is_active ? 'Activo' : 'Inactivo' }}
-    </span>
-  </div>
-</div>
-</div>
+          <!-- Estado (solo edición) -->
+          <!-- <div class="form-control" *ngIf="isEditMode()">
+            <label class="label">
+              <span class="label-text font-noto-sans font-medium text-gray-900">Estado</span>
+            </label>
+            <div class="flex items-center gap-2">
+              <input
+                type="checkbox"
+                class="toggle"
+                [ngClass]="currentUser.is_active ? 'toggle-success' : 'toggle-error'"
+                [(ngModel)]="currentUser.is_active"
+                name="isActive"
+              />
+              <span class="label-text font-noto-sans text-sm">
+                {{ currentUser.is_active ? 'Activo' : 'Inactivo' }}
+              </span>
+            </div>
+          </div> -->
 
-        <div class="modal-action">
-        <div class="w-full text-left mb-2">
-          <span class="text-xs text-gray-500 font-noto-sans">Los campos marcados con <span class="text-primary">*</span> son obligatorios.</span>
+          <!-- Password opcional (solo editar usuario) -->
+          <div class="form-control" *ngIf="isEditMode()">
+            <label class="label">
+              <span class="label-text font-noto-sans font-medium text-gray-900">
+                Nueva Contraseña <span class="label-text font-noto-sans text-xs">Opcional, mínimo 10 caracteres</span>
+              </span>
+            </label>
+            <input
+              type="password"
+              class="input input-bordered font-noto-sans"
+              [(ngModel)]="currentUser.password"
+              name="editPassword"
+              placeholder="Nueva contraseña"
+              minlength="10"
+              maxlength="45"
+              #editPassword="ngModel"
+            />
+            <div *ngIf="editPassword.invalid && editPassword.touched" class="text-red-600 text-xs mt-1">
+              <div *ngIf="editPassword.errors?.['minlength']">Debe tener al menos 10 caracteres.</div>
+              <div *ngIf="editPassword.errors?.['maxlength']">Máximo 45 caracteres.</div>
+            </div>
+          </div>
         </div>
-          <button
-            type="button"
-            class="btn btn-ghost font-noto-sans"
-            (click)="closeUserModal()"
-          >
-            Cancelar
-          </button>
+
+        <!-- Footer -->
+        <div class="modal-action">
+          <div class="w-full text-left mb-2">
+            <span class="text-xs text-gray-500 font-noto-sans">
+              Los campos marcados con <span class="text-primary">*</span> son obligatorios.
+            </span>
+          </div>
+          <button type="button" class="btn btn-ghost font-noto-sans" (click)="closeUserModal()">Cancelar</button>
           <button
             type="submit"
             class="btn btn-primary font-noto-sans"
-            [disabled]="!userForm.form.valid || isLoading()"
+            [disabled]="!userForm.form.valid || isLoading() || (currentUser.password !== confirmPassword && !isEditMode())"
           >
             <span *ngIf="isLoading()" class="loading loading-spinner loading-sm"></span>
             {{ isEditMode() ? 'Actualizar' : 'Crear' }} Usuario

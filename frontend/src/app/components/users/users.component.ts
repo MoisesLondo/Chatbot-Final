@@ -20,7 +20,7 @@ export interface AuthUser {
   role: 'admin' | 'vendedor';
   is_active: boolean;
   created_at: string;
-  profile?: VendedorProfile;
+  profile: VendedorProfile;
 }
 
 interface UserStats {
@@ -152,8 +152,8 @@ export class UsersComponent {
       is_active: true,
       created_at: new Date().toISOString(),
       profile: {
-        full_name: 'Nombre',
-        email: 'dummy@example.com',
+        full_name: '',
+        email: '',
         tel: '0412 000-0000'
       }
     };
@@ -260,27 +260,32 @@ export class UsersComponent {
     this.isLoading.set(true);
 
     if (this.isEditMode()) {
-      // Update user
-      this.http.put(`http://127.0.0.1:8000/users/${this.currentUser.id}`, this.currentUser).subscribe({
-        next: (updatedUser: any) => {
-          const users = this.users();
-          const index = users.findIndex(u => u.id === this.currentUser.id);
-          if (index !== -1) {
-            users[index] = updatedUser;
-            this.users.set([...users]);
-          }
-          this.closeUserModal();
-          this.isLoading.set(false);
-        },
-        error: (err) => {
-          console.error('Error updating user:', err);
-          this.error.set('Error al actualizar el usuario');
-          this.isLoading.set(false);
-          
-          // Simular actualización exitosa para desarrollo
+  const updatePayload: Partial<AuthUser> = { ...this.currentUser };
+
+  // Si el admin no ingresó nueva contraseña, eliminarla para no sobrescribir
+  if (!this.currentUser.password) {
+    delete updatePayload.password;
+  }
+
+  this.http.put(`http://127.0.0.1:8000/users/${this.currentUser.id}`, updatePayload).subscribe({
+    next: (updatedUser: any) => {
+      const users = this.users();
+      const index = users.findIndex(u => u.id === this.currentUser.id);
+      if (index !== -1) {
+        users[index] = updatedUser;
+        this.users.set([...users]);
+      }
+      this.closeUserModal();
+      this.isLoading.set(false);
+    },
+    error: (err) => {
+      console.error('Error updating user:', err);
+      this.error.set('Error al actualizar el usuario');
+      this.isLoading.set(false);
+      // Simular actualización exitosa para desarrollo
           this.simulateUserUpdate();
-        },
-      });
+    },
+  });
     } else {
       // Create user
       const createRequest: CreateUserRequest = {

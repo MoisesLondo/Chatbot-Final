@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
 interface VendedorProfile {
   id?: number;
@@ -11,7 +12,7 @@ interface VendedorProfile {
   tel: string;
 }
 
-interface AuthUser {
+export interface AuthUser {
   id: string;
   username: string;
   password?: string;
@@ -50,8 +51,9 @@ interface CreateUserRequest {
   styleUrls: ['./users.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class UsersComponent implements OnInit {
+export class UsersComponent {
   private readonly http = inject(HttpClient);
+  private readonly route = inject(ActivatedRoute);
 
   // Signals
   protected readonly users = signal<AuthUser[]>([]);
@@ -61,6 +63,12 @@ export class UsersComponent implements OnInit {
   protected readonly showViewModal = signal(false);
   protected readonly isEditMode = signal(false);
   protected readonly selectedUser = signal<AuthUser | null>(null);
+
+  constructor() {
+    this.route.data.subscribe(({ users }) => {
+      this.users.set(users);
+    });
+  }
 
   // Filters
   protected readonly searchTermSignal = signal('');
@@ -88,6 +96,7 @@ export class UsersComponent implements OnInit {
   protected readonly filteredUsers = computed(() => {
     let filtered = this.users();
     
+    
     // Search filter
     const search = this.searchTermSignal().toLowerCase();
     if (search) {
@@ -113,9 +122,26 @@ export class UsersComponent implements OnInit {
     return filtered;
   });
 
-  ngOnInit(): void {
-    this.loadUsers();
+
+  refreshUsers(): void {
+    this.isLoading.set(true);
+    this.error.set(null);
+    this.http.get<AuthUser[]>('http://127.0.0.1:8000/users').subscribe({
+      next: (users) => {
+        this.users.set(users);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Error refreshing users:', err);
+        this.error.set('Error al cargar los usuarios');
+        this.isLoading.set(false);
+      },
+    });
   }
+  
+  // ngOnInit(): void {
+  //   this.loadUsers();
+  // }
 
   private getEmptyUser(): AuthUser {
     return {
@@ -133,23 +159,23 @@ export class UsersComponent implements OnInit {
     };
   }
 
-  loadUsers(): void {
-    this.isLoading.set(true);
-    this.error.set(null);
+  // loadUsers(): void {
+  //   this.isLoading.set(true);
+  //   this.error.set(null);
 
-    // Simular llamada a API - reemplaza con tu endpoint real
-    this.http.get<AuthUser[]>('http://127.0.0.1:8000/users').subscribe({
-      next: (users) => {
-        this.users.set(users);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        console.error('Error loading users:', err);
-        this.error.set('Error al cargar los usuarios');
-        this.isLoading.set(false);
-      },
-    });
-  }
+  //   // Simular llamada a API - reemplaza con tu endpoint real
+  //   this.http.get<AuthUser[]>('http://127.0.0.1:8000/users').subscribe({
+  //     next: (users) => {
+  //       this.users.set(users);
+  //       this.isLoading.set(false);
+  //     },
+  //     error: (err) => {
+  //       console.error('Error loading users:', err);
+  //       this.error.set('Error al cargar los usuarios');
+  //       this.isLoading.set(false);
+  //     },
+  //   });
+  // }
 
   filterUsers(): void {
     // Los filtros se aplican automáticamente a través del computed

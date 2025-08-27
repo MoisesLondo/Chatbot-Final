@@ -41,6 +41,9 @@
 
       <!-- Main Content Area -->
       <main class="flex-1 p-6">
+        <div *ngIf="loadingService.isLoading()" class="loader-overlay">
+      <span class="loading loading-spinner text-error loading-xl"></span>
+    </div>
         <router-outlet></router-outlet>
       </main>
 

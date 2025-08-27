@@ -225,10 +225,18 @@ export class UsersComponent {
     this.showUserModal.set(true);
   }
 
-  closeUserModal(): void {
-    this.showUserModal.set(false);
-    this.currentUser = this.getEmptyUser();
+closeUserModal(userForm?: any): void {
+  this.showUserModal.set(false);
+  this.currentUser = this.getEmptyUser();
+  this.confirmPassword = '';
+  this.codigoTelefono = '0424';
+  this.telefono = '';
+
+  // Resetea el formulario y los errores
+  if (userForm) {
+    userForm.resetForm();
   }
+}
 
   viewUser(user: AuthUser): void {
     this.selectedUser.set(user);
@@ -378,4 +386,5 @@ export class UsersComponent {
   get searchTerm() { return this.searchTermSignal.asReadonly(); }
   get roleFilter() { return this.roleFilterSignal.asReadonly(); }
   get statusFilter() { return this.statusFilterSignal.asReadonly(); }
+  
 }

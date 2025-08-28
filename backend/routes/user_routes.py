@@ -1,12 +1,47 @@
 from uuid import UUID
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, HTTPException, Depends
 from models.user import *
-from services.manage_user import *
+from uuid import uuid4
+from datetime import datetime
+from services.auth import pwd_context
+from services.db import get_connection_login
 router = APIRouter()
 
 @router.post("/register-vendedor")
-def register_vendedor_route(user: UserCreate, profile: VendedorProfile):
-    return register_user(user, profile)
+def register_user(data: RegisterUserWithProfile):
+    user_id = str(uuid4())
+    password_hash = pwd_context.hash(data.password)
+
+    conn = get_connection_login()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO auth_users (id, username, password_hash, role, is_active, created_at)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (
+                user_id,
+                data.username,
+                password_hash,
+                data.role,
+                True,
+                datetime.utcnow()
+            ))
+
+            cur.execute("""
+                INSERT INTO vendedores_profile (id, full_name, email, tel)
+                VALUES (%s, %s, %s, %s)
+            """, (
+                user_id,
+                data.profile.full_name,
+                data.profile.email,
+                data.profile.tel
+            ))
+
+            conn.commit()
+        return {"message": "Vendedor registrado exitosamente"}
+    finally:
+        conn.close()
+
 
 @router.get("/users")
 def get_all_users():

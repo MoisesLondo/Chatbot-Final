@@ -300,11 +300,11 @@ closeUserModal(userForm?: any): void {
         username: this.currentUser.username,
         password: this.currentUser.password || '',
         role: this.currentUser.role,
-        is_active: this.currentUser.is_active,
+        is_active: true,
         profile: this.currentUser.profile || { full_name: '', email: '', tel: '' }
       };
 
-      this.http.post<AuthUser>('http://127.0.0.1:8000/users', createRequest).subscribe({
+      this.http.post<AuthUser>('http://127.0.0.1:8000/register-vendedor', createRequest).subscribe({
         next: (newUser) => {
           this.users.set([...this.users(), newUser]);
           this.closeUserModal();

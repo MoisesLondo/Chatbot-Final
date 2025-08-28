@@ -12,3 +12,9 @@ class VendedorProfile(BaseModel):
 
 class UserStatusUpdate(BaseModel):
     is_active: bool
+
+class RegisterUserWithProfile(BaseModel):
+    username: str
+    password: str
+    role: str
+    profile: VendedorProfile

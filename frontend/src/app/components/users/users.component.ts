@@ -4,7 +4,6 @@ import { RouterModule } from '@angular/router';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { afterNextRender } from '@angular/core';
 
 interface VendedorProfile {
   id?: number;
@@ -279,11 +278,18 @@ closeUserModal(userForm?: any): void {
   this.http.put(`http://127.0.0.1:8000/users/${this.currentUser.id}`, updatePayload).subscribe({
     next: (updatedUser: any) => {
       const users = this.users();
-      const index = users.findIndex(u => u.id === this.currentUser.id);
-      if (index !== -1) {
-        users[index] = updatedUser;
-        this.users.set([...users]);
-      }
+          const index = users.findIndex(u => u.id === this.currentUser.id);
+          if (index !== -1) {
+            users[index] = {
+              ...updatedUser,
+              profile: {
+                full_name: updatedUser.profile.full_name || '',
+                email: updatedUser.profile.email || '',
+                tel: updatedUser.profile.tel || ''
+              }
+            };
+            this.users.set([...users]);
+          }
       this.closeUserModal();
       this.isLoading.set(false);
     },
@@ -292,7 +298,7 @@ closeUserModal(userForm?: any): void {
       this.error.set('Error al actualizar el usuario');
       this.isLoading.set(false);
       // Simular actualización exitosa para desarrollo
-          this.simulateUserUpdate();
+          // this.simulateUserUpdate();
     },
   });
     } else {
@@ -349,6 +355,7 @@ closeUserModal(userForm?: any): void {
 
   toggleUserStatus(user: AuthUser): void {
     const newStatus = !user.is_active;
+    this.isLoading.set(true);
     
     this.http.patch(`http://127.0.0.1:8000/users/${user.id}/status`, { is_active: newStatus }).subscribe({
       next: () => {
@@ -358,10 +365,12 @@ closeUserModal(userForm?: any): void {
           users[index].is_active = newStatus;
           this.users.set([...users]);
         }
+        this.isLoading.set(false);
       },
       error: (err) => {
         console.error('Error toggling user status:', err);
         this.error.set('Error al cambiar el estado del usuario');
+        this.isLoading.set(false);
         
         // Simular cambio exitoso para desarrollo
         // const users = this.users();

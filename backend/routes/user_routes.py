@@ -1,10 +1,16 @@
 from uuid import UUID
 from fastapi import APIRouter, HTTPException, Depends
+import psycopg2
+from requests import Session
 from models.user import *
+from passlib.context import CryptContext
 from uuid import uuid4
 from datetime import datetime
 from services.auth import pwd_context
 from services.db import get_connection_login
+
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 router = APIRouter()
 
 @router.post("/register-vendedor")
@@ -149,3 +155,76 @@ def toggle_user_status(user_id: UUID, status: UserStatusUpdate):
         raise HTTPException(status_code=500, detail=f"Error al cambiar el estado del usuario: {e}")
     finally:
         conn.close()
+
+@router.put("/users/{user_id}")
+def update_user(user_id: str, data: UserUpdate):
+    conn = get_connection_login()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            # Primero actualizamos la tabla auth_users
+            updates = []
+            values = []
+
+            if data.password:
+                password_hash = pwd_context.hash(data.password)
+                updates.append("password_hash = %s")
+                values.append(password_hash)
+
+            if data.role:
+                updates.append("role = %s")
+                values.append(data.role)
+
+            if updates:
+                set_clause = ", ".join(updates)
+                cur.execute(f"UPDATE auth_users SET {set_clause} WHERE id = %s", (*values, user_id))
+
+            # Ahora actualizamos el perfil de vendedor
+            if data.profile:
+                profile_updates = []
+                profile_values = []
+                if data.profile.full_name is not None:
+                    profile_updates.append("full_name = %s")
+                    profile_values.append(data.profile.full_name)
+                if data.profile.tel is not None:
+                    profile_updates.append("tel = %s")
+                    profile_values.append(data.profile.tel)
+
+                if profile_updates:
+                    set_clause = ", ".join(profile_updates)
+                    cur.execute(f"UPDATE vendedores_profile SET {set_clause} WHERE id = %s", (*profile_values, user_id))
+
+            # Opcional: actualizar email directo en vendedores_profile
+            if data.email is not None:
+                cur.execute("UPDATE vendedores_profile SET email = %s WHERE id = %s", (data.email, user_id))
+
+            conn.commit()
+
+            # Recuperar datos actualizados para devolver al frontend
+            cur.execute("""
+                SELECT u.id, u.username, u.role, u.is_active, u.created_at,
+                       v.full_name, v.email, v.tel
+                FROM auth_users u
+                LEFT JOIN vendedores_profile v ON u.id = v.id
+                WHERE u.id = %s
+            """, (user_id,))
+            updated_user = cur.fetchone()
+
+            if not updated_user:
+                raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+            # Dar estructura que espera el frontend
+            return {
+                "id": updated_user["id"],
+                "username": updated_user["username"],
+                "role": updated_user["role"],
+                "is_active": updated_user["is_active"],
+                "created_at": updated_user["created_at"],
+                "profile": {
+                    "full_name": updated_user["full_name"],
+                    "email": updated_user["email"],
+                    "tel": updated_user["tel"]
+                }
+            }
+    finally:
+        conn.close()
+

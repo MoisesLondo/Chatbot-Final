@@ -402,7 +402,7 @@
             <label class="label">
               <span class="label-text font-noto-sans font-medium text-gray-900">
                 Contraseña <span class="label-text font-noto-sans font-medium text-primary">*</span>
-                <span class="label-text font-noto-sans text-xs">Mínimo 10 caracteres</span>
+                <span class="label-text font-noto-sans text-xs">Mínimo 5 caracteres</span>
               </span>
             </label>
             <input
@@ -413,12 +413,12 @@
               required
               placeholder="Contraseña"
               maxlength="45"
-              minlength="10"
+              minlength="5"
               #password="ngModel"
             />
             <div *ngIf="password.invalid && password.touched" class="text-red-600 text-xs mt-1">
               <div *ngIf="password.errors?.['required']">La contraseña es obligatoria.</div>
-              <div *ngIf="password.errors?.['minlength']">Debe tener al menos 10 caracteres.</div>
+              <div *ngIf="password.errors?.['minlength']">Debe tener al menos 5 caracteres.</div>
               <div *ngIf="password.errors?.['maxlength']">Máximo 45 caracteres.</div>
             </div>
           </div>
@@ -438,7 +438,7 @@
               required
               placeholder="Repite la contraseña"
               maxlength="45"
-              minlength="10"
+              minlength="5"
               #confirmPass="ngModel"
             />
             <div *ngIf="confirmPass.invalid && confirmPass.touched" class="text-red-600 text-xs mt-1">

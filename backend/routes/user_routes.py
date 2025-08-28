@@ -8,7 +8,7 @@ from services.db import get_connection_login
 router = APIRouter()
 
 @router.post("/register-vendedor")
-def register_user(data: RegisterUserWithProfile):
+def register_user(data: RegisterUserWithProfile, response_model=RegisterUserWithProfile):
     user_id = str(uuid4())
     password_hash = pwd_context.hash(data.password)
 
@@ -38,7 +38,18 @@ def register_user(data: RegisterUserWithProfile):
             ))
 
             conn.commit()
-        return {"message": "Vendedor registrado exitosamente"}
+        return {
+                "id": user_id,
+                "username": data.username,
+                "role": data.role,
+                "is_active": True,
+                "created_at": datetime.utcnow(),
+                "profile": {
+                    "full_name": data.profile.full_name,
+                    "email": data.profile.email,
+                    "tel": data.profile.tel
+                }
+            }
     finally:
         conn.close()
 
@@ -77,9 +88,12 @@ def get_all_users():
                     "role": user[2],
                     "is_active": user[3],
                     "created_at": user[4],
-                    "full_name": user[5],
-                    "email": user[6],
-                    "tel": user[7]
+                    "profile": {
+                        "id": user[0],
+                        "full_name": user[5],
+                        "email": user[6],
+                        "tel": user[7]
+                    }
                 })
 
         return result

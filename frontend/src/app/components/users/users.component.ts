@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { afterNextRender } from '@angular/core';
 
 interface VendedorProfile {
   id?: number;
@@ -316,7 +317,7 @@ closeUserModal(userForm?: any): void {
           this.isLoading.set(false);
           
           // Simular creación exitosa para desarrollo
-          this.simulateUserCreation();
+          // this.simulateUserCreation();
         },
       });
     }

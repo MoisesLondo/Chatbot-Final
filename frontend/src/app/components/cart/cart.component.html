@@ -17,9 +17,14 @@
         <span class="font-semibold text-slate-800 text-base">{{ item.product.nombre }}</span>
         <span class="text-xs text-slate-500">{{ item.product.categoria }}</span>
       </div>
-      <div class="flex items-center gap-2">
-        <span class="text-xs text-blue-700 font-bold bg-blue-100 px-2 py-1 rounded">x{{ item.quantity }}</span>
-        <span class="text-sm text-green-600 font-bold">${{ item.product.precio }}</span>
+      <div class="flex flex-col items-end">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-xs text-blue-700 font-bold bg-blue-100 px-2 py-1 rounded">x</span>
+          <input type="number" min="1" [max]="item.product.stock || 9999" [(ngModel)]="item.quantity" (change)="updateQuantity(item.product.codigo, item.quantity)" class="w-14 px-2 py-1 rounded border border-blue-200 text-blue-700 font-bold text-xs" />
+        </div>
+        <span class="text-sm text-green-600 font-bold">${{ item.product.precio }} c/u</span>
+        <span class="text-xs text-slate-700">Total: ${{ (item.product.precio * item.quantity) | number:'1.2-2' }}</span>
+        <button (click)="removeItem(item.product.codigo)" class="mt-2 px-2 py-1 text-xs bg-red-200 text-red-700 rounded hover:bg-red-300 transition-colors duration-150">Eliminar</button>
       </div>
     </li>
   </ul>
@@ -30,8 +35,11 @@
         ${{ total | number:'1.2-2' }}
       </span>
     </div>
-    <button class="btn btn-primary bg-primary w-full mt-2 text-base font-semibold py-2 rounded-lg shadow hover:bg-blue-800 transition-colors duration-150 text-white">
+    <button (click)="cotizar()" class="btn btn-primary bg-primary w-full mt-2 text-base font-semibold py-2 rounded-lg shadow hover:bg-blue-800 transition-colors duration-150 text-white">
       Cotizar
+    </button>
+    <button (click)="clearCart()" class="w-full mt-2 text-base font-semibold py-2 rounded-lg shadow bg-red-100 text-red-700 hover:bg-red-200 transition-colors duration-150">
+      Vaciar carrito
     </button>
   </div>
 </div>

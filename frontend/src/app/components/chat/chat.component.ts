@@ -32,6 +32,7 @@ import { CartComponent } from '../cart/cart.component';
   styleUrls: ['./chat.component.css'],
 })
 export class ChatComponent implements OnInit, AfterViewInit {
+  @ViewChild(CartComponent) cartComponent!: CartComponent;
   showCart = false;
   private sessionId: string;
   constructor(
@@ -122,8 +123,24 @@ export class ChatComponent implements OnInit, AfterViewInit {
     this.messages = [];
     this.sessionId = crypto.randomUUID();
     sessionStorage.setItem('session_id', this.sessionId);
+    // Reiniciar el carrito y limpiar localStorage
+    localStorage.removeItem('cart');
+    localStorage.removeItem('cart_total');
+    localStorage.removeItem('cart_items');
+    // Si el CartService tiene método para limpiar, llamarlo también
+    if (this.cartService && typeof this.cartService.clearCart === 'function') {
+      this.cartService.clearCart();
+    }
   }
   // ...existing code...
+
+  ngAfterViewChecked(): void {
+    // Detectar si se pidió cotizar desde el carrito
+    if (this.cartComponent && this.cartComponent.cotizarRequested) {
+      this.cartComponent.cotizarRequested = false;
+      this.addMessage('Quiero cotizar los productos que tengo en mi carrito.');
+    }
+  }
 
   ngOnInit(): void {
     this.loadHistory();
@@ -139,6 +156,11 @@ export class ChatComponent implements OnInit, AfterViewInit {
       this.messages.push(this.buildMsg('Mensaje Enviado', 'user'));
       this.isLoadingBotResponse = true;
       setTimeout(() => this.scrollToBottom(), 0);
+    } else if (userText.includes('[ABRIR_FORMULARIO_COTIZACION]')) {
+      // Mostrar un mensaje natural relacionado al carrito
+      this.messages.push(this.buildMsg('Quiero cotizar los productos que tengo en mi carrito.', 'user'));
+      this.isLoadingBotResponse = true;
+      setTimeout(() => this.scrollToBottom(), 0);
     } else {
       this.messages.push(this.buildMsg(userText, 'user'));
       this.isLoadingBotResponse = true;
@@ -152,32 +174,60 @@ export class ChatComponent implements OnInit, AfterViewInit {
         if (res.response) {
           const safeResponse = res.response || '';
 
-          // Detectar [AÑADIR_AL_CARRITO] y extraer productos
-          if (safeResponse.includes('[AÑADIR_AL_CARRITO]')) {
-            const htmlMatch = safeResponse.match(/\[AÑADIR_AL_CARRITO\]([\s\S]*)/i);
-            const productosHtml = htmlMatch ? htmlMatch[1].trim() : '';
-            const productos = this.extractProductsFromHtml(productosHtml);
-            productos.forEach(prod => {
-              // Buscar el producto en la última lista visual del bot
-              const lastBotMsg = this.messages.filter(m => m.sender === 'bot').slice(-1)[0]?.text || '';
-              const visualList = this.extractVisualList(lastBotMsg).items;
-              const found = visualList.find((p: any) => p.nombre === prod.nombre);
-              if (found) {
-                this.cartService.addProduct(found, prod.cantidad);
-              }
-            });
+          // Detectar [AGREGAR_CARRITO] y extraer productos
+          if (safeResponse.includes('[AGREGAR_CARRITO]')) {
+            this.cartService.processAgregarCarritoMessage(safeResponse);
+            this.messages.push(this.buildMsg('¡Listo! Los productos han sido agregados a tu carrito. Puedes revisarlos y cotizar cuando lo desees. 🛒', 'bot'));
+            // No mostrar el mensaje original del bot si contiene [AGREGAR_CARRITO]
+            this.isLoadingBotResponse = false;
+            this.scrollToBottom();
+            return;
+          }
+
+          // Detectar [ELIMINAR_DEL_CARRITO] y eliminar producto
+          if (safeResponse.includes('[ELIMINAR_DEL_CARRITO]')) {
+            // Espera formato: [ELIMINAR_DEL_CARRITO]CODIGO_PRODUCTO
+            const match = safeResponse.match(/\[ELIMINAR_DEL_CARRITO\](\S+)/);
+            if (match && match[1]) {
+              this.cartService.removeProduct(match[1]);
+              this.messages.push(this.buildMsg('Producto eliminado del carrito correctamente.', 'bot'));
+            }
+            this.isLoadingBotResponse = false;
+            this.scrollToBottom();
+            return;
+          }
+
+          // Detectar [VACIAR_CARRITO] y vaciar el carrito
+          if (safeResponse.includes('[VACIAR_CARRITO]')) {
+            this.cartService.clearCart();
+            this.messages.push(this.buildMsg('Todos los productos han sido eliminados del carrito.', 'bot'));
+            this.isLoadingBotResponse = false;
+            this.scrollToBottom();
+            return;
           }
 
           if (safeResponse.includes('[ABRIR_FORMULARIO_COTIZACION]')) {
-            const match = safeResponse.match(/\[ABRIR_FORMULARIO_COTIZACION\]([\s\S]*)/i);
-            const productosHtml = match ? match[1].trim() : '';
+            // Construir productosHtml desde el carrito actual
+            const cartProducts = this.cartService.getCartItems();
+            let productosHtml = '';
+            if (cartProducts && cartProducts.length > 0) {
+              productosHtml = `<ul class=\"list-disc pl-4\">` +
+                cartProducts.map((item: any) => {
+                  const nombre = item.product?.nombre || '';
+                  const cantidad = item.quantity || 1;
+                  return `<li>${nombre} (Cantidad: ${cantidad})</li>`;
+                }).join('') + `</ul>`;
+            }
             this.messages.push(this.buildMsg('Por favor, completa el formulario de cotización.', 'bot'));
             this.openCotizacionModal(productosHtml);
             this.scrollToBottom();
             this.isLoadingBotResponse = false;
             return;
           }
-          this.messages.push(this.buildMsg(res.response, 'bot', true));
+          // Solo mostrar el mensaje del bot si no contiene [AGREGAR_CARRITO]
+          if (!safeResponse.includes('[AGREGAR_CARRITO]')) {
+            this.messages.push(this.buildMsg(res.response, 'bot', true));
+          }
         } else {
           this.messages.push(this.buildMsg('No se recibió respuesta del bot.', 'bot'));
         }
@@ -218,6 +268,14 @@ export class ChatComponent implements OnInit, AfterViewInit {
     const sender = e.type === 'human' ? 'user' : 'bot';
     if (sender === 'user' && e.content.includes('[FORMULARIO-ENVIADO]')) {
       return this.buildMsg('Mensaje Enviado', 'user');
+    }
+    // Ocultar [ABRIR_FORMULARIO_COTIZACION] en el historial
+    if (sender === 'user' && e.content.includes('[ABRIR_FORMULARIO_COTIZACION]')) {
+      return { text: '', sender };
+    }
+    // Mostrar mensaje amigable si el bot envía [AGREGAR_CARRITO]
+    if (sender === 'bot' && e.content.includes('[AGREGAR_CARRITO]')) {
+      return this.buildMsg('¡Listo! Los productos han sido agregados a tu carrito. Puedes revisarlos y cotizar cuando lo desees. 🛒', 'bot');
     }
     return this.buildMsg(e.content, sender, sender === 'bot');
   };

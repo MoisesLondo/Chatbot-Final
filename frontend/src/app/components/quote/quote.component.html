@@ -36,7 +36,7 @@
         </div>
 
         <!-- Search by ID -->
-        <div *ngIf="searchType() === 'id'">
+        <div *ngIf="searchType() === 'id'" (keyup.enter)="fetchCotizacion()">
           <h2 class="card-title font-montserrat text-xl text-gray-900 mb-4">
             <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -59,6 +59,7 @@
             </div>
             <button 
               class="btn btn-primary font-noto-sans"
+              type="submit"
               (click)="fetchCotizacion()"
               [disabled]="!cotizacionId()"
             >
@@ -367,7 +368,7 @@
     </div>
 
     <!-- Single Quote Details (when searching by ID) -->
-    <div *ngIf="cotizacion() && searchType() === 'id'" class="cotizacion-details space-y-6">
+    <div *ngIf="cotizacion() && searchType() === 'id' && !isLoading()" class="cotizacion-details space-y-6">
       <!-- Quote Header -->
       <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
@@ -646,49 +647,74 @@
       </div>
     </div>
 
-    <!-- Empty State for ID Search -->
-    <div *ngIf="!cotizacion() && cotizacionId() && searchType() === 'id'" class="card bg-base-100 shadow-xl">
-      <div class="card-body text-center py-12">
-        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-        </svg>
-        <h3 class="font-montserrat font-semibold text-xl text-gray-900 mb-2">
-          Cotización no encontrada
-        </h3>
-        <p class="font-noto-sans text-gray-600">
-          No se encontró ninguna cotización con el ID proporcionado.
-        </p>
-      </div>
+<!-- Loading State -->
+@if (isLoading()) {
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body text-center py-12">
+      <!-- Spinner SVG -->
+      <svg class="animate-spin w-16 h-16 text-primary mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <h3 class="font-montserrat font-semibold text-xl text-gray-900 mb-2">
+        Cargando...
+      </h3>
+      <p class="font-noto-sans text-gray-600">
+        Buscando cotizaciones. Por favor, espera.
+      </p>
     </div>
+  </div>
+}
 
-    <!-- Empty State for Criteria/Status Search -->
-    <div *ngIf="cotizacionesList().length === 0 && hasSearched() && (searchType() === 'criteria' || searchType() === 'status')" class="card bg-base-100 shadow-xl">
-      <div class="card-body text-center py-12">
-        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-        </svg>
-        <h3 class="font-montserrat font-semibold text-xl text-gray-900 mb-2">
-          No se encontraron cotizaciones
-        </h3>
-        <p class="font-noto-sans text-gray-600">
-          No hay cotizaciones que coincidan con los criterios de búsqueda especificados.
-        </p>
-      </div>
+<!-- Empty State for ID Search -->
+@if (!isLoading() && !cotizacion() && hasSearched() && searchType() === 'id') {
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body text-center py-12">
+      <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+      </svg>
+      <h3 class="font-montserrat font-semibold text-xl text-gray-900 mb-2">
+        Cotización no encontrada
+      </h3>
+      <p class="font-noto-sans text-gray-600">
+        No se encontró ninguna cotización con el ID proporcionado.
+      </p>
     </div>
+  </div>
+}
 
-    <!-- Initial State -->
-    <div *ngIf="!cotizacion() && !cotizacionId() && cotizacionesList().length === 0 && !hasSearched()" class="card bg-base-100 shadow-xl">
-      <div class="card-body text-center py-12">
-        <svg class="w-16 h-16 text-primary mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-        </svg>
-        <h3 class="font-montserrat font-semibold text-xl text-gray-900 mb-2">
-          Buscar Cotizaciones
-        </h3>
-        <p class="font-noto-sans text-gray-600">
-          Utiliza la búsqueda por ID para ver una cotización específica, la búsqueda avanzada para múltiples criterios, o busca por estado de cotización.
-        </p>
-      </div>
+<!-- Empty State for Criteria/Status Search -->
+@if (!isLoading() && cotizacionesList().length === 0 && hasSearched() && (searchType() === 'criteria' || searchType() === 'status')) {
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body text-center py-12">
+      <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      </svg>
+      <h3 class="font-montserrat font-semibold text-xl text-gray-900 mb-2">
+        No se encontraron cotizaciones
+      </h3>
+      <p class="font-noto-sans text-gray-600">
+        No hay cotizaciones que coincidan con los criterios de búsqueda especificados.
+      </p>
     </div>
+  </div>
+}
+
+<!-- Initial State -->
+@if (!isLoading() && !cotizacion() && cotizacionesList().length === 0 && !hasSearched()) {
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body text-center py-12">
+      <svg class="w-16 h-16 text-primary mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      </svg>
+      <h3 class="font-montserrat font-semibold text-xl text-gray-900 mb-2">
+        Buscar Cotizaciones
+      </h3>
+      <p class="font-noto-sans text-gray-600">
+        Utiliza la búsqueda por ID para ver una cotización específica, la búsqueda avanzada para múltiples criterios, o busca por estado de cotización.
+      </p>
+    </div>
+  </div>
+}
   </div>
 </section>

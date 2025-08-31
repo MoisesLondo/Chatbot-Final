@@ -184,8 +184,6 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
     // Nos suscribimos a las actualizaciones del carrito
     this.cartUpdateSubscription = this.cartService.cartUpdate$.subscribe(update => {
       this.updateCartCount();
-      // ¡Esta es la parte que faltaba!
-      // Activar la animación solo cuando se agrega un producto.
       if (update.type === 'add') {
         this.triggerAnimation();
       }
@@ -345,9 +343,6 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
 
   triggerAnimation(): void {
     this.animateCartIcon = true;
-    setTimeout(() => {
-      this.animateCartIcon = false;
-    }, 500);
   }
 
   ngOnDestroy(): void {

@@ -11,24 +11,9 @@ import { FormsModule } from '@angular/forms';
 })
 export class ProductModalComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['isOpen']) {
-      if (this.isOpen) {
-        document.body.style.overflow = 'hidden';
-        this.quantity = 1;
-        this.error = '';
-        setTimeout(() => {
-          const modal = document.querySelector('.bg-white.rounded-lg.shadow-2xl');
-          if (modal) {
-            modal.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
-          const chatScroll = document.querySelector('.flex-grow.min-h-0.bg-base-100');
-          if (chatScroll) chatScroll.classList.add('overflow-hidden');
-        }, 50);
-      } else {
-        document.body.style.overflow = '';
-        const chatScroll = document.querySelector('.flex-grow.min-h-0.bg-base-100');
-        if (chatScroll) chatScroll.classList.remove('overflow-hidden');
-      }
+    if (changes['product'] && this.product) {
+      this.quantity = this.isDecimalStock() ? 1 : 1; 
+      this.error = '';
     }
   }
   @Input() product: any | null = null;
@@ -57,5 +42,26 @@ export class ProductModalComponent implements OnChanges {
   onClose(): void {
   document.body.style.overflow = '';
   this.close.emit();
+  }
+
+  isDecimalStock(): boolean {
+    if (!this.product || this.product.stock === undefined) {
+      return false;
+    }
+    // Si el número módulo 1 no es 0, entonces tiene decimales.
+    return this.product.stock % 1 !== 0;
+  }
+
+  onQuantityInput(): void {
+    // Si el stock es decimal, no hacemos nada y permitimos cualquier valor.
+    if (this.isDecimalStock()) {
+      return;
+    }
+
+    // Si el stock es entero y el valor actual tiene decimales...
+    if (this.quantity && !Number.isInteger(this.quantity)) {
+      // ...lo redondeamos hacia abajo para eliminar el decimal.
+      this.quantity = Math.floor(this.quantity);
+    }
   }
 }

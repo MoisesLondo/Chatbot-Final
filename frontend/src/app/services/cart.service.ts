@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Subject } from 'rxjs';
 
 export interface Product {
   id: string;
@@ -16,12 +17,23 @@ export interface CartItem {
   quantity: number;
 }
 
+export interface CartUpdate {
+  type: 'add' | 'remove' | 'clear';
+  product?: Product;
+}
+
 @Injectable({ providedIn: 'root' })
 export class CartService {
   /**
    * Borra todos los productos del carrito
    */
   private items: CartItem[] = [];
+  private cartUpdateSource = new Subject<CartUpdate>();
+
+  /**
+   * Observable que emite cuando el carrito se actualiza.
+   */
+  cartUpdate$ = this.cartUpdateSource.asObservable();
 
   constructor() {
     const saved = localStorage.getItem('cart_items');
@@ -63,6 +75,7 @@ export class CartService {
       this.items.push({ product, quantity });
     }
     this.saveCart();
+    this.cartUpdateSource.next({ type: 'add', product });
   }
 
   saveCart() {
@@ -70,28 +83,31 @@ export class CartService {
   }
 
   removeProduct(codigo: string) {
+    const itemToRemove = this.items.find(item => item.product.codigo === codigo);
     this.items = this.items.filter(item => item.product.codigo !== codigo);
     this.saveCart();
+    if (itemToRemove) {
+      this.cartUpdateSource.next({ type: 'remove', product: itemToRemove.product });
+    }
   }
 
   clearCart() {
     this.items = [];
     this.saveCart();
+    this.cartUpdateSource.next({ type: 'clear' });
   }
 
   getTotalItems(): number {
     return this.items.reduce((acc, item) => acc + item.quantity, 0);
+  }
+  getUniqueItemCount(): number {
+    return this.items.length;
   }
 
   getTotalPrice(): number {
     return this.items.reduce((acc, item) => acc + item.product.precio * item.quantity, 0);
   }
 
-  /**
-   * Procesa un mensaje del bot con la etiqueta [AGREGAR_CARRITO] y agrega los productos al carrito.
-   * Soporta formato HTML tipo lista:
-   * [AGREGAR_CARRITO]\n<ul class=...><li>Producto 1 (Cantidad: X, precio: Y)</li>...</ul>
-   */
   processAgregarCarritoMessage(message: string): void {
     if (!message.startsWith('[AGREGAR_CARRITO]')) return;
     const content = message.replace('[AGREGAR_CARRITO]', '').trim();
@@ -136,6 +152,5 @@ export class CartService {
     productos.forEach(({ product, quantity }) => {
       this.addProduct(product, quantity);
     });
-    this.saveCart();
   }
 }

@@ -3,7 +3,7 @@
   {{ title }}
 </div>
 <ul class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-  <li *ngFor="let prod of products" class="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden hover:scale-[1.01] hover:shadow-lg transition-all duration-200 p-4 flex flex-col gap-2">
+  <li *ngFor="let prod of products" (click)="prod.precio === undefined && onCategoryClick(prod)" [class.cursor-pointer]="prod.precio === undefined"  class="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden hover:scale-[1.01] hover:shadow-lg transition-all duration-200 p-4 flex flex-col gap-2">
     <ng-container *ngIf="prod.precio !== undefined; else categoriaCard">
       <div class="flex items-center gap-3">
         <div class="flex-shrink-0">
@@ -25,18 +25,12 @@
           <div class="flex items-center gap-2 mt-1">
             <span class="text-xs text-slate-500">Stock:</span>
             <span class="font-semibold text-slate-800">{{ prod.stock }}</span>
-            <button *ngIf="!showQtyInput[prod.codigo]" class="ml-auto flex items-center gap-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors duration-200 text-xs z-10 cursor-pointer">
+            <button (click)="$event.stopPropagation(); openProductModal(prod)" class="ml-auto flex items-center gap-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors duration-200 text-xs z-10 cursor-pointer">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mx-auto my-auto block">
                 <path d="M7.2998 5H22L20 12H8.37675M21 16H9L7 3H4M4 8H2M5 11H2M6 14H2M10 20C10 20.5523 9.55228 21 9 21C8.44772 21 8 20.5523 8 20C8 19.4477 8.44772 19 9 19C9.55228 19 10 19.4477 10 20ZM21 20C21 20.5523 20.5523 21 20 21C19.4477 21 19 20.5523 19 20C19 19.4477 19.4477 19 20 19C20.5523 19 21 19.4477 21 20Z" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
               Agregar
             </button>
-            <div *ngIf="showQtyInput[prod.codigo]" class="flex items-center gap-2 ml-auto animate-fade-in">
-              <input type="number" min="1" [max]="prod.stock" [(ngModel)]="qty[prod.codigo]" class="w-16 px-2 py-1 border rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Cantidad" />
-              <button (click)="confirmAdd(prod)" class="px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs">OK</button>
-              <button (click)="closeQtyInput(prod)" class="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded text-xs">✕</button>
-            </div>
-            <div *ngIf="error[prod.codigo]" class="text-xs text-red-500 mt-1 ml-auto">{{ error[prod.codigo] }}</div>
           </div>
         </div>
       </div>
@@ -51,3 +45,5 @@
     </ng-template>
   </li>
 </ul>
+
+

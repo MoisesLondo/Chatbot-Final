@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, ChangeDetectorRef} from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, ChangeDetectorRef, AfterViewChecked, OnDestroy} from '@angular/core';
 import { CotizacionModalComponent } from '../quote-modal/cotizacion-modal.component';
 import { ProductListComponent } from '../product-list/product-list.component';
 import { CommonModule } from '@angular/common';
@@ -7,7 +7,10 @@ import { InputChatComponent } from '../input-chat/input-chat.component';
 import { AskPayload, HistoryEntry } from '../../models';
 import { ChatService } from '../../services';
 import { Router } from '@angular/router';
-import { CartService, Product } from '../../services/cart.service';
+import { CartService } from '../../services/cart.service';
+import { ProductModalComponent } from '../product-modal/product-modal.component';
+import { Subscription } from 'rxjs';
+
  
 interface Message {
   text: string;
@@ -26,15 +29,20 @@ import { CartComponent } from '../cart/cart.component';
     InputChatComponent,
     CotizacionModalComponent,
     ProductListComponent,
-    CartComponent
+    CartComponent,
+    ProductModalComponent
   ],
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css'],
 })
-export class ChatComponent implements OnInit, AfterViewInit {
+export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, OnDestroy {
+  private shouldScrollToBottom = false;
   @ViewChild(CartComponent) cartComponent!: CartComponent;
   showCart = false;
   private sessionId: string;
+  cartItemCount = 0;
+  animateCartIcon = false;
+  private cartUpdateSubscription: Subscription = new Subscription();
   constructor(
     private chat: ChatService,
     private cartService: CartService,
@@ -57,16 +65,14 @@ export class ChatComponent implements OnInit, AfterViewInit {
   }
 
   onAddToQuote(event: { producto: any, cantidad: number }) {
-    if (this.addToCartHandler) {
-      this.addToCartHandler(event);
-    } else {
-      // fallback local (solo para pruebas)
-      const idx = this.cartItems.findIndex(p => p.producto.codigo === event.producto.codigo);
-      if (idx >= 0) {
-        this.cartItems[idx].cantidad += event.cantidad;
-      } else {
-        this.cartItems.push(event);
-      }
+    this.cartService.addProduct(event.producto, event.cantidad);
+    // Opcional: mostrar notificación/feedback
+    console.log(`${event.cantidad} de ${event.producto.nombre} agregado(s) al carrito.`);
+    
+    // Actualizar la vista del carrito si está abierta
+    if (this.showCart && this.cartComponent) {
+      this.cartComponent.items = this.cartService.getCart();
+  this.cartComponent.total = this.cartComponent.items.reduce((acc, item) => acc + item.product.precio * item.quantity, 0);
     }
   }
   // Extrae el primer array JSON de productos de cualquier string
@@ -93,6 +99,35 @@ export class ChatComponent implements OnInit, AfterViewInit {
   showCotizacionModal = false;
   productosHtml: string = '';
 
+  isModalOpen = false;
+  selectedProduct: any | null = null;
+
+
+  openProductModal = (product: any): void => {
+    this.selectedProduct = product;
+    this.isModalOpen = true;
+    document.body.style.overflow = 'hidden';
+    const chatScroll = document.querySelector('.flex-grow.min-h-0.bg-base-100');
+    if (chatScroll) chatScroll.classList.add('overflow-hidden');
+  }
+
+  closeModal(): void {
+    this.isModalOpen = false;
+    this.selectedProduct = null;
+    document.body.style.overflow = '';
+    const chatScroll = document.querySelector('.flex-grow.min-h-0.bg-base-100');
+    if (chatScroll) chatScroll.classList.remove('overflow-hidden');
+  }
+
+  onConfirmAddToCart(event: { product: any, quantity: number }): void {
+    this.onAddToQuote({ producto: event.product, cantidad: event.quantity });
+    this.closeModal();
+  }
+
+  toggleCart(): void {
+    this.showCart = !this.showCart;
+    this.animateCartIcon = false;
+  }
 
   openCotizacionModal(productosHtml: string) {
     this.productosHtml = productosHtml;
@@ -105,6 +140,7 @@ export class ChatComponent implements OnInit, AfterViewInit {
     this.productosHtml = '';
     if (cancelado) {
       this.messages.push(this.buildMsg('Formulario cancelado por el usuario.', 'bot'));
+      this.shouldScrollToBottom = true;
     }
   }
 
@@ -135,19 +171,32 @@ export class ChatComponent implements OnInit, AfterViewInit {
   // ...existing code...
 
   ngAfterViewChecked(): void {
-    // Detectar si se pidió cotizar desde el carrito
-    if (this.cartComponent && this.cartComponent.cotizarRequested) {
-      this.cartComponent.cotizarRequested = false;
-      this.addMessage('Quiero cotizar los productos que tengo en mi carrito.');
+    if (this.shouldScrollToBottom) {
+      this.scrollToBottom();
+      this.shouldScrollToBottom = false;
     }
   }
 
   ngOnInit(): void {
     this.loadHistory();
+    this.updateCartCount(); // Para tener el número inicial correcto
+
+    // Nos suscribimos a las actualizaciones del carrito
+    this.cartUpdateSubscription = this.cartService.cartUpdate$.subscribe(update => {
+      this.updateCartCount();
+      // ¡Esta es la parte que faltaba!
+      // Activar la animación solo cuando se agrega un producto.
+      if (update.type === 'add') {
+        this.triggerAnimation();
+      }
+    });
   }
 
-  ngAfterViewInit(): void {
-    setTimeout(() => this.scrollToBottom(), 0);
+  ngAfterViewInit(): void {}
+
+  handleCotizar(): void {
+    this.showCart = false; // Cierra el carrito al cotizar
+    this.addMessage('Quiero cotizar los productos que tengo en mi carrito.');
   }
 
   addMessage(userText: string): void {
@@ -155,17 +204,15 @@ export class ChatComponent implements OnInit, AfterViewInit {
       // Mostrar solo 'Mensaje Enviado' en el chat para el usuario y NO mostrar el JSON
       this.messages.push(this.buildMsg('Mensaje Enviado', 'user'));
       this.isLoadingBotResponse = true;
-      setTimeout(() => this.scrollToBottom(), 0);
     } else if (userText.includes('[ABRIR_FORMULARIO_COTIZACION]')) {
       // Mostrar un mensaje natural relacionado al carrito
       this.messages.push(this.buildMsg('Quiero cotizar los productos que tengo en mi carrito.', 'user'));
       this.isLoadingBotResponse = true;
-      setTimeout(() => this.scrollToBottom(), 0);
     } else {
       this.messages.push(this.buildMsg(userText, 'user'));
       this.isLoadingBotResponse = true;
-      setTimeout(() => this.scrollToBottom(), 0);
     }
+    this.shouldScrollToBottom = true;
 
     const payload: AskPayload = { query: userText, session_id: this.sessionId };
 
@@ -178,35 +225,17 @@ export class ChatComponent implements OnInit, AfterViewInit {
           if (safeResponse.includes('[AGREGAR_CARRITO]')) {
             this.cartService.processAgregarCarritoMessage(safeResponse);
             this.messages.push(this.buildMsg('¡Listo! Los productos han sido agregados a tu carrito. Puedes revisarlos y cotizar cuando lo desees. 🛒', 'bot'));
-            // No mostrar el mensaje original del bot si contiene [AGREGAR_CARRITO]
-            this.isLoadingBotResponse = false;
-            this.scrollToBottom();
-            return;
-          }
-
-          // Detectar [ELIMINAR_DEL_CARRITO] y eliminar producto
-          if (safeResponse.includes('[ELIMINAR_DEL_CARRITO]')) {
+          } else if (safeResponse.includes('[ELIMINAR_DEL_CARRITO]')) {
             // Espera formato: [ELIMINAR_DEL_CARRITO]CODIGO_PRODUCTO
             const match = safeResponse.match(/\[ELIMINAR_DEL_CARRITO\](\S+)/);
             if (match && match[1]) {
               this.cartService.removeProduct(match[1]);
               this.messages.push(this.buildMsg('Producto eliminado del carrito correctamente.', 'bot'));
             }
-            this.isLoadingBotResponse = false;
-            this.scrollToBottom();
-            return;
-          }
-
-          // Detectar [VACIAR_CARRITO] y vaciar el carrito
-          if (safeResponse.includes('[VACIAR_CARRITO]')) {
+          } else if (safeResponse.includes('[VACIAR_CARRITO]')) {
             this.cartService.clearCart();
             this.messages.push(this.buildMsg('Todos los productos han sido eliminados del carrito.', 'bot'));
-            this.isLoadingBotResponse = false;
-            this.scrollToBottom();
-            return;
-          }
-
-          if (safeResponse.includes('[ABRIR_FORMULARIO_COTIZACION]')) {
+          } else if (safeResponse.includes('[ABRIR_FORMULARIO_COTIZACION]')) {
             // Construir productosHtml desde el carrito actual
             const cartProducts = this.cartService.getCartItems();
             let productosHtml = '';
@@ -220,24 +249,20 @@ export class ChatComponent implements OnInit, AfterViewInit {
             }
             this.messages.push(this.buildMsg('Por favor, completa el formulario de cotización.', 'bot'));
             this.openCotizacionModal(productosHtml);
-            this.scrollToBottom();
-            this.isLoadingBotResponse = false;
-            return;
-          }
-          // Solo mostrar el mensaje del bot si no contiene [AGREGAR_CARRITO]
-          if (!safeResponse.includes('[AGREGAR_CARRITO]')) {
+          } else {
             this.messages.push(this.buildMsg(res.response, 'bot', true));
           }
         } else {
           this.messages.push(this.buildMsg('No se recibió respuesta del bot.', 'bot'));
         }
-        setTimeout(() => this.scrollToBottom(), 0);
         this.isLoadingBotResponse = false;
+        this.shouldScrollToBottom = true;
       },
       error: err => {
         console.error(err);
         this.messages.push(this.buildMsg('Error al obtener respuesta del bot.', 'bot'));
         this.isLoadingBotResponse = false;
+        this.shouldScrollToBottom = true;
       }
     });
   }
@@ -258,7 +283,7 @@ export class ChatComponent implements OnInit, AfterViewInit {
       next: h => {
         this.messages = h.history.map(this.historyEntryToMsg);
         this.cdr.detectChanges();
-        setTimeout(() => this.scrollToBottom(), 0);
+        this.shouldScrollToBottom = true;
       },
       error: err => console.error(err)
     });
@@ -307,6 +332,28 @@ export class ChatComponent implements OnInit, AfterViewInit {
       return 'http://localhost:8000' + match[0];
     }
     return null;
+  }
+
+  onCategorySelected(category: any): void {
+    const userMessage = `Quisiera ver los productos de la categoría '${category.nombre}'`;
+    this.addMessage(userMessage);
+  }
+
+  updateCartCount(): void {
+    this.cartItemCount = this.cartService.getUniqueItemCount();
+  }
+
+  triggerAnimation(): void {
+    this.animateCartIcon = true;
+    setTimeout(() => {
+      this.animateCartIcon = false;
+    }, 500);
+  }
+
+  ngOnDestroy(): void {
+    if (this.cartUpdateSubscription) {
+      this.cartUpdateSubscription.unsubscribe();
+    }
   }
 
 }

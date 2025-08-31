@@ -98,12 +98,22 @@ fetchCotizacion() {
           fecha_creacion: response.cotizacion.fecha_creacion || null,
           estado: response.cotizacion.estado || 'Estado no disponible',
         });
+
+        this.http.get(`http://127.0.0.1:8000/cotizacion/${id}/pdf`).subscribe({
+          next: () => console.log('PDF generation triggered successfully.'),
+          error: (err) => console.error('Error triggering PDF generation:', err)
+        });
+
+        this.http.get(`http://127.0.0.1:8000/cotizacion/${id}/docx`).subscribe({
+          next: () => console.log('DOCX generation triggered successfully.'),
+          error: (err) => console.error('Error triggering DOCX generation:', err)
+        });
       } else {
         this.cotizacion.set(null);
       }
       this.detalles.set(response.detalles || []);
       this.hasSearched.set(true);
-     this.isLoading.set(false);
+      this.isLoading.set(false);
     },
     error: (err) => {
       console.error('Error fetching cotización:', err);
@@ -367,16 +377,15 @@ fetchCotizacion() {
     window.open(`http://127.0.0.1:8000/cotizacion/${quoteId}/docx`, '_blank');
   }
 
-  // Original download functions (unchanged)
-  downloadPDF() {
-    const id = this.cotizacionId();
-    if (!id) return;
-    window.open(`http://127.0.0.1:8000/cotizacion/${id}/pdf`, '_blank');
-  }
+  // downloadPDF() {
+  //   const id = this.cotizacionId();
+  //   if (!id) return;
+  //   window.open(`http://127.0.0.1:8000/cotizacion/${id}/pdf`, '_blank');
+  // }
 
-  downloadDOCX() {
-    const id = this.cotizacionId();
-    if (!id) return;
-    window.open(`http://127.0.0.1:8000/cotizacion/${id}/docx`, '_blank');
-  }
+  // downloadDOCX() {
+  //   const id = this.cotizacionId();
+  //   if (!id) return;
+  //   window.open(`http://127.0.0.1:8000/cotizacion/${id}/docx`, '_blank');
+  // }
 }

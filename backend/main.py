@@ -37,4 +37,5 @@ app.include_router(user_routes.router)
 
 # Montar el directorio de archivos estáticos
 app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static/temp", StaticFiles(directory="static/temp"), name="temp")
 

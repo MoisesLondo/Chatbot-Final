@@ -32,6 +32,9 @@ interface StatusSearch {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class QuoteComponent {
+
+protected readonly isLoading = signal(false);
+
   // Existing signals for single quote search
   protected readonly cotizacionId = signal('');
   protected readonly cotizacion = signal<any | null>(null);
@@ -85,6 +88,7 @@ fetchCotizacion() {
   const id = this.cotizacionId();
   if (!id) return;
 
+  this.isLoading.set(true);
   this.http.get<{ cotizacion: any; detalles: any[] }>(`http://127.0.0.1:8000/cotizacion/${id}`).subscribe({
     next: (response) => {
       if (response.cotizacion) {
@@ -99,12 +103,14 @@ fetchCotizacion() {
       }
       this.detalles.set(response.detalles || []);
       this.hasSearched.set(true);
+     this.isLoading.set(false);
     },
     error: (err) => {
       console.error('Error fetching cotización:', err);
       this.cotizacion.set(null);
       this.detalles.set([]);
       this.hasSearched.set(true);
+      this.isLoading.set(false);
     },
   });
 }

@@ -262,16 +262,4 @@ fetchCotizacion() {
   downloadQuoteDOCX(quoteId: string) {
     window.open(`http://127.0.0.1:8000/cotizacion/${quoteId}/docx`, '_blank');
   }
-
-  // downloadPDF() {
-  //   const id = this.cotizacionId();
-  //   if (!id) return;
-  //   window.open(`http://127.0.0.1:8000/cotizacion/${id}/pdf`, '_blank');
-  // }
-
-  // downloadDOCX() {
-  //   const id = this.cotizacionId();
-  //   if (!id) return;
-  //   window.open(`http://127.0.0.1:8000/cotizacion/${id}/docx`, '_blank');
-  // }
 }

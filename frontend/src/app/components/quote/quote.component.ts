@@ -95,8 +95,7 @@ fetchCotizacion() {
         // Asegurarse de que los datos necesarios existan
         this.cotizacion.set({
           ...response.cotizacion,
-          fecha_creacion: response.cotizacion.fecha_creacion || null,
-          estado: response.cotizacion.estado || 'Estado no disponible',
+          fecha_creacion: response.cotizacion.created_at || null,
         });
 
         this.http.get(`http://127.0.0.1:8000/cotizacion/${id}/pdf`).subscribe({

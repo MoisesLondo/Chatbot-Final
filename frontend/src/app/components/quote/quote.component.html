@@ -432,7 +432,6 @@
                   <th>Cédula/RIF</th>
                   <th>Email</th>
                   <th>Teléfono</th>
-                  <th>Estado</th>
                   <th>Fecha</th>
                   <th class="text-right">Total</th>
                   <th>Acciones</th>
@@ -445,15 +444,6 @@
                   <td>{{ cot.cedula_rif }}</td>
                   <td>{{ cot.cliente_email }}</td>
                   <td>{{ cot.cliente_telefono }}</td>
-                  <td>
-                    <div class="badge" [ngClass]="{
-                      'badge-warning': cot.estado === 'en_espera',
-                      'badge-success': cot.estado === 'convertido',
-                      'badge-error': cot.estado === 'perdido'
-                    }">
-                      {{ getStatusLabel(cot.estado) }}
-                    </div>
-                  </td>
                   <td>{{ cot.fecha_creacion | date:'short' }}</td>
                   <td class="text-right font-medium">{{ cot.total | currency:'USD':'symbol':'1.2-2' }}</td>
                   <td>

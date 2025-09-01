@@ -175,40 +175,6 @@ fetchCotizacion() {
     });
   }
 
-  // New status search
-  searchByStatus() {
-    if (!this.statusSearch.estado) return;
-
-    // Build query parameters
-    const params = new URLSearchParams();
-    params.append('estado', this.statusSearch.estado);
-    
-    if (this.statusSearch.fecha_desde) {
-      params.append('fecha_desde', this.statusSearch.fecha_desde);
-    }
-    if (this.statusSearch.fecha_hasta) {
-      params.append('fecha_hasta', this.statusSearch.fecha_hasta);
-    }
-    if (this.statusSearch.vendedor) {
-      params.append('vendedor', this.statusSearch.vendedor);
-    }
-
-    this.http.get<any[]>(`http://127.0.0.1:8000/cotizaciones/status?${params.toString()}`).subscribe({
-      next: (cotizaciones) => {
-        this.cotizacionesList.set(cotizaciones);
-        this.hasSearched.set(true);
-      },
-      error: (err) => {
-        console.error('Error searching by status:', err);
-        this.cotizacionesList.set([]);
-        this.hasSearched.set(true);
-        
-        // Mock data for development
-        this.loadMockStatusResults();
-      },
-    });
-  }
-
   // Load mock data for development
   private loadMockSearchResults() {
     const mockResults = [
@@ -248,65 +214,7 @@ fetchCotizacion() {
     this.hasSearched.set(true);
   }
 
-  // Load mock status results
-  private loadMockStatusResults() {
-    const estado = this.statusSearch.estado;
-    let mockResults: any[] = [];
-
-    if (estado === 'en_espera') {
-      mockResults = [
-        {
-          id: 'COT-2024-004',
-          nombre_cliente: 'Ana Martínez',
-          cedula_rif: 'V-11111111',
-          cliente_email: 'ana@email.com',
-          cliente_telefono: '+58 414 111-1111',
-          fecha_creacion: '2024-01-18T08:00:00Z',
-          estado: 'en_espera',
-          total: 12000.00
-        },
-        {
-          id: 'COT-2024-005',
-          nombre_cliente: 'Pedro López',
-          cedula_rif: 'V-22222222',
-          cliente_email: 'pedro@email.com',
-          cliente_telefono: '+58 424 222-2222',
-          fecha_creacion: '2024-01-19T10:30:00Z',
-          estado: 'en_espera',
-          total: 18500.00
-        }
-      ];
-    } else if (estado === 'convertido') {
-      mockResults = [
-        {
-          id: 'COT-2024-006',
-          nombre_cliente: 'Luis García',
-          cedula_rif: 'V-33333333',
-          cliente_email: 'luis@email.com',
-          cliente_telefono: '+58 414 333-3333',
-          fecha_creacion: '2024-01-20T11:15:00Z',
-          estado: 'convertido',
-          total: 35000.00
-        }
-      ];
-    } else if (estado === 'perdido') {
-      mockResults = [
-        {
-          id: 'COT-2024-007',
-          nombre_cliente: 'Carmen Silva',
-          cedula_rif: 'V-44444444',
-          cliente_email: 'carmen@email.com',
-          cliente_telefono: '+58 424 444-4444',
-          fecha_creacion: '2024-01-21T13:45:00Z',
-          estado: 'perdido',
-          total: 9500.00
-        }
-      ];
-    }
-    
-    this.cotizacionesList.set(mockResults);
-    this.hasSearched.set(true);
-  }
+  
 
   // Check if any search criteria is filled
   hasSearchCriteria(): boolean {
@@ -337,27 +245,6 @@ fetchCotizacion() {
       fecha_hasta: ''
     };
     this.clearResults();
-  }
-
-  // Clear status search
-  clearStatusSearch() {
-    this.statusSearch = {
-      estado: '',
-      fecha_desde: '',
-      fecha_hasta: '',
-      vendedor: ''
-    };
-    this.clearResults();
-  }
-
-  // Get status label for display
-  getStatusLabel(estado: string): string {
-    const labels: { [key: string]: string } = {
-      'en_espera': 'En Espera',
-      'convertido': 'Convertido',
-      'perdido': 'Perdido'
-    };
-    return labels[estado] || estado;
   }
 
   // View quote details from search results

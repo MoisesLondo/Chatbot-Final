@@ -1,5 +1,9 @@
 from uuid import UUID
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
+from typing import Optional, List
+from psycopg2.extras import RealDictCursor
+import datetime
+from decimal import Decimal
 from models.cotizacion import Cotizacion, DetalleCotizacion
 from services.tools.cotizacion_pdf import generar_ruta_pdf
 from services.cotizacion_bd import guardar_cotizacion
@@ -91,3 +95,101 @@ def descargar_cotizacion_pdf(cotizacion_id: str):
         return pdf_url
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+
+@router.get("/cotizaciones/search", response_model=List[dict])
+def search_cotizaciones(
+    cedula_rif: Optional[str] = Query(None, description="Cédula o RIF del cliente."),
+    nombre_cliente: Optional[str] = Query(None, description="Nombre del cliente."),
+    cliente_email: Optional[str] = Query(None, description="Email del cliente."),
+    cliente_telefono: Optional[str] = Query(None, description="Teléfono del cliente."),
+    producto: Optional[str] = Query(None, description="Nombre o código del producto."),
+    total_min: Optional[float] = Query(None, description="Total mínimo de la cotización."),
+    total_max: Optional[float] = Query(None, description="Total máximo de la cotización."),
+    fecha_desde: Optional[str] = Query(None, description="Fecha de creación desde (YYYY-MM-DD)."),
+    fecha_hasta: Optional[str] = Query(None, description="Fecha de creación hasta (YYYY-MM-DD).")
+):
+    conn = None
+    try:
+        conn = get_connection()
+        if not conn:
+            raise HTTPException(status_code=500, detail="Error al conectar a la base de datos.")
+
+        # Construir la consulta SQL dinámicamente
+        query = "SELECT * FROM cotizacion"
+        conditions = []
+        params = []
+
+        if cedula_rif:
+            conditions.append("cedula_rif LIKE %s")
+            params.append(f"%{cedula_rif}%")
+
+        if nombre_cliente:
+            conditions.append("nombre_cliente ILIKE %s")
+            params.append(f"%{nombre_cliente}%")
+
+        if cliente_email:
+            conditions.append("cliente_email ILIKE %s")
+            params.append(f"%{cliente_email}%")
+
+        if cliente_telefono:
+            conditions.append("cliente_telefono ILIKE %s")
+            params.append(f"%{cliente_telefono}%")
+
+        if total_min is not None:
+            conditions.append("total >= %s")
+            params.append(Decimal(str(total_min)))
+
+        if total_max is not None:
+            conditions.append("total <= %s")
+            params.append(Decimal(str(total_max)))
+
+        if fecha_desde:
+            conditions.append("created_at >= %s")
+            params.append(fecha_desde)
+
+        if fecha_hasta:
+            # Añadir un día para incluir la fecha final completa
+            fecha_hasta_obj = datetime.datetime.strptime(fecha_hasta, '%Y-%m-%d').date() + datetime.timedelta(days=1)
+            conditions.append("created_at < %s")
+            params.append(fecha_hasta_obj)
+
+        if producto:
+            # Subconsulta para buscar productos en el detalle_cotizacion
+            # Ahora con dos placeholders `%s` explícitos en la subconsulta
+            product_search_query = """
+            EXISTS (
+                SELECT 1 FROM detalle_cotizacion
+                WHERE detalle_cotizacion.cotizacion_id = cotizacion.id
+                AND (detalle_cotizacion.nombre_producto ILIKE %s OR detalle_cotizacion.codigo_producto ILIKE %s)
+            )
+            """
+            conditions.append(product_search_query)
+            params.append(f"%{producto}%")
+            params.append(f"%{producto}%")
+
+        # Unir las condiciones con AND si existen
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
+
+        query += " ORDER BY created_at DESC"
+
+        # Depuración: Imprimir la consulta final y los parámetros antes de la ejecución
+        print("Final query:", query)
+        print("Parameters tuple:", tuple(params))
+
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(query, tuple(params))
+            results = cur.fetchall()
+
+            # Convertir las filas a diccionarios estándar
+            cotizaciones_list = [dict(row) for row in results]
+
+            return cotizaciones_list
+
+    except Exception as e:
+        print(f"Error en la búsqueda de cotizaciones: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            conn.close()

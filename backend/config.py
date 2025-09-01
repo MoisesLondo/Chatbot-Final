@@ -52,13 +52,29 @@ No agregues explicaciones, JSON ni tool. Este marcador será interpretado por el
 
 
 
+
+
 **NOTA IMPORTANTE:** Cuando recibas un mensaje que comience con `[FORMULARIO-ENVIADO]` seguido de un objeto JSON como este:
 
 ```
-'[FORMULARIO-ENVIADO]{{\n  "nombre": "dadad",\n  "cedula": "dadad",\n  "direccion": "dadad",\n  "email": "dadad",\n  "telefono": "adad",\n  "productosHtml": "<ul class=\\"...tailwind classes...\\">\\n  <li>PLETINA 2 1/2\\"X1/4\\"X6MTS (Cantidad: 6)</li>\\n</ul>\\n```"\n}}'
+'[FORMULARIO-ENVIADO]{{\n  "nombre": "dadad",\n  "cedula": "dadad",\n  "direccion": "dadad",\n  "email": "dadad",\n  "telefono": "adad",\n  "productosHtml": "<ul class=\\"...tailwind classes...\\">\\n  <li>PLETINA 2 1/2\\"X1/4\\"X6MTS (Cantidad: 6)</li>\\n</ul>\\n```"\n  "vendedor": {{"nombre": "Juan Pérez", "id": "user-123"}} \n}}'
 ```
 
-debes extraer los datos del JSON (nombre, cedula, direccion, email, telefono, productosHtml) y usarlos para invocar la herramienta `CotizacionProducto` y así generar la cotización formal en PDF. No pidas confirmación adicional ni repreguntes por los datos, simplemente procesa la cotización.
+Si el usuario es admin o vendedor, el JSON debe incluir el campo "vendedor" como un objeto con "nombre" e "id". Ejemplo:
+
+```
+{{
+  "nombre": "dadad",
+  "cedula": "dadad",
+  "direccion": "dadad",
+  "email": "dadad",
+  "telefono": "adad",
+  "productosHtml": "<ul class=...>",
+  "vendedor": {{"nombre": "Juan Pérez", "id": "user-123"}}
+}}
+```
+
+debes extraer los datos del JSON (nombre, cedula, direccion, email, telefono, productosHtml) y usarlos para invocar la herramienta `CotizacionProducto` y así generar la cotización formal en PDF. Si el usuario que envía el formulario es admin o vendedor, también debes extraer y enviar la data del vendedor (por ejemplo, un objeto con 'nombre' e 'id') al invocar la herramienta, para que la cotización refleje quién la generó. No pidas confirmación adicional ni repreguntes por los datos, simplemente procesa la cotización.
 
 **IMPORTANTE:** Nunca muestres al usuario el JSON, diccionario o datos de entrada/salida de la herramienta `CotizacionProducto`. Solo responde con el enlace al PDF generado (por ejemplo: `http://localhost:8000/static/temp/xxxx.pdf`) o un mensaje de éxito. Nunca muestres el JSON ni ningún detalle técnico al usuario final.
 

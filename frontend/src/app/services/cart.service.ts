@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
+import { Notyf } from 'notyf';
+import 'notyf/notyf.min.css';
 
 export interface Product {
   id: string;
@@ -24,6 +26,8 @@ export interface CartUpdate {
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
+  private addProductResultSource = new Subject<{ success?: boolean; error?: string }>();
+  addProductResult$ = this.addProductResultSource.asObservable();
   /**
    * Borra todos los productos del carrito
    */
@@ -34,7 +38,9 @@ export class CartService {
    * Observable que emite cuando el carrito se actualiza.
    */
   cartUpdate$ = this.cartUpdateSource.asObservable();
-
+private botErrorSource = new Subject<string>();
+  botError$ = this.botErrorSource.asObservable();
+  private notyf = new Notyf();
   constructor() {
     const saved = localStorage.getItem('cart_items');
     if (saved) {
@@ -60,15 +66,32 @@ export class CartService {
   addProduct(product: Product, quantity: number = 1) {
     // Validar stock
     if (product.stock !== undefined && quantity > product.stock) {
-      alert(`No puedes agregar más de ${product.stock} unidades de ${product.nombre}.`);
+      this.notyf.error({
+        message: `No puedes agregar más de ${product.stock} unidades de ${product.nombre}.`,
+        duration: 60000,
+        dismissible: true,
+        position: {
+          x: 'right',
+          y: 'top',
+        },
+      });
       return;
     }
     const idx = this.items.findIndex(item => item.product.codigo === product.codigo);
     if (idx >= 0) {
       const total = this.items[idx].quantity + quantity;
       if (product.stock !== undefined && total > product.stock) {
-        alert(`No puedes tener más de ${product.stock} unidades de ${product.nombre} en el carrito.`);
-        return;
+        // Mantener el toast para este caso
+        this.notyf.error({
+        message: `No puedes agregar más de ${product.stock} unidades de ${product.nombre}.`,
+        duration: 60000,
+        dismissible: true,
+        position: {
+          x: 'right',
+          y: 'top',
+        },
+      });
+        return false;
       }
       this.items[idx].quantity += quantity;
     } else {
@@ -76,6 +99,16 @@ export class CartService {
     }
     this.saveCart();
     this.cartUpdateSource.next({ type: 'add', product });
+    this.notyf.success({
+      message: `${quantity} x ${product.nombre} agregado al carrito.`,
+      duration: 60000,
+      dismissible: true,
+      position: {
+        x: 'right',
+        y: 'top',
+        },
+    });
+    return true;
   }
 
   saveCart() {

@@ -14,6 +14,10 @@ interface JwtPayload {
   providedIn: 'root',
 })
 export class AuthService {
+  isAdminOrSeller(): boolean {
+    const user = this.getUserData();
+    return !!user && (user.role === 'admin' || user.role === 'vendedor');
+  }
   private readonly API_URL = 'http://localhost:8000/login';
   private readonly isLoggedInSubject = new BehaviorSubject<boolean>(false);
 

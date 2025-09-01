@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 import { CartService } from '../../services/cart.service';
 import { ProductModalComponent } from '../product-modal/product-modal.component';
 import { Subscription } from 'rxjs';
+import { AuthService } from '../../services/auth.service';
 
  
 interface Message {
@@ -36,6 +37,10 @@ import { CartComponent } from '../cart/cart.component';
   styleUrls: ['./chat.component.css'],
 })
 export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, OnDestroy {
+  onAdminAction() {
+    // Aquí va la lógica especial para admin/vendedor
+    alert('Función especial solo para admin/vendedor');
+  }
   private shouldScrollToBottom = false;
   @ViewChild(CartComponent) cartComponent!: CartComponent;
   showCart = false;
@@ -43,15 +48,21 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
   cartItemCount = 0;
   animateCartIcon = false;
   private cartUpdateSubscription: Subscription = new Subscription();
+  private botErrorSubscription: Subscription = new Subscription();
   constructor(
     private chat: ChatService,
     private cartService: CartService,
     private cdr: ChangeDetectorRef,
-    private router: Router
+    private router: Router,
+    private auth: AuthService
   ) {
     this.sessionId = sessionStorage.getItem('session_id') ?? crypto.randomUUID();
     sessionStorage.setItem('session_id', this.sessionId);
     console.log('Session ID:', this.sessionId);
+  }
+
+  isAdminOrSeller(): boolean {
+    return this.auth.isAdminOrSeller();
   }
 
   goHome() {
@@ -149,8 +160,19 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
     if (data && typeof data === 'object' && 'isTrusted' in data) {
       return;
     }
-  
-    const mensaje: string = `[FORMULARIO-ENVIADO]${JSON.stringify({ ...data, productosHtml: this.productosHtml }, null, 2)}`;
+    // Obtener datos de vendedor si aplica
+    let vendedor = null;
+    if (this.isAdminOrSeller()) {
+      const user = this.auth.getUserData();
+      if (user) {
+        vendedor = { nombre: user.sub, id: user.user_id };
+      }
+    }
+    const payload = { ...data, productosHtml: this.productosHtml };
+    if (vendedor) {
+      payload.vendedor = vendedor;
+    }
+    const mensaje: string = `[FORMULARIO-ENVIADO]${JSON.stringify(payload, null, 2)}`;
     this.addMessage(mensaje);
     this.closeCotizacionModal(false);
   }
@@ -222,7 +244,7 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
           // Detectar [AGREGAR_CARRITO] y extraer productos
           if (safeResponse.includes('[AGREGAR_CARRITO]')) {
             this.cartService.processAgregarCarritoMessage(safeResponse);
-            this.messages.push(this.buildMsg('¡Listo! Los productos han sido agregados a tu carrito. Puedes revisarlos y cotizar cuando lo desees. 🛒', 'bot'));
+            this.messages.push(this.buildMsg('Agregando los productos a tu carrito. Te notificaremos si se agregaron correctamente o si hubo algún problema.', 'bot'));
           } else if (safeResponse.includes('[ELIMINAR_DEL_CARRITO]')) {
             // Espera formato: [ELIMINAR_DEL_CARRITO]CODIGO_PRODUCTO
             const match = safeResponse.match(/\[ELIMINAR_DEL_CARRITO\](\S+)/);
@@ -298,7 +320,7 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
     }
     // Mostrar mensaje amigable si el bot envía [AGREGAR_CARRITO]
     if (sender === 'bot' && e.content.includes('[AGREGAR_CARRITO]')) {
-      return this.buildMsg('¡Listo! Los productos han sido agregados a tu carrito. Puedes revisarlos y cotizar cuando lo desees. 🛒', 'bot');
+      return this.buildMsg('Agregando los productos a tu carrito. Te notificaremos si se agregaron correctamente o si hubo algún problema.', 'bot');
     }
     return this.buildMsg(e.content, sender, sender === 'bot');
   };
@@ -348,6 +370,9 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
   ngOnDestroy(): void {
     if (this.cartUpdateSubscription) {
       this.cartUpdateSubscription.unsubscribe();
+    }
+    if (this.botErrorSubscription) {
+      this.botErrorSubscription.unsubscribe();
     }
   }
 

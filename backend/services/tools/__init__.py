@@ -29,6 +29,6 @@ tools = [
             - prodName: Nombre del producto (string)
             - qty: Cantidad del producto (entero)
             - uPrice: Precio unitario del producto (número flotante, obtenido usando InventarioBusqueda)
-        El agente debe extraer estos datos, mapearlos correctamente y pasarlos como argumentos separados. Nunca muestres el JSON ni los datos internos al usuario, solo responde con el enlace al PDF generado o un mensaje de éxito. Solo invoca esta herramienta cuando todos los datos estén completos y confirmados."""
+        Si el usuario que cotiza es admin o vendedor, también debes enviar el campo 'vendedor' como dict con 'nombre' e 'id', para que la cotización refleje quién la generó. El agente debe extraer estos datos, mapearlos correctamente y pasarlos como argumentos separados. Nunca muestres el JSON ni los datos internos al usuario, solo responde con el enlace al PDF generado o un mensaje de éxito. Solo invoca esta herramienta cuando todos los datos estén completos y confirmados."""
     )
 ]

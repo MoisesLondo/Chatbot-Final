@@ -42,7 +42,13 @@ def armar_modelo_cotizacion(datos: dict) -> Cotizacion:
         print(f"Error al obtener o crear el cliente: {e}")
         raise
 
-    # Crear el modelo Cotizacion
+    # Determinar el creador de la cotización
+    created_by = "chatbot"
+    created_by_vendedor_id = None
+    if "vendedor" in datos and datos["vendedor"]:
+        created_by = datos["vendedor"].get("nombre", "vendedor")
+        created_by_vendedor_id = datos["vendedor"].get("id")
+
     cotizacion = Cotizacion(
         cliente_id=cliente_id,
         nombre_cliente=datos["cxName"],
@@ -52,7 +58,8 @@ def armar_modelo_cotizacion(datos: dict) -> Cotizacion:
         iva=iva,
         total=total,
         detalles=detalles,
-        created_by="chatbot",  # O "vendedor" si aplica
+        created_by=created_by,
+        created_by_vendedor_id=created_by_vendedor_id,
         cliente_email=datos.get("email"),
         cliente_telefono=datos.get("tel")
     )
@@ -88,7 +95,8 @@ def generar_cotizacion_pdf(
     cxAddress: str,
     email: str,
     tel: str,
-    products: List[ProductoCotizacion]
+    products: List[ProductoCotizacion],
+    vendedor: dict = None
 ) -> str:
     """
     Guarda la cotización en la base de datos, llena la plantilla de cotización con los datos y devuelve la ruta del PDF generado.
@@ -104,6 +112,8 @@ def generar_cotizacion_pdf(
             "tel": tel,
             "products": productos_dict
         }
+        if vendedor:
+            datos["vendedor"] = vendedor
         cotizacion = armar_modelo_cotizacion(datos)
 
         # Guardar cotización en la base de datos

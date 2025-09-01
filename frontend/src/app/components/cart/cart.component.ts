@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CartService, CartItem } from '../../services/cart.service';
@@ -11,6 +11,7 @@ import { CartService, CartItem } from '../../services/cart.service';
   styleUrls: ['./cart.component.css']
 })
 export class CartComponent {
+  @Output() cotizarEvent = new EventEmitter<void>();
   updateQuantity(codigo: string, newQuantity: number) {
     if (newQuantity < 1) return;
     const item = this.items.find(i => i.product.codigo === codigo);
@@ -29,6 +30,7 @@ export class CartComponent {
   cotizarRequested = false;
   cotizar() {
     this.cotizarRequested = true;
+    this.cotizarEvent.emit();
   }
   removeItem(codigo: string) {
     this.cartService.removeProduct(codigo);

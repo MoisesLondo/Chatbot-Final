@@ -444,7 +444,7 @@
                   <td>{{ cot.cedula_rif }}</td>
                   <td>{{ cot.cliente_email }}</td>
                   <td>{{ cot.cliente_telefono }}</td>
-                  <td>{{ cot.fecha_creacion | date:'short' }}</td>
+                  <td>{{ cot.created_at | date:'short' }}</td>
                   <td class="text-right font-medium">{{ cot.total | currency:'USD':'symbol':'1.2-2' }}</td>
                   <td>
                     <div class="flex space-x-2">

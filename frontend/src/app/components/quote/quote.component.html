@@ -72,7 +72,7 @@
         </div>
 
         <!-- Advanced Search -->
-        <div *ngIf="searchType() === 'criteria'">
+        <div (keyup.enter)="searchByCriteria()" *ngIf="searchType() === 'criteria'" >
           <h2 class="card-title font-montserrat text-xl text-gray-900 mb-4">
             <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
@@ -414,7 +414,7 @@
     </div>
 
     <!-- Multiple Quotes Results (when searching by criteria or status) -->
-    <div *ngIf="cotizacionesList().length > 0 && (searchType() === 'criteria' || searchType() === 'status')">
+    <div *ngIf="cotizacionesList().length > 0 && searchType() === 'criteria' && !isLoading()">
       <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
           <div class="flex justify-between items-center mb-4">

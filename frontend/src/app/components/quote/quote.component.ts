@@ -126,6 +126,7 @@ fetchCotizacion() {
 
   // New multiple criteria search
   searchByCriteria() {
+    this.isLoading.set(true);
     if (!this.hasSearchCriteria()) return;
 
     // Build query parameters
@@ -163,11 +164,13 @@ fetchCotizacion() {
       next: (cotizaciones) => {
         this.cotizacionesList.set(cotizaciones);
         this.hasSearched.set(true);
+        this.isLoading.set(false);
       },
       error: (err) => {
         console.error('Error searching cotizaciones:', err);
         this.cotizacionesList.set([]);
         this.hasSearched.set(true);
+        this.isLoading.set(false);
         
         // Mock data for development
         this.loadMockSearchResults();

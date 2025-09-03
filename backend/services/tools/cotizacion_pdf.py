@@ -2,12 +2,15 @@
 from docxtpl import DocxTemplate
 import os
 from services.cotizacion_bd import guardar_cotizacion, obtener_o_crear_cliente  # Asegúrate de tener esta función implementada
-from models.cotizacion import Cliente, Cotizacion, DetalleCotizacion
+from models.cotizacion import Cliente, CotizacionCreate, DetalleCotizacionCreate
 from typing import Any
 import pythoncom
 from docx2pdf import convert
+from services.db_queries import get_vendedor_profile_by_id
+from services.db import get_connection_login
+from fastapi import HTTPException
 
-def armar_modelo_cotizacion(datos: dict) -> Cotizacion:
+def armar_modelo_cotizacion(datos: dict) -> CotizacionCreate:
     # Calcular totales
     subtotal = sum(prod["qty"] * prod["uPrice"] for prod in datos["products"])
     iva = round(subtotal * 0.16, 2)
@@ -15,7 +18,7 @@ def armar_modelo_cotizacion(datos: dict) -> Cotizacion:
 
     # Transformar productos al modelo DetalleCotizacion
     detalles = [
-        DetalleCotizacion(
+        DetalleCotizacionCreate(
             codigo_producto=prod["pCod"],
             nombre_producto=prod["prodName"],
             cantidad=prod["qty"],
@@ -45,11 +48,11 @@ def armar_modelo_cotizacion(datos: dict) -> Cotizacion:
     # Determinar el creador de la cotización
     created_by = "chatbot"
     created_by_vendedor_id = None
-    if "vendedor" in datos and datos["vendedor"]:
-        created_by = datos["vendedor"].get("nombre", "vendedor")
-        created_by_vendedor_id = datos["vendedor"].get("id")
+    if "vendedorId" in datos and datos["vendedorId"]:
+        created_by = "vendedor"
+        created_by_vendedor_id = datos["vendedorId"]
 
-    cotizacion = Cotizacion(
+    cotizacion = CotizacionCreate(
         cliente_id=cliente_id,
         nombre_cliente=datos["cxName"],
         cedula_rif=datos["cxId"],
@@ -59,9 +62,9 @@ def armar_modelo_cotizacion(datos: dict) -> Cotizacion:
         total=total,
         detalles=detalles,
         created_by=created_by,
-        created_by_vendedor_id=created_by_vendedor_id,
         cliente_email=datos.get("email"),
-        cliente_telefono=datos.get("tel")
+        cliente_telefono=datos.get("tel"),
+        created_by_vendedor_id=created_by_vendedor_id
     )
 
     return cotizacion
@@ -96,7 +99,7 @@ def generar_cotizacion_pdf(
     email: str,
     tel: str,
     products: List[ProductoCotizacion],
-    vendedor: dict = None
+    vendedorId: str
 ) -> str:
     """
     Guarda la cotización en la base de datos, llena la plantilla de cotización con los datos y devuelve la ruta del PDF generado.
@@ -110,11 +113,14 @@ def generar_cotizacion_pdf(
             "cxAddress": cxAddress,
             "email": email,
             "tel": tel,
-            "products": productos_dict
+            "products": productos_dict,
         }
-        if vendedor:
-            datos["vendedor"] = vendedor
+        if vendedorId:
+            datos["vendedorId"] = vendedorId
         cotizacion = armar_modelo_cotizacion(datos)
+        vendedor_id = cotizacion.created_by_vendedor_id            
+        vendedor = fetch_seller_name(vendedor_id)
+        print(f"Vendedor obtenido: {vendedor['full_name']}")
 
         # Guardar cotización en la base de datos
         cotizacion_id = guardar_cotizacion(cotizacion)
@@ -149,7 +155,8 @@ def generar_cotizacion_pdf(
             "products": productos,
             "sumAll": f"{cotizacion.subtotal:.2f}",
             "iva": f"{cotizacion.iva:.2f}",
-            "total": f"{cotizacion.total:.2f}"
+            "total": f"{cotizacion.total:.2f}",
+            "sellerName": vendedor['full_name'],
         }
 
         # Renderizar y guardar DOCX temporal
@@ -165,7 +172,6 @@ def generar_cotizacion_pdf(
         # Convertir a PDF (requiere docx2pdf y MS Word en Windows)
         try:
             pythoncom.CoInitialize()
-            
             convert(temp_docx, temp_pdf)
             return f"http://localhost:8000/static/temp/{temp_id}.pdf"
         except Exception as e:
@@ -176,7 +182,7 @@ def generar_cotizacion_pdf(
         print(f"Error al guardar la cotización o generar el PDF: {e}")
         raise
 
-def generar_ruta_docx(cotizacion: Cotizacion) -> str:
+def generar_ruta_docx(cotizacion: CotizacionCreate) -> str:
     """
     Genera un archivo DOCX para una cotización existente y devuelve la ruta del archivo.
     Si el archivo ya existe, simplemente devuelve la ruta.
@@ -219,7 +225,8 @@ def generar_ruta_docx(cotizacion: Cotizacion) -> str:
             "products": productos,
             "sumAll": f"{cotizacion.subtotal:.2f}",
             "iva": f"{cotizacion.iva:.2f}",
-            "total": f"{cotizacion.total:.2f}"
+            "total": f"{cotizacion.total:.2f}",
+            "sellerName": cotizacion.created_by,
         }
 
         # Renderizar y guardar DOCX
@@ -233,7 +240,7 @@ def generar_ruta_docx(cotizacion: Cotizacion) -> str:
         raise
 
 
-def generar_ruta_pdf(cotizacion: Cotizacion) -> str:
+def generar_ruta_pdf(cotizacion: CotizacionCreate) -> str:
     """
     Genera un archivo PDF para una cotización existente y devuelve la ruta del archivo.
     Si el archivo ya existe, simplemente devuelve la ruta.
@@ -261,3 +268,16 @@ def generar_ruta_pdf(cotizacion: Cotizacion) -> str:
     except Exception as e:
         print(f"Error al generar el archivo PDF: {e}")
         raise
+
+def fetch_seller_name(vendedor_id: str):
+    try:
+        conn = get_connection_login()
+        try:
+            vendedor = get_vendedor_profile_by_id(vendedor_id, conn)
+            if not vendedor:
+                raise HTTPException(status_code=404, detail="Vendedor no encontrado")
+            return vendedor
+        finally:
+            conn.close()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

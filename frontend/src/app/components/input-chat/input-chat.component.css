@@ -1,0 +1,43 @@
+.chat-textarea {
+  width: 100%;
+  border: none;
+  outline: none;
+  resize: none; /* Deshabilitamos el redimensionado manual */
+  background-color: transparent; /* El fondo lo da el wrapper */
+  font-size: 16px;
+  line-height: 1.5;
+  max-height: 200px; /* Altura máxima antes de que aparezca el scroll */
+  overflow-y: auto; /* Scroll vertical cuando se supera max-height */
+  color: #000000;
+  padding: 6px 0;
+  box-sizing: border-box;
+}
+:host {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.chat-bar-container {
+  /* El contenedor principal rojo que pediste */ /* Tono de rojo similar al de tu imagen */
+  padding: 12px;
+  border-radius: 28px; /* Bordes más redondeados estilo Gemini */
+  display: flex;
+  align-items: flex-end; /* Alinea los botones abajo cuando el textarea crece */
+  gap: 12px;
+  width: 100%;
+  max-width: 800px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+}
+
+.chat-input-wrapper {
+  /* Contenedor del textarea para darle el fondo blanco y padding */
+  flex-grow: 1; /* Ocupa todo el espacio disponible */
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 6px 15px;
+  display: flex;
+  align-items: center;
+  min-width: 0; /* Soluciona problemas de flexbox en algunos navegadores */
+}

@@ -1,16 +1,18 @@
-<div class="flex items-center justify-center w-full gap-2 flex-wrap md:flex-nowrap">
-  <div class="relative w-full max-w-full sm:max-w-md md:max-w-xl h-[45px] flex-1">
+<div class="chat-bar-container">
+
+  <div class="chat-input-wrapper">
     <textarea
-      placeholder="Escribe tu mensaje..."
-      class="px-3 py-2 pr-10 rounded-xl border focus:border-blue-400 focus:ring-1 focus:ring-blue-100 focus:outline-none transition-all duration-200 bg-white shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-primary-content resize-none h-full max-h-[40px] text-base w-full min-w-0"
-      style="box-sizing: border-box;"
-      [(ngModel)]="message"
-      (keydown)="handleKeyDown($event); autoGrow($event)"
-      [disabled]="disabled"
-      rows="2"
       #chatInput
+      class="chat-textarea"
+      placeholder="Escribe tu mensaje..."
+      rows="1"
+      [(ngModel)]="message"
+      (input)="autoGrow()"
+      (keydown)="handleKeyDown($event)"
+      [disabled]="disabled"
     ></textarea>
   </div>
+
   <button
     class="w-10 h-10 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-r from-secondary to-blue-900 hover:from-blue-700 hover:to-secondary disabled:from-gray-300 disabled:to-gray-400 text-white rounded-full flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg disabled:shadow-sm disabled:cursor-not-allowed transform hover:scale-105 disabled:scale-100"
     (click)="handleSend()"
@@ -18,6 +20,7 @@
   >
     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
   </button>
+  
   <button
     class="w-10 h-10 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-r from-primary to-blue-500 hover:from-blue-700 hover:to-primary text-white rounded-full flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg ml-0 md:ml-1"
     (click)="resetChatHistory()"

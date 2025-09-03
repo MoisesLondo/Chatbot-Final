@@ -1,7 +1,8 @@
 from datetime import datetime
-from models.cotizacion import Cotizacion, DetalleCotizacion, Cliente
+from models.cotizacion import Cotizacion, DetalleCotizacion, Cliente, CotizacionCreate
 from services.db import get_connection
 import traceback
+
 
 def obtener_o_crear_cliente(cliente: Cliente) -> int:
     """
@@ -59,12 +60,25 @@ def obtener_o_crear_cliente(cliente: Cliente) -> int:
     finally:
         conn.close()
 
-def guardar_cotizacion(cotizacion: Cotizacion):
+def guardar_cotizacion(cotizacion: CotizacionCreate):
     try:
         conn = get_connection()
         if not conn:
             raise Exception("Error al conectar a la base de datos")
         with conn.cursor() as cur:
+            # Log de los datos antes de guardar
+            print("Datos a guardar en cotizacion:")
+            print("cliente_id:", cotizacion.cliente_id)
+            print("nombre_cliente:", cotizacion.nombre_cliente)
+            print("cedula_rif:", cotizacion.cedula_rif)
+            print("direccion:", cotizacion.direccion)
+            print("subtotal:", cotizacion.subtotal)
+            print("iva:", cotizacion.iva)
+            print("total:", cotizacion.total)
+            print("created_by:", cotizacion.created_by)
+            print("created_by_vendedor_id:", cotizacion.created_by_vendedor_id)
+            print("cliente_email:", cotizacion.cliente_email)
+            print("cliente_telefono:", cotizacion.cliente_telefono)
             # Insertar cotización
             cur.execute("""
                 INSERT INTO cotizacion (

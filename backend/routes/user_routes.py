@@ -227,4 +227,3 @@ def update_user(user_id: str, data: UserUpdate):
             }
     finally:
         conn.close()
-

@@ -13,3 +13,6 @@ Content-Type: application/json
 {
   "session_id": "b96c8d11-ffb3-47a0-9346-f79257f64844"
 }
+
+### obtener info del vendedor
+GET http://127.0.0.1:8000/vendedores_profile/785840b0-7d4e-45de-abb1-d6265b30bab8

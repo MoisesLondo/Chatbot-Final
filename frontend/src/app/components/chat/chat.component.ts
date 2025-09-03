@@ -165,7 +165,7 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
     if (this.isAdminOrSeller()) {
       const user = this.auth.getUserData();
       if (user) {
-        vendedor = { nombre: user.sub, id: user.user_id };
+        vendedor = { id: user.user_id };
       }
     }
     const payload = { ...data, productosHtml: this.productosHtml };
@@ -190,7 +190,17 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
       this.cartService.clearCart();
     }
   }
-  // ...existing code...
+  enviarCotizacion() {
+    // Suponiendo que aquí se arma el payload para la cotización
+    const productosCotizar = this.cartService.getCart().map(item => ({
+      qty: item.quantity,
+      uPrice: item.product.precio, // Asegúrate de usar 'precio' del producto
+      pCod: item.product.codigo,
+      prodName: item.product.nombre
+    }));
+    console.log('Productos enviados a cotización:', productosCotizar);
+    // ...aquí sigue el envío al backend...
+  }
 
   ngAfterViewChecked(): void {
     if (this.shouldScrollToBottom) {

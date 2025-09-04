@@ -20,12 +20,12 @@
         <div class="tabs tabs-boxed mb-6">
           <a class="tab font-noto-sans" 
              [class.tab-active]="searchType() === 'id'"
-             (click)="setSearchType('id')">
+             (click)="setSearchType('id'); clearResults()">
             Buscar por ID
           </a>
           <a class="tab font-noto-sans" 
              [class.tab-active]="searchType() === 'criteria'"
-             (click)="setSearchType('criteria')">
+             (click)="setSearchType('criteria'); clearSearchCriteria() ">
             Búsqueda Avanzada
           </a>
           <!-- <a class="tab font-noto-sans" 

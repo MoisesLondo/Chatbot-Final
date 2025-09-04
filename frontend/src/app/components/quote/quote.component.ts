@@ -71,15 +71,18 @@ protected readonly isLoading = signal(false);
   // Set search type and clear previous results
   setSearchType(type: 'id' | 'criteria' | 'status') {
     this.searchType.set(type);
-    this.clearResults();
   }
 
+  onTabChange(type: 'id' | 'criteria' | 'status') {
+  this.clearResults();
+  this.setSearchType(type);
+}
   // Clear all results
   clearResults() {
     this.cotizacion.set(null);
     this.detalles.set([]);
     this.cotizacionesList.set([]);
-    this.cotizacionId.set('');
+    // this.cotizacionId.set('');
     this.hasSearched.set(false);
   }
 
@@ -109,10 +112,6 @@ fetchCotizacion() {
       this.http.get(`http://127.0.0.1:8000/cotizacion/${id}/pdf`).subscribe({
         next: () => console.log('PDF generado correctamente.'),
         error: (err) => console.error('Error generando PDF:', err)
-      });
-      this.http.get(`http://127.0.0.1:8000/cotizacion/${id}/docx`).subscribe({
-        next: () => console.log('DOCX generado correctamente.'),
-        error: (err) => console.error('Error generando DOCX:', err)
       });
     },
     
@@ -173,53 +172,9 @@ fetchCotizacion() {
         this.cotizacionesList.set([]);
         this.hasSearched.set(true);
         this.isLoading.set(false);
-        
-        // Mock data for development
-        this.loadMockSearchResults();
       },
     });
   }
-
-  // Load mock data for development
-  private loadMockSearchResults() {
-    const mockResults = [
-      {
-        id: 'COT-2024-001',
-        nombre_cliente: 'Juan Pérez',
-        cedula_rif: 'V-12345678',
-        cliente_email: 'juan@email.com',
-        cliente_telefono: '+58 414 123-4567',
-        fecha_creacion: '2024-01-15T10:30:00Z',
-        estado: 'en_espera',
-        total: 15000.00
-      },
-      {
-        id: 'COT-2024-002',
-        nombre_cliente: 'María González',
-        cedula_rif: 'V-87654321',
-        cliente_email: 'maria@email.com',
-        cliente_telefono: '+58 424 987-6543',
-        fecha_creacion: '2024-01-16T14:20:00Z',
-        estado: 'convertido',
-        total: 8500.00
-      },
-      {
-        id: 'COT-2024-003',
-        nombre_cliente: 'Carlos Rodríguez',
-        cedula_rif: 'J-40123456-7',
-        cliente_email: 'carlos@empresa.com',
-        cliente_telefono: '+58 212 555-0123',
-        fecha_creacion: '2024-01-17T09:15:00Z',
-        estado: 'perdido',
-        total: 25000.00
-      }
-    ];
-    
-    this.cotizacionesList.set(mockResults);
-    this.hasSearched.set(true);
-  }
-
-  
 
   // Check if any search criteria is filled
   hasSearchCriteria(): boolean {
@@ -254,9 +209,9 @@ fetchCotizacion() {
 
   // View quote details from search results
   viewQuoteDetails(quoteId: string) {
-    this.cotizacionId.set(quoteId);
-    this.setSearchType('id');
-    this.fetchCotizacion();
+  this.setSearchType('id');
+  this.cotizacionId.set(quoteId);
+  this.fetchCotizacion();
   }
 
   // Download functions for search results

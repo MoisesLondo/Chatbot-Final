@@ -92,28 +92,30 @@ fetchCotizacion() {
   this.http.get<{ cotizacion: any; detalles: any[] }>(`http://127.0.0.1:8000/cotizacion/${id}`).subscribe({
     next: (response) => {
       if (response.cotizacion) {
+        // console.log('Cotización data:', response.cotizacion);
         // Asegurarse de que los datos necesarios existan
         this.cotizacion.set({
           ...response.cotizacion,
           fecha_creacion: response.cotizacion.created_at || null,
         });
 
-        this.http.get(`http://127.0.0.1:8000/cotizacion/${id}/pdf`).subscribe({
-          next: () => console.log('PDF generation triggered successfully.'),
-          error: (err) => console.error('Error triggering PDF generation:', err)
-        });
-
-        this.http.get(`http://127.0.0.1:8000/cotizacion/${id}/docx`).subscribe({
-          next: () => console.log('DOCX generation triggered successfully.'),
-          error: (err) => console.error('Error triggering DOCX generation:', err)
-        });
       } else {
         this.cotizacion.set(null);
       }
       this.detalles.set(response.detalles || []);
       this.hasSearched.set(true);
       this.isLoading.set(false);
+
+      this.http.get(`http://127.0.0.1:8000/cotizacion/${id}/pdf`).subscribe({
+        next: () => console.log('PDF generado correctamente.'),
+        error: (err) => console.error('Error generando PDF:', err)
+      });
+      this.http.get(`http://127.0.0.1:8000/cotizacion/${id}/docx`).subscribe({
+        next: () => console.log('DOCX generado correctamente.'),
+        error: (err) => console.error('Error generando DOCX:', err)
+      });
     },
+    
     error: (err) => {
       console.error('Error fetching cotización:', err);
       this.cotizacion.set(null);
@@ -259,10 +261,16 @@ fetchCotizacion() {
 
   // Download functions for search results
   downloadQuotePDF(quoteId: string) {
-    window.open(`http://127.0.0.1:8000/cotizacion/${quoteId}/pdf`, '_blank');
+    this.http.get(`http://127.0.0.1:8000/cotizacion/${quoteId}/pdf`).subscribe({
+          next: () => console.log('PDF generation triggered successfully.'),
+          error: (err) => console.error('Error triggering PDF generation:', err)
+        });
   }
 
   downloadQuoteDOCX(quoteId: string) {
-    window.open(`http://127.0.0.1:8000/cotizacion/${quoteId}/docx`, '_blank');
+    this.http.get(`http://127.0.0.1:8000/cotizacion/${quoteId}/docx`).subscribe({
+          next: () => console.log('DOCX generation triggered successfully.'),
+          error: (err) => console.error('Error triggering DOCX generation:', err)
+        });
   }
 }

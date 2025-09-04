@@ -249,17 +249,21 @@ def generar_ruta_pdf(cotizacion: CotizacionCreate) -> str:
         temp_dir = "static/temp"
         os.makedirs(temp_dir, exist_ok=True)
         temp_pdf = os.path.join(temp_dir, f"{cotizacion.id}.pdf")
-
         # Verificar si el archivo ya existe
         if os.path.exists(temp_pdf):
             return f"http://localhost:8000/static/temp/{cotizacion.id}.pdf"
 
         # Generar el archivo DOCX primero
-        temp_docx = generar_ruta_docx(cotizacion).replace("http://localhost:8000", "")
+        temp_docx_url = generar_ruta_docx(cotizacion)
+        temp_docx = temp_docx_url.replace("http://localhost:8000", os.getcwd().replace("\\", "/"))
+        temp_docx = temp_docx.replace("/", os.sep)
 
         # Convertir a PDF (requiere docx2pdf y MS Word en Windows)
+        
         try:
+            pythoncom.CoInitialize()
             convert(temp_docx, temp_pdf)
+            pythoncom.CoUninitialize()
             return f"http://localhost:8000/static/temp/{cotizacion.id}.pdf"
         except Exception as e:
             print(f"Error al convertir a PDF: {e}")

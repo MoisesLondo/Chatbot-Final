@@ -28,7 +28,13 @@ def obtener_cotizacion(cotizacion_id: int):
     try:
         with conn.cursor() as cur:
             # Ejecutar consulta para obtener la cotización
-            cur.execute("SELECT * FROM cotizacion WHERE id = %s", (str(cotizacion_id),))
+            cur.execute("""SELECT 
+    c.*, 
+    v.full_name AS vendedor_full_name
+FROM cotizacion c
+LEFT JOIN vendedores_profile v
+    ON c.created_by_vendedor_id = v.id
+WHERE c.id = %s;""", (str(cotizacion_id),))
             cotizacion = cur.fetchone()
 
             # Verificar si existe la cotización

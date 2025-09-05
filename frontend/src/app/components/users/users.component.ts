@@ -332,30 +332,6 @@ closeUserModal(userForm?: any): void {
     }
   }
 
-  private simulateUserUpdate(): void {
-    const users = this.users();
-    const index = users.findIndex(u => u.id === this.currentUser.id);
-    if (index !== -1) {
-      users[index] = { ...this.currentUser };
-      this.users.set([...users]);
-    }
-    this.closeUserModal();
-    this.isLoading.set(false);
-  }
-
-  private simulateUserCreation(): void {
-    const newUser: AuthUser = {
-      ...this.currentUser,
-      id: `550e8400-e29b-41d4-a716-${Date.now()}`,
-      created_at: new Date().toISOString(),
-    };
-    delete newUser.password; // Remove password from stored user
-    
-    this.users.set([...this.users(), newUser]);
-    this.closeUserModal();
-    this.isLoading.set(false);
-  }
-
 toggleUserStatus(user: AuthUser): void {
   this.loadingStatusMap[user.id] = true; // empezar loader
   

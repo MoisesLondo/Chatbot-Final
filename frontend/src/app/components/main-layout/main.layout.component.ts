@@ -44,7 +44,7 @@ export class MainLayoutComponent {
   ngOnInit(): void {
     const user = this.authService.getUserData();
     if (user) {
-      this.userName = user.sub.charAt(0).toUpperCase() + user.sub.slice(1);   
+      this.userName = user.sub;  
       this.userRole = user.role;  
     } else {
       this.router.navigate(['/login']);

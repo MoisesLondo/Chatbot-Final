@@ -30,7 +30,13 @@ export class CotizacionModalComponent {
   email = '';
   telefono = '';
   codigoTelefono = '0424';
-  
+  cedulaError: string | null = null;
+  nombreError: string | null = null;
+  apellidoError: string | null = null;
+  telefonoError: string | null = null;
+  emailError: string | null = null;
+  calleError: string | null = null;
+  direccionError: string | null = null;
 
   ngOnInit() {
     // Load all states on init
@@ -48,7 +54,68 @@ export class CotizacionModalComponent {
     }
     this.ciudad = '';
   }
+  validateCedula() {
+    const cedulaRegex = /^[VEve]-\d{6,8}$/;
+    const rifRegex = /^[VEJPGvejpgc]-\d{8}-\d{1}$/;
+    if (!this.cedula || !this.tipoDocumento) {
+      this.cedulaError = 'Este campo es obligatorio.';
+      return;
+    }
+    if (this.tipoDocumento === 'V' || this.tipoDocumento === 'E') {
+      if (!cedulaRegex.test(`${this.tipoDocumento}-${this.cedula}`)) {
+        this.cedulaError = 'Formato de cédula inválido. Ejemplo: V-12345678';
+        return;
+      }
+    } else if (this.tipoDocumento === 'J') {
+      if (!rifRegex.test(`${this.tipoDocumento}-${this.cedula}`)) {
+        this.cedulaError = 'Formato de RIF inválido. Ejemplo: J-12345678-9';
+        return;
+      }
+    }
+    this.cedulaError = null;
+  }
+  validateNombre() {
+    this.nombreError = !this.nombre ? 'Este campo es obligatorio.' : null;
+  }
+  validateApellido() {
+    this.apellidoError = !this.apellido ? 'Este campo es obligatorio.' : null;
+  }
+  validateTelefono() {
+    this.telefonoError = !this.telefono || !/^\d{7}$/.test(this.telefono) ? 'Teléfono inválido. Ejemplo: 1234567' : null;
+  }
+  validateEmail() {
+    this.emailError = !this.email || !/^\S+@\S+\.\S+$/.test(this.email) ? 'Correo inválido.' : null;
+  }
+  validateCalle() {
+    this.calleError = !this.calle ? 'Este campo es obligatorio.' : null;
+  }
+  validateDireccion() {
+    this.direccionError = !this.calle ? 'Este campo es obligatorio.' : null;
+  }
+
+  validateAll() {
+    this.validateNombre();
+    this.validateApellido();
+    this.validateCedula();
+    this.validateTelefono();
+    this.validateEmail();
+    this.validateCalle();
+    this.validateDireccion();
+  }
+
   onSubmit() {
+    this.validateAll();
+    if (
+      this.nombreError ||
+      this.apellidoError ||
+      this.cedulaError ||
+      this.telefonoError ||
+      this.emailError ||
+      this.calleError ||
+      this.direccionError
+    ) {
+      return;
+    }
     // Concatenar la dirección modular
     const direccion = `${this.calle}, ${this.urbanizacion}, ${this.ciudad}, ${this.estado}`;
     const telefonoCompleto = `${this.codigoTelefono}-${this.telefono}`;
@@ -59,5 +126,18 @@ export class CotizacionModalComponent {
       email: this.email,
       telefono: telefonoCompleto,
     });
+  }
+
+  getCedulaPlaceholder(): string {
+    switch (this.tipoDocumento) {
+      case 'V':
+        return 'V-12345678';
+      case 'E':
+        return 'E-12345678';
+      case 'J':
+        return 'J-12345678-9';
+      default:
+        return 'Documento';
+    }
   }
 }

@@ -8,11 +8,13 @@
         <div class="flex gap-3 mb-3">
           <div class="w-1/2">
             <label class="block text-gray-700 font-semibold mb-1">Nombre</label>
-            <input [(ngModel)]="nombre" name="nombre" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" placeholder="Ej: Andrés" />
+            <input [(ngModel)]="nombre" name="nombre" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" placeholder="Andrés" (blur)="validateNombre()" [ngClass]="{'border-red-500': nombreError}" />
+            <span *ngIf="nombreError" class="text-red-600 text-xs mt-1 block">{{ nombreError }}</span>
           </div>
           <div class="w-1/2">
             <label class="block text-gray-700 font-semibold mb-1">Apellido</label>
-            <input [(ngModel)]="apellido" name="apellido" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" placeholder="Ej: Pérez" />
+            <input [(ngModel)]="apellido" name="apellido" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" placeholder="Pérez" (blur)="validateApellido()" [ngClass]="{'border-red-500': apellidoError}" />
+            <span *ngIf="apellidoError" class="text-red-600 text-xs mt-1 block">{{ apellidoError }}</span>
           </div>
         </div>
         <div class="flex gap-3 mb-3">
@@ -24,8 +26,9 @@
                 <option value="E">E</option>
                 <option value="J">J</option>
               </select>
-              <input [(ngModel)]="cedula" name="cedula" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400 ml-2" placeholder="Ej: 29750712" />
+              <input [(ngModel)]="cedula" name="cedula" required [ngClass]="{'border-red-500': cedulaError}" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400 ml-2" [placeholder]="getCedulaPlaceholder()" (blur)="validateCedula()" />
             </div>
+            <span *ngIf="cedulaError" class="text-red-600 text-xs mt-1 block">{{ cedulaError }}</span>
           </div>
           <div class="w-1/2">
             <label class="block text-gray-700 font-semibold mb-1">Número de teléfono</label>
@@ -37,13 +40,15 @@
                 <option value="0416">0416</option>
                 <option value="0426">0426</option>
               </select>
-              <input [(ngModel)]="telefono" name="telefono" required pattern="[0-9]{7}" maxlength="7" minlength="7" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400 ml-2" placeholder="Ej: 1234567" />
+              <input [(ngModel)]="telefono" name="telefono" required pattern="[0-9]{7}" maxlength="7" minlength="7" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400 ml-2" placeholder="1234567" (blur)="validateTelefono()" [ngClass]="{'border-red-500': telefonoError}" />
             </div>
+            <span *ngIf="telefonoError" class="text-red-600 text-xs mt-1 block">{{ telefonoError }}</span>
           </div>
         </div>
         <div class="mb-3">
           <label class="block text-gray-700 font-semibold mb-1">Correo electrónico</label>
-          <input [(ngModel)]="email" name="email" type="email" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" placeholder="Ej: correo@dominio.com" />
+          <input [(ngModel)]="email" name="email" type="email" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" placeholder="correo@dominio.com" (blur)="validateEmail()" [ngClass]="{'border-red-500': emailError}" />
+          <span *ngIf="emailError" class="text-red-600 text-xs mt-1 block">{{ emailError }}</span>
         </div>
         <div class="flex justify-end mt-6 gap-2">
           <button type="button" (click)="close.emit()" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700">Cancelar</button>
@@ -55,7 +60,8 @@
       <div *ngIf="step === 2">
         <div class="mb-3">
           <label class="block text-gray-700 font-semibold mb-1">Calle / Avenida</label>
-          <input [(ngModel)]="calle" name="calle" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" placeholder="Ej: Av. Bolívar" />
+          <input [(ngModel)]="calle" name="calle" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" placeholder="Av. Bolívar" (blur)="validateDireccion()" [ngClass]="{'border-red-500': direccionError}" />
+          <span *ngIf="direccionError" class="text-red-600 text-xs mt-1 block">{{ direccionError }}</span>
         </div>
         <div class="mb-3">
           <label class="block text-gray-700 font-semibold mb-1">Urbanización / Sector</label>

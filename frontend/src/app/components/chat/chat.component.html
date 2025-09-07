@@ -86,7 +86,8 @@
                         <span *ngIf="msg.text.includes('/static/temp/')">
                           <a [href]="getStaticTempUrl(msg.text)" target="_blank">Descargar cotización</a>
                         </span>
-                        <span *ngIf="!msg.text.includes('/static/temp/')" [innerHTML]="msg.text"></span>
+                        <!-- Solo muestra el <p> si hay lista de productos, oculta el array JSON -->
+                        <span *ngIf="!msg.text.includes('/static/temp/') && extractVisualList(msg.text).items.length === 0" [innerHTML]="msg.text"></span>
                       </ng-container>
                     </div>
                     

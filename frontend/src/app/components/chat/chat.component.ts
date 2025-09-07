@@ -88,25 +88,33 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
   // Extrae el primer array JSON de productos de cualquier string
   extractVisualList(text: string): { items: any[], type: 'productos' | 'categorias' | null } {
     if (!text) return { items: [], type: null };
-    const match = text.match(/\[\s*{[\s\S]*?}\s*\]/);
-    if (match) {
-      try {
-        const arr = JSON.parse(match[0]);
-        if (Array.isArray(arr) && arr.length > 0) {
-          if (arr[0].nombre && arr[0].precio !== undefined) {
-            return { items: arr, type: 'productos' };
-          } else if (arr[0].nombre && arr[0].precio === undefined) {
-            return { items: arr, type: 'categorias' };
+    // Busca todos los arrays JSON en el texto
+    const matches = text.match(/\[\s*{[\s\S]*?}\s*\]/g);
+    if (matches && matches.length > 0) {
+      // Toma el último array JSON válido
+      for (let i = matches.length - 1; i >= 0; i--) {
+        try {
+          const arr = JSON.parse(matches[i]);
+          if (Array.isArray(arr) && arr.length > 0) {
+            if (arr[0].nombre && (arr[0].precio !== undefined || arr[0].stock !== undefined)) {
+              return { items: arr, type: 'productos' };
+            } else if (arr[0].nombre && arr[0].precio === undefined && arr[0].stock === undefined) {
+              return { items: arr, type: 'categorias' };
+            }
           }
-        }
-      } catch {}
+        } catch {}
+      }
     }
     return { items: [], type: null };
   }
   // Extrae el <p> final de un mensaje del bot si existe
+  // Extrae el último <p> de un mensaje del bot si existen varios
   extractTrailingP(text: string): string | null {
-    const pMatch = text.match(/<p>[\s\S]*?<\/p>\s*$/);
-    return pMatch ? pMatch[0] : null;
+    const pMatches = text.match(/<p>[\s\S]*?<\/p>/g);
+    if (pMatches && pMatches.length > 0) {
+      return pMatches[pMatches.length - 1];
+    }
+    return null;
   }
   @ViewChild('chatContainer') private chatContainer!: ElementRef;
   isLoadingBotResponse: boolean = false;

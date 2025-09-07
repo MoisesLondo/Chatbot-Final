@@ -36,23 +36,23 @@ def search(query: str, top_k: int = 10, mas_baratos: bool = False, mas_caros: bo
     query_words = [w for w in query_norm.split() if w not in stopwords]
 
     categorias_conocidas = [
-        "laminas galvanizadas",
+        "láminas galvanizadas",
         "tubo redondo ventilacion",
         "pletinas",
         "rieles perfiles y rejillas",
-        "alambron",
+        "alambrón",
         "cerchas",
-        "angulos",
+        "ángulos",
         "barras",
         "barras estriadas",
         "tubos hierro pulido",
         "mallas",
-        "laminas hierro negro",
+        "láminas hierro negro",
         "vigas",
         "tubos hierro negro",
         "base para anclaje",
-        "laminas para techo",
-        "laminas hierro pulido"
+        "láminas para techo",
+        "láminas hierro pulido"
     ]
 
     # Buscar coincidencias exactas y parciales en categorías conocidas

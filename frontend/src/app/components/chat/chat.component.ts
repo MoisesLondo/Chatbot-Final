@@ -79,11 +79,12 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
     this.cartService.addProduct(event.producto, event.cantidad);
     // Opcional: mostrar notificación/feedback
     console.log(`${event.cantidad} de ${event.producto.nombre} agregado(s) al carrito.`);
-    
     // Actualizar la vista del carrito si está abierta
     if (this.showCart && this.cartComponent) {
       this.cartComponent.items = this.cartService.getCart();
-  this.cartComponent.total = this.cartComponent.items.reduce((acc, item) => acc + item.product.precio * item.quantity, 0);
+      if (typeof this.cartComponent.calcularTotales === 'function') {
+        this.cartComponent.calcularTotales();
+      }
     }
   }
   // Extrae el primer array JSON de productos de cualquier string
@@ -169,6 +170,7 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
       }
     }
     const payload = { ...data, productosHtml: this.productosHtml };
+    console.log(payload)
     if (vendedor) {
       payload.vendedor = vendedor;
     }
@@ -274,7 +276,9 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
                 cartProducts.map((item: any) => {
                   const nombre = item.product?.nombre || '';
                   const cantidad = item.quantity || 1;
-                  return `<li>${nombre} (Cantidad: ${cantidad})</li>`;
+                  const codigo = item.product?.codigo || '';
+                  const precio = item.product?.precio || 0;
+                  return `<li>${nombre} (Cantidad: ${cantidad}, Código: ${codigo}, uPrice: ${precio})</li>`;
                 }).join('') + `</ul>`;
             }
             this.messages.push(this.buildMsg('Por favor, completa el formulario de cotización.', 'bot'));

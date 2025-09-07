@@ -216,7 +216,7 @@ export class CotizacionModalComponent {
       return;
     }
     // Concatenar la dirección modular
-    const direccion = `${this.calle}, ${this.urbanizacion}, ${this.municipio}, ${this.estado}`;
+    const direccion = `${this.calle}, ${this.urbanizacion}, ${this.municipio}, ${this.parroquia}, ${this.estado}`;
     const telefonoCompleto = `${this.codigoTelefono}-${this.telefono}`;
     this.submit.emit({
       nombre: `${this.nombre} ${this.apellido}`,

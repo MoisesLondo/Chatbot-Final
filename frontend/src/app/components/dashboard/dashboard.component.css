@@ -33,3 +33,14 @@ main {
 .sidebar .btn-link:hover {
   text-decoration: underline;
 }
+
+canvas {
+  width: 100% !important;
+  max-width: 100%;
+  height: 300px !important; /* Puedes ajustar entre 250-400px según te guste */
+  max-height: 400px;
+}
+
+.card-body {
+  overflow-x: auto;
+}

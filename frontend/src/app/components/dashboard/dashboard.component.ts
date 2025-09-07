@@ -1,11 +1,12 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterModule, RouterLink } from '@angular/router';
-import { OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ChangeDetectionStrategy, Component, OnInit, ChangeDetectorRef, AfterViewInit } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectorRef } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Chart, registerables } from 'chart.js';
+
+Chart.register(...registerables);
 
 interface Lead {
   id: number;
@@ -20,28 +21,35 @@ interface Stats {
   totalQuotes: number;
   most_active_seller: string;
   most_quoted_product: string;
+  avgTicket?: number;
+  totalClients?: number;
 }
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterModule, CommonModule],
+  imports: [RouterModule, CommonModule, FormsModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DashboardComponent implements OnInit{
-  
+export class DashboardComponent implements OnInit, AfterViewInit {
+
   userName: string = '';
   userRole: string = '';
+  selectedPeriod: string = 'month'; // default para admin
 
   leads: Lead[] = [];
   stats: Stats = {
     totalLeads: 0,
     totalQuotes: 0,
     most_active_seller: '',
-    most_quoted_product: ''
+    most_quoted_product: '',
+    avgTicket: 0,
+    totalClients: 0
   };
+
+  private charts: Chart[] = [];
 
   constructor(
     private router: Router,
@@ -53,16 +61,20 @@ export class DashboardComponent implements OnInit{
   ngOnInit(): void {
     const user = this.authService.getUserData();
     if (user) {
-      this.userName = user.sub;   
-      this.userRole = user.role;  
+      this.userName = user.sub;
+      this.userRole = user.role;
     } else {
       this.router.navigate(['/login']);
-    
     }
 
     this.loadStats();
     this.loadLeads();
+  }
 
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      this.initCharts();
+    }, 300);
   }
 
   loadStats(): void {
@@ -72,6 +84,8 @@ export class DashboardComponent implements OnInit{
         this.stats.totalQuotes = data.totalQuotes;
         this.stats.most_active_seller = data.mostActiveSeller;
         this.stats.most_quoted_product = data.mostQuotedProduct;
+        this.stats.avgTicket = data.avgTicket || 0;
+        this.stats.totalClients = data.totalClients || 0;
         this.cdr.markForCheck();
         console.log('Estadísticas cargadas:', this.stats);
       },
@@ -100,22 +114,104 @@ export class DashboardComponent implements OnInit{
     });
   }
 
+  // Inicializa todos los gráficos del dashboard
+  initCharts(): void {
+    this.destroyCharts();
+
+    if (this.userRole === 'admin') {
+      this.createChart('quotesBySellerChart', 'bar', {
+        labels: ['Juan', 'Ana', 'Pedro'],
+        datasets: [{
+          label: 'Cotizaciones',
+          data: [12, 19, 8]
+        }],
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
+
+      this.createChart('topProductsChart', 'pie', {
+        labels: ['Varilla', 'Cemento', 'Lámina'],
+        datasets: [{
+          data: [30, 50, 20]
+        }],
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
+
+      this.createChart('quotesOverTimeChart', 'line', {
+        labels: ['Ene', 'Feb', 'Mar', 'Abr'],
+        datasets: [{
+          label: 'Cotizaciones',
+          data: [10, 15, 20, 18]
+        }],
+        options: {
+          responsive: true,
+          maintainAspectRatio: false  
+        }
+      });
+
+      this.createChart('channelComparisonChart', 'doughnut', {
+        labels: ['Chatbot', 'Vendedores'],
+        datasets: [{
+          data: [45, 55]
+        }],
+        options: {
+          responsive: true,
+          maintainAspectRatio: false  
+        }
+      });
+
+    } else if (this.userRole === 'vendedor') {
+      this.createChart('sellerQuotesOverTimeChart', 'line', {
+        labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
+        datasets: [{
+          label: 'Tus Cotizaciones',
+          data: [3, 6, 4, 8]
+        }]
+      });
+
+      this.createChart('sellerTopProductsChart', 'bar', {
+        labels: ['Varilla', 'Tubo', 'Perfil'],
+        datasets: [{
+          label: 'Productos Cotizados',
+          data: [5, 2, 7]
+        }]
+      });
+    }
+  }
+
+  private createChart(elementId: string, type: any, data: any): void {
+    const ctx = document.getElementById(elementId) as HTMLCanvasElement;
+    if (!ctx) return;
+    const chart = new Chart(ctx, {
+      type,
+      data,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+    this.charts.push(chart);
+  }
+
+  private destroyCharts(): void {
+    this.charts.forEach(chart => chart.destroy());
+    this.charts = [];
+  }
+
   viewLead(leadId: number): void {
-    console.log('Ver lead:', leadId);
-    // Implementar navegación a vista de detalle del lead
     this.router.navigate(['/leads', leadId]);
   }
 
   editLead(leadId: number): void {
-    console.log('Editar lead:', leadId);
-    // Implementar navegación a formulario de edición del lead
     this.router.navigate(['/leads', leadId, 'edit']);
   }
 
   logout(): void {
-    console.log('Cerrando sesión...');
-    // Implementar lógica de logout
-    // Limpiar tokens, redirigir al login, etc.
     this.router.navigate(['/login']);
   }
 }

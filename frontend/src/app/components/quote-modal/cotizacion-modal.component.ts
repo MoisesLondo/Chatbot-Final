@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import venezuela from 'venezuela';
+import { estadosVenezuela } from '../../../types/venezuela';
 
 @Component({
   selector: 'app-cotizacion-modal',
@@ -11,14 +11,75 @@ import venezuela from 'venezuela';
   imports: [FormsModule, CommonModule]
 })
 export class CotizacionModalComponent {
+  estadoError: string | null = null;
+  municipioError: string | null = null;
+  parroquiaError: string | null = null;
+  validateEstado() {
+    this.estadoError = !this.estado ? 'Este campo es obligatorio.' : null;
+  }
+  validateMunicipio() {
+    this.municipioError = !this.municipio ? 'Este campo es obligatorio.' : null;
+  }
+  validateParroquia() {
+    this.parroquiaError = !this.parroquia ? 'Este campo es obligatorio.' : null;
+  }
+  urbanizacionError: string | null = null;
+  validateUrbanizacion() {
+    this.urbanizacionError = !this.urbanizacion ? 'Este campo es obligatorio.' : null;
+  }
+  nextStep1() {
+    this.validateNombre();
+    this.validateApellido();
+    this.validateCedula();
+    this.validateTelefono();
+    this.validateEmail();
+    if (!this.nombreError && !this.apellidoError && !this.cedulaError && !this.telefonoError && !this.emailError && this.nombre && this.apellido && this.cedula && this.email && this.telefono) {
+      this.step = 2;
+    }
+  }
+
+  nextStep2() {
+    this.validateCalle();
+    this.validateDireccion();
+    this.validateUrbanizacion();
+    this.validateEstado();
+    this.validateMunicipio();
+    this.validateParroquia();
+    if (!this.direccionError && !this.urbanizacionError && !this.estadoError && !this.municipioError && !this.parroquiaError && this.calle && this.urbanizacion && this.municipio && this.estado && this.parroquia) {
+      this.step = 3;
+    }
+  }
+  onCedulaKeyPress(event: KeyboardEvent) {
+    const key = event.key;
+    if (this.tipoDocumento === 'J') {
+      // Permitir números y guion
+      if (!(/[0-9\-]/.test(key))) {
+        event.preventDefault();
+      }
+    } else {
+      // Solo números
+      if (key < '0' || key > '9') {
+        event.preventDefault();
+      }
+    }
+  }
+
+  onTelefonoKeyPress(event: KeyboardEvent) {
+    const key = event.key;
+    if (key < '0' || key > '9') {
+      event.preventDefault();
+    }
+  }
   step = 1;
   calle = '';
   urbanizacion = '';
-  ciudad = '';
+  municipio = '';
+  parroquia = '';
   estado = '';
   apellido = '';
   estados: string[] = [];
-  ciudades: string[] = [];
+  municipios: string[] = [];
+  parroquias: string[] = [];
   @Input() show = false;
   @Input() productosHtml: string = '';
   @Output() close = new EventEmitter<void>();
@@ -38,22 +99,54 @@ export class CotizacionModalComponent {
   calleError: string | null = null;
   direccionError: string | null = null;
 
+    onCedulaInput(event: Event) {
+      const input = event.target as HTMLInputElement;
+      const maxLen = this.tipoDocumento === 'J' ? 10 : 8;
+      let value = input.value;
+      if (this.tipoDocumento === 'J') {
+        value = value.replace(/[^0-9\-]/g, '');
+      } else {
+        value = value.replace(/[^0-9]/g, '');
+      }
+      if (value.length > maxLen) value = value.slice(0, maxLen);
+      this.cedula = value;
+    }
+
+    onTelefonoInput(event: Event) {
+      const input = event.target as HTMLInputElement;
+      let value = input.value.replace(/[^0-9]/g, '');
+      if (value.length > 7) value = value.slice(0, 7);
+      this.telefono = value;
+    }
+
   ngOnInit() {
     // Load all states on init
-    this.estados = venezuela.pais.map((e: any) => e.estado);
+    this.estados = estadosVenezuela[0].map((e: any) => e.estado);
     console.log(this.estados);
   }
 
   onEstadoChange() {
-    // Update cities when state changes
+    // Update municipios when estado changes
     if (this.estado) {
-      const edo = venezuela.pais.find((e: any) => e.estado === this.estado);
-      this.ciudades = edo ? edo.municipios.map((m: any) => m.capital) : [];
+      const edo = estadosVenezuela[0].find((e: any) => e.estado === this.estado);
+      this.municipios = edo ? edo.municipios.map((m: any) => m.municipio) : [];
     } else {
-      this.ciudades = [];
+      this.municipios = [];
     }
-    this.ciudad = '';
+    this.municipio = '';
   }
+  onMunicipioChange() {
+    // Update parroquias when municipio changes
+    if (this.municipio) {
+      const edo = estadosVenezuela[0].find((e: any) => e.estado === this.estado);
+      const mun = edo?.municipios.find((m: any) => m.municipio === this.municipio);
+      this.parroquias = mun ? mun.parroquias : [];
+    } else {
+      this.parroquias = [];
+    }
+    this.parroquia = '';
+  }
+
   validateCedula() {
     const cedulaRegex = /^[VEve]-\d{6,8}$/;
     const rifRegex = /^[VEJPGvejpgc]-\d{8}-\d{1}$/;
@@ -81,7 +174,13 @@ export class CotizacionModalComponent {
     this.apellidoError = !this.apellido ? 'Este campo es obligatorio.' : null;
   }
   validateTelefono() {
-    this.telefonoError = !this.telefono || !/^\d{7}$/.test(this.telefono) ? 'Teléfono inválido. Ejemplo: 1234567' : null;
+    if (!this.telefono) {
+      this.telefonoError = 'Este campo es obligatorio.';
+    } else if (!/^\d{7}$/.test(this.telefono)) {
+      this.telefonoError = 'Teléfono inválido. Ejemplo: 1234567';
+    } else {
+      this.telefonoError = null;
+    }
   }
   validateEmail() {
     this.emailError = !this.email || !/^\S+@\S+\.\S+$/.test(this.email) ? 'Correo inválido.' : null;
@@ -117,7 +216,7 @@ export class CotizacionModalComponent {
       return;
     }
     // Concatenar la dirección modular
-    const direccion = `${this.calle}, ${this.urbanizacion}, ${this.ciudad}, ${this.estado}`;
+    const direccion = `${this.calle}, ${this.urbanizacion}, ${this.municipio}, ${this.estado}`;
     const telefonoCompleto = `${this.codigoTelefono}-${this.telefono}`;
     this.submit.emit({
       nombre: `${this.nombre} ${this.apellido}`,
@@ -131,11 +230,11 @@ export class CotizacionModalComponent {
   getCedulaPlaceholder(): string {
     switch (this.tipoDocumento) {
       case 'V':
-        return 'V-12345678';
+        return '12345678';
       case 'E':
-        return 'E-12345678';
+        return '12345678';
       case 'J':
-        return 'J-12345678-9';
+        return '12345678-9';
       default:
         return 'Documento';
     }

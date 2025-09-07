@@ -544,7 +544,7 @@
           <div class="form-control" *ngIf="isEditMode()">
             <label class="label">
               <span class="label-text font-noto-sans font-medium text-gray-900">
-                Nueva Contraseña <span class="label-text font-noto-sans text-xs">Opcional, mínimo 10 caracteres</span>
+                Nueva Contraseña <span class="label-text font-noto-sans text-xs">Opcional, mínimo 5 caracteres</span>
               </span>
             </label>
             <input
@@ -553,7 +553,7 @@
               [(ngModel)]="currentUser.password"
               name="editPassword"
               placeholder="Nueva contraseña"
-              minlength="10"
+              minlength="5"
               maxlength="45"
               #editPassword="ngModel"
             />

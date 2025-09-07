@@ -1,3 +1,17 @@
+/* Centrado del modal de confirmación */
+.cart-delete-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(6px);
+}
 .cart-container {
   min-width: 18rem;
   max-width: 20rem;

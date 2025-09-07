@@ -23,7 +23,7 @@ export class CartComponent {
         item.quantity = newQuantity;
       }
       this.cartService.saveCart();
-      this.total = this.items.reduce((acc, i) => acc + i.product.precio * i.quantity, 0);
+      this.calcularTotales();
     }
   }
   // Evento para cotizar
@@ -32,21 +32,45 @@ export class CartComponent {
     this.cotizarRequested = true;
     this.cotizarEvent.emit();
   }
-  removeItem(codigo: string) {
-    this.cartService.removeProduct(codigo);
-    this.items = this.cartService.getCart();
-    this.total = this.items.reduce((acc, item) => acc + item.product.precio * item.quantity, 0);
+  showDeleteModal: boolean = false;
+  itemToDelete: CartItem | null = null;
+  iva: number = 0;
+totalConIva: number = 0;
+
+  openDeleteModal(item: CartItem) {
+    this.itemToDelete = item;
+    this.showDeleteModal = true;
+  }
+
+  closeDeleteModal() {
+    this.itemToDelete = null;
+    this.showDeleteModal = false;
+  }
+
+  confirmDelete() {
+    if (this.itemToDelete) {
+      this.cartService.removeProduct(this.itemToDelete.product.codigo);
+      this.items = this.cartService.getCart();
+      this.calcularTotales();
+      this.closeDeleteModal();
+    }
   }
   clearCart() {
     this.cartService.clearCart();
     this.items = [];
-    this.total = 0;
+    this.calcularTotales();
   }
   items: CartItem[] = [];
   total: number = 0;
 
   constructor(private cartService: CartService) {
     this.items = this.cartService.getCart();
+    this.calcularTotales();
+  }
+
+  calcularTotales() {
     this.total = this.items.reduce((acc, item) => acc + item.product.precio * item.quantity, 0);
+    this.iva = this.total * 0.16;
+    this.totalConIva = this.total + this.iva;
   }
 }

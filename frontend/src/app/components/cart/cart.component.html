@@ -26,15 +26,35 @@
         </div>
         <span class="text-sm text-green-600 font-bold whitespace-nowrap">${{ item.product.precio }} c/u</span>
         <span class="text-xs text-slate-700">Total: ${{ (item.product.precio * item.quantity) | number:'1.2-2' }}</span>
-        <button (click)="removeItem(item.product.codigo)" class="mt-2 px-2 py-1 text-xs bg-red-200 text-red-700 rounded hover:bg-red-300 transition-colors duration-150">Eliminar</button>
+  <button (click)="openDeleteModal(item)" class="mt-2 px-2 py-1 text-xs bg-red-200 text-red-700 rounded hover:bg-red-300 transition-colors duration-150">Eliminar</button>
+  <!-- Modal de confirmación de borrado -->
+  <div *ngIf="showDeleteModal" class="cart-delete-modal-backdrop">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-sm p-6 relative animate-fade-in">
+      <button type="button" (click)="closeDeleteModal()" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
+      <h2 class="text-xl font-bold mb-4 text-blue-700">Confirmar eliminación</h2>
+      <p class="text-slate-700 text-center mb-4">¿Seguro que deseas eliminar <span class="font-semibold text-red-700">{{ itemToDelete?.product?.nombre || 'este producto' }}</span> del carrito?</p>
+      <div class="flex gap-4 justify-center">
+        <button (click)="confirmDelete()" class="px-4 py-2 rounded-lg bg-red-200 text-red-700 font-semibold hover:bg-red-300 transition-colors">Eliminar</button>
+        <button (click)="closeDeleteModal()" class="px-4 py-2 rounded-lg bg-blue-100 text-blue-700 font-semibold hover:bg-blue-200 transition-colors">Cancelar</button>
+      </div>
+    </div>
+  </div>
       </div>
     </li>
   </ul>
 
   <div *ngIf="items.length > 0" class="flex flex-col gap-2 mt-auto flex-shrink-0">
     <div class="flex justify-between items-center text-lg font-bold text-blue-700">
-      <span>Total:</span>
+      <span>Total base:</span>
       <span>${{ total | number:'1.2-2' }}</span>
+    </div>
+    <div class="flex justify-between items-center text-lg font-bold text-blue-700">
+      <span>IVA (16%):</span>
+      <span>${{ iva | number:'1.2-2' }}</span>
+    </div>
+    <div class="flex justify-between items-center text-lg font-bold text-blue-700">
+      <span>Total con IVA:</span>
+      <span>${{ totalConIva | number:'1.2-2' }}</span>
     </div>
     <button (click)="cotizar()" class="btn btn-primary bg-primary w-full mt-2 text-base font-semibold py-2 rounded-lg shadow hover:bg-blue-800 transition-colors duration-150 text-white">
       Cotizar

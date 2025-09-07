@@ -1,3 +1,7 @@
+input::placeholder {
+  color: rgba(107, 114, 128, 0.7); /* gray-500 with 70% opacity */
+  font-style: italic;
+}
 .modal-enter { animation: fadeIn 0.2s; }
 @keyframes fadeIn {
   from { opacity: 0; }

@@ -99,6 +99,11 @@
                       [openProductModal]="openProductModal">
                     </app-product-list>
 
+                    <!-- Renderiza el <p> al final si existe y hay productos -->
+                    <div *ngIf="msg.sender === 'bot' && extractVisualList(msg.text).items.length > 0 && extractTrailingP(msg.text)" class="chat-bubble bg-white text-[#1F2937] font-medium px-6 py-4 rounded-2xl shadow-md mt-2" style="max-width:900px; min-width:48px; font-size:1rem;">
+                      <span [innerHTML]="extractTrailingP(msg.text)"></span>
+                    </div>
+
                   </div>
                 </ng-container>
               </ng-container>

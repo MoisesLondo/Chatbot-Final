@@ -58,7 +58,6 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
   ) {
     this.sessionId = sessionStorage.getItem('session_id') ?? crypto.randomUUID();
     sessionStorage.setItem('session_id', this.sessionId);
-    console.log('Session ID:', this.sessionId);
   }
 
   isAdminOrSeller(): boolean {
@@ -78,7 +77,6 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
   onAddToQuote(event: { producto: any, cantidad: number }) {
     this.cartService.addProduct(event.producto, event.cantidad);
     // Opcional: mostrar notificación/feedback
-    console.log(`${event.cantidad} de ${event.producto.nombre} agregado(s) al carrito.`);
     // Actualizar la vista del carrito si está abierta
     if (this.showCart && this.cartComponent) {
       this.cartComponent.items = this.cartService.getCart();
@@ -104,6 +102,11 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
       } catch {}
     }
     return { items: [], type: null };
+  }
+  // Extrae el <p> final de un mensaje del bot si existe
+  extractTrailingP(text: string): string | null {
+    const pMatch = text.match(/<p>[\s\S]*?<\/p>\s*$/);
+    return pMatch ? pMatch[0] : null;
   }
   @ViewChild('chatContainer') private chatContainer!: ElementRef;
   isLoadingBotResponse: boolean = false;
@@ -170,7 +173,6 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
       }
     }
     const payload = { ...data, productosHtml: this.productosHtml };
-    console.log(payload)
     if (vendedor) {
       payload.vendedor = vendedor;
     }
@@ -200,7 +202,6 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
       pCod: item.product.codigo,
       prodName: item.product.nombre
     }));
-    console.log('Productos enviados a cotización:', productosCotizar);
     // ...aquí sigue el envío al backend...
   }
 

@@ -42,7 +42,7 @@ private botErrorSource = new Subject<string>();
   botError$ = this.botErrorSource.asObservable();
   private notyf = new Notyf();
   constructor() {
-    const saved = localStorage.getItem('cart_items');
+    const saved = sessionStorage.getItem('cart_items');
     if (saved) {
       try {
         this.items = JSON.parse(saved);
@@ -112,7 +112,7 @@ private botErrorSource = new Subject<string>();
   }
 
   saveCart() {
-    localStorage.setItem('cart_items', JSON.stringify(this.items));
+    sessionStorage.setItem('cart_items', JSON.stringify(this.items));
   }
 
   removeProduct(codigo: string) {
@@ -142,8 +142,9 @@ private botErrorSource = new Subject<string>();
   }
 
   processAgregarCarritoMessage(message: string): void {
-    if (!message.startsWith('[AGREGAR_CARRITO]')) return;
+    if (!message.includes('[AGREGAR_CARRITO]')) return;
     const content = message.replace('[AGREGAR_CARRITO]', '').trim();
+    console.log('Contenido a procesar para agregar al carrito:', content);
 
     // Parsear productos
     const productos: CartItem[] = [];

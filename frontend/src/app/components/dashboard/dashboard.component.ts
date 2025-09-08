@@ -252,24 +252,19 @@ statsLoaded = signal(false);
       this.stats.totalClients = statsData.totalClients || 0;
       this.statsLoaded.set(true);
       this.stats.totalLeads = statsData.totalLeads;
-      // ... etc ...
-
-      // --- INICIO DE LA SOLUCIÓN ---
-      // Aquí está la clave. 'responses.leads' es la data cruda de la API.
       const leadsFromApi = responses.leads;
 
-      // Usamos .map() para transformar cada objeto de la API
-      // a la estructura que nuestra interfaz 'Lead' espera.
+      
       this.leads = leadsFromApi.map(apiLead => {
         return {
-          id: apiLead.id, // Asegúrate de que 'apiLead.id' exista en la respuesta
-          name: apiLead.name, // o si es 'apiLead.full_name', cámbialo aquí
+          id: apiLead.id, 
+          name: apiLead.name, 
           email: apiLead.email,
           phone: apiLead.phone,
-          date: new Date(apiLead.date) // Convertimos el string de fecha a un objeto Date
+          date: new Date(apiLead.date) 
         };
       });
-      // --- FIN DE LA SOLUCIÓN ---
+      
 
       console.log('Leads cargados y transformados:', this.leads);
     },

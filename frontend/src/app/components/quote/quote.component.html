@@ -86,14 +86,27 @@
               <label class="label">
                 <span class="label-text font-noto-sans text-gray-900 font-bold">Cédula/RIF Cliente:</span>
               </label>
-              <input
-                type="text"
-                class="input input-bordered font-noto-sans"
-                [(ngModel)]="searchCriteria.cedula_rif"
-                placeholder="V-12345678"
-                [ngClass]="{'border-red-500': cedulaRifError}"
-                (blur)="validateCedulaRif()"
-              />
+              <div class="flex gap-2">
+                <select [(ngModel)]="cedulaRifTipo" name="cedulaRifTipo" class="select select-bordered font-noto-sans w-20" (change)="onCedulaRifTipoChange()">
+                  <option value="V">V</option>
+                  <option value="J">J</option>
+                  <option value="E">E</option>
+                </select>
+                <input
+                  type="text"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  class="input input-bordered font-noto-sans flex-1"
+                  [(ngModel)]="cedulaRifNumero"
+                  name="cedulaRifNumero"
+                  [placeholder]="cedulaRifTipo === 'J' ? '297507121' : (cedulaRifTipo === 'V' ? '29750712' : '84750712')"
+                  maxlength="10"
+                  [ngClass]="{'border-red-500': cedulaRifError}"
+                  (input)="onCedulaRifInput($event)"
+                  (blur)="updateCedulaRif()"
+                  (keypress)="blockNonNumeric($event)"
+                />
+              </div>
               <span *ngIf="cedulaRifError" class="text-red-500 text-xs mt-1">{{ cedulaRifError }}</span>
             </div>
 
@@ -135,11 +148,17 @@
               </label>
               <div class="flex items-center gap-2">
                 <select [(ngModel)]="codigoTelefono" name="codigoTelefono" class="select select-bordered font-noto-sans w-20">
-                  <option value="0424">0424</option>
                   <option value="0412">0412</option>
                   <option value="0414">0414</option>
+                  <option value="0424">0424</option>
                   <option value="0416">0416</option>
                   <option value="0426">0426</option>
+                  <option value="0212">0212</option>
+                  <option value="0241">0241</option>
+                  <option value="0243">0243</option>
+                  <option value="0251">0251</option>
+                  <option value="0254">0254</option>
+                  <option value="0255">0255</option>
                 </select>
                 <input
                   type="tel"
@@ -149,7 +168,7 @@
                   pattern="[0-9]{7}"
                   maxlength="7"
                   minlength="7"
-                  placeholder="1234567"
+                  placeholder="4632499"
                   required
                   [ngClass]="{'border-red-500': telefonoError}"
                   (blur)="validateTelefono()"
@@ -181,14 +200,16 @@
                 <span class="label-text font-noto-sans text-gray-900 font-bold">Total Mínimo:</span>
               </label>
               <input
-                type="number"
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]*"
                 class="input input-bordered font-noto-sans"
                 [(ngModel)]="searchCriteria.total_min"
                 placeholder="1000"
-                min="0"
-                step="0.01"
                 [ngClass]="{'border-red-500': totalMinError}"
+                (input)="onTotalMinInput($event)"
                 (blur)="validateTotalMin()"
+                (keypress)="blockNonNumeric($event)"
               />
               <div *ngIf="totalMinError" class="block w-full">
                 <span class="text-red-500 text-xs mt-1 block">{{ totalMinError }}</span>
@@ -225,14 +246,16 @@
                 <span class="label-text font-noto-sans text-gray-900 font-bold">Total Máximo:</span>
               </label>
               <input
-                type="number"
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]*"
                 class="input input-bordered font-noto-sans"
                 [(ngModel)]="searchCriteria.total_max"
                 placeholder="10000"
-                min="0"
-                step="0.01"
                 [ngClass]="{'border-red-500': totalMaxError}"
+                (input)="onTotalMaxInput($event)"
                 (blur)="validateTotalMax()"
+                (keypress)="blockNonNumeric($event)"
               />
               <div *ngIf="totalMaxError" class="block w-full">
                 <span class="text-red-500 text-xs mt-1 block">{{ totalMaxError }}</span>

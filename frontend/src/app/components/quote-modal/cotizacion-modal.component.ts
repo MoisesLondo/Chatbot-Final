@@ -51,17 +51,10 @@ export class CotizacionModalComponent {
   }
   onCedulaKeyPress(event: KeyboardEvent) {
     const key = event.key;
-    if (this.tipoDocumento === 'J') {
-      // Permitir números y guion
-      if (!(/[0-9\-]/.test(key))) {
-        event.preventDefault();
-      }
-    } else {
       // Solo números
       if (key < '0' || key > '9') {
         event.preventDefault();
       }
-    }
   }
 
   onTelefonoKeyPress(event: KeyboardEvent) {
@@ -103,11 +96,7 @@ export class CotizacionModalComponent {
       const input = event.target as HTMLInputElement;
       const maxLen = this.tipoDocumento === 'J' ? 10 : 8;
       let value = input.value;
-      if (this.tipoDocumento === 'J') {
-        value = value.replace(/[^0-9\-]/g, '');
-      } else {
-        value = value.replace(/[^0-9]/g, '');
-      }
+      value = value.replace(/[^0-9]/g, '');
       if (value.length > maxLen) value = value.slice(0, maxLen);
       this.cedula = value;
     }
@@ -148,7 +137,7 @@ export class CotizacionModalComponent {
 
   validateCedula() {
     const cedulaRegex = /^[VEve]-\d{6,8}$/;
-    const rifRegex = /^[VEJPGvejpgc]-\d{8}-\d{1}$/;
+    const rifRegex = /^[VEJPGvejpgc]-\d{9}$/;
     if (!this.cedula || !this.tipoDocumento) {
       this.cedulaError = 'Este campo es obligatorio.';
       return;
@@ -160,7 +149,7 @@ export class CotizacionModalComponent {
       }
     } else if (this.tipoDocumento === 'J') {
       if (!rifRegex.test(`${this.tipoDocumento}-${this.cedula}`)) {
-        this.cedulaError = 'Formato de RIF inválido. Ejemplo: J-12345678-9';
+        this.cedulaError = 'Formato de RIF inválido. Ejemplo: J-123456789';
         return;
       }
     }
@@ -229,11 +218,11 @@ export class CotizacionModalComponent {
   getCedulaPlaceholder(): string {
     switch (this.tipoDocumento) {
       case 'V':
-        return '12345678';
+        return '22345678';
       case 'E':
-        return '12345678';
+        return '84222456';
       case 'J':
-        return '12345678-9';
+        return '223456789';
       default:
         return 'Documento';
     }

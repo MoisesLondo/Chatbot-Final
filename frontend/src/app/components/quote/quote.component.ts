@@ -32,15 +32,42 @@ interface StatusSearch {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class QuoteComponent {
+  // Solo permite números en Total Mínimo
+  onTotalMinInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input && input.value !== undefined) {
+      const value = input.value.replace(/[^0-9]/g, '');
+  this.searchCriteria.total_min = value ? Number(value) : null;
+    }
+  }
 
-protected readonly isLoading = signal(false);
+  // Solo permite números en Total Máximo
+  onTotalMaxInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input && input.value !== undefined) {
+      const value = input.value.replace(/[^0-9]/g, '');
+  this.searchCriteria.total_max = value ? Number(value) : null;
+    }
+  }
+  // Solo permite números en el input
+  onCedulaRifInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input && input.value !== undefined) {
+      const value = input.value.replace(/[^0-9]/g, '');
+      this.cedulaRifNumero = value;
+    }
+  }
 
-  // Existing signals for single quote search
+  // Cambia el placeholder dinámicamente y limpia el número
+  onCedulaRifTipoChange() {
+    this.cedulaRifNumero = '';
+    this.updateCedulaRif();
+  }
+
+  protected readonly isLoading = signal(false);
   protected readonly cotizacionId = signal('');
   protected readonly cotizacion = signal<any | null>(null);
   protected readonly detalles = signal<any[]>([]);
-
-  // New signals for multiple search functionality
   protected readonly searchType = signal<'id' | 'criteria' | 'status'>('id');
   protected readonly cotizacionesList = signal<any[]>([]);
   protected readonly hasSearched = signal(false);
@@ -72,6 +99,10 @@ protected readonly isLoading = signal(false);
   telefonoError: string = '';
   totalMinError: string = '';
   totalMaxError: string = '';
+
+  // Cedula/RIF select logic
+  cedulaRifTipo: string = 'V';
+  cedulaRifNumero: string = '';
 
   codigoTelefono: string = '0414';
   telefono: string = '';
@@ -239,21 +270,47 @@ fetchCotizacion() {
         });
   }
 
-  // Validate Cédula/RIF
-validateCedulaRif() {
-  const value = this.searchCriteria.cedula_rif?.trim();
-  if (!value) {
-    this.cedulaRifError = '';
-    return;
+  // Actualiza el modelo y valida Cédula/RIF
+  updateCedulaRif() {
+    const tipo = this.cedulaRifTipo;
+    const numero = this.cedulaRifNumero.trim();
+    if (!numero) {
+      this.searchCriteria.cedula_rif = '';
+      this.cedulaRifError = '';
+      return;
+    }
+    // Validación específica para cada tipo
+    let rifRegex;
+    let minDigits = 7;
+    if (tipo === 'J') {
+      rifRegex = /^J-\d{9,10}$/i;
+      minDigits = 9;
+    } else if (tipo === 'V') {
+      rifRegex = /^V-\d{7,8}$/i;
+      minDigits = 7;
+    } else if (tipo === 'E') {
+      rifRegex = /^E-\d{7,8}$/i;
+      minDigits = 7;
+    } else {
+      rifRegex = /^(V|E|J)-\d{6,10}$/i;
+      minDigits = 6;
+    }
+    const value = `${tipo}-${numero}`;
+    this.searchCriteria.cedula_rif = value;
+    if (!rifRegex.test(value) || numero.length < minDigits) {
+      if (tipo === 'J') {
+        this.cedulaRifError = 'El RIF debe tener al menos 9 dígitos. Ejemplo: J-297507121';
+      } else if (tipo === 'V') {
+        this.cedulaRifError = 'Formato inválido. Ejemplo: V-12345678';
+      } else if (tipo === 'E') {
+        this.cedulaRifError = 'Formato inválido. Ejemplo: E-12345678';
+      } else {
+        this.cedulaRifError = 'Formato inválido.';
+      }
+    } else {
+      this.cedulaRifError = '';
+    }
   }
-  // Venezuelan Cédula/RIF regex
-  const rifRegex = /^(V|E|J|G|P)-?\d{6,10}$/i;
-  if (!rifRegex.test(value)) {
-    this.cedulaRifError = 'Formato inválido. Ejemplo: V-12345678';
-  } else {
-    this.cedulaRifError = '';
-  }
-}
 
 // Validate Email
 validateEmail() {

@@ -296,13 +296,13 @@
   </div>
 
   <!-- Create/Edit User Modal -->
-  <div class="modal text-gray-900" [class.modal-open]="showUserModal()">
+  <div class="modal text-gray-900 modal-open" *ngIf="showUserModal()">
     <div class="modal-box w-11/12 max-w-2xl">
       <h3 class="font-montserrat font-bold text-lg mb-4">
         {{ isEditMode() ? 'Editar Usuario' : 'Crear Nuevo Usuario' }}
       </h3>
       
-      <form (ngSubmit)="saveUser()" #userForm="ngForm">
+      <form (ngSubmit)="saveUser()" #userForm="ngForm" [attr.key]="showUserModal() ? 'open' : 'closed'">
         <div class="grid md:grid-cols-2 gap-4">
           <!-- Username -->
           <div class="form-control">

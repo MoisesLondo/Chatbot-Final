@@ -190,14 +190,17 @@ export class UsersComponent {
     this.statusFilterSignal.set('');
   }
 
-  openCreateUserModal(): void {
-    this.currentUser = this.getEmptyUser();
-    this.confirmPassword = '';
-    this.codigoTelefono = '0424';
-    this.telefono = '';
-    this.isEditMode.set(false);
-    this.showUserModal.set(true);
-  }
+openCreateUserModal(): void {
+  this.currentUser = this.getEmptyUser();
+  this.confirmPassword = '';
+  this.codigoTelefono = '0424';
+  this.telefono = '';
+  this.isEditMode.set(false);
+  this.error.set(null);
+  this.isLoading.set(false);
+  this.showUserModal.set(true);
+  
+}
 
   editUser(user: AuthUser): void {
     this.currentUser = { 
@@ -229,18 +232,26 @@ export class UsersComponent {
   }
 
 closeUserModal(userForm?: any): void {
-  this.showUserModal.set(false);
+  this.error.set(null);
+  this.isLoading.set(false);
   this.currentUser = this.getEmptyUser();
   this.confirmPassword = '';
   this.codigoTelefono = '0424';
   this.telefono = '';
 
-  // Resetea el formulario y los errores
-  if (userForm) {
-    userForm.resetForm();
+  console.log('userForm at close:', userForm);
+  if (userForm && userForm.form) {
+    userForm.resetForm(this.getEmptyUser());
+    Object.values(userForm.controls).forEach(control => {
+      const formControl = control as import('@angular/forms').AbstractControl;
+      formControl.markAsPristine();
+      formControl.markAsUntouched();
+      formControl.setErrors(null); 
+    });
   }
-}
 
+  this.showUserModal.set(false);
+}
   viewUser(user: AuthUser): void {
     this.selectedUser.set(user);
     this.showViewModal.set(true);

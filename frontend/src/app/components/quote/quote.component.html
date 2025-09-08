@@ -18,12 +18,12 @@
       <div class="card-body">
         <!-- Search Type Tabs -->
         <div class="tabs tabs-boxed mb-6">
-          <a class="tab font-noto-sans" 
+          <a class="tab font-noto-sans text-gray-900 font-bold" 
              [class.tab-active]="searchType() === 'id'"
              (click)="setSearchType('id'); clearResults()">
             Buscar por ID
           </a>
-          <a class="tab font-noto-sans" 
+          <a class="tab font-noto-sans text-gray-900 font-bold" 
              [class.tab-active]="searchType() === 'criteria'"
              (click)="setSearchType('criteria'); clearSearchCriteria() ">
             Búsqueda Avanzada
@@ -84,20 +84,23 @@
             <!-- Cliente Identificación -->
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-noto-sans font-medium">Cédula/RIF Cliente:</span>
+                <span class="label-text font-noto-sans text-gray-900 font-bold">Cédula/RIF Cliente:</span>
               </label>
               <input
                 type="text"
                 class="input input-bordered font-noto-sans"
                 [(ngModel)]="searchCriteria.cedula_rif"
                 placeholder="V-12345678"
+                [ngClass]="{'border-red-500': cedulaRifError}"
+                (blur)="validateCedulaRif()"
               />
+              <span *ngIf="cedulaRifError" class="text-red-500 text-xs mt-1">{{ cedulaRifError }}</span>
             </div>
 
             <!-- Cliente Nombre -->
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-noto-sans font-medium">Nombre Cliente:</span>
+                <span class="label-text font-noto-sans text-gray-900 font-bold">Nombre Cliente:</span>
               </label>
               <input
                 type="text"
@@ -110,33 +113,59 @@
             <!-- Cliente Email -->
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-noto-sans font-medium">Email Cliente:</span>
+                <span class="label-text font-noto-sans text-gray-900 font-bold">Email Cliente:</span>
               </label>
               <input
                 type="email"
                 class="input input-bordered font-noto-sans"
                 [(ngModel)]="searchCriteria.cliente_email"
                 placeholder="cliente@email.com"
+                [ngClass]="{'border-red-500': emailError}"
+                (blur)="validateEmail()"
               />
+              <div *ngIf="emailError" class="block w-full">
+                <span class="text-red-500 text-xs mt-1 block">{{ emailError }}</span>
+              </div>
             </div>
 
             <!-- Cliente Teléfono -->
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-noto-sans font-medium">Teléfono Cliente:</span>
+                <span class="label-text font-noto-sans text-gray-900 font-bold">Teléfono Cliente:</span>
               </label>
-              <input
-                type="tel"
-                class="input input-bordered font-noto-sans"
-                [(ngModel)]="searchCriteria.cliente_telefono"
-                placeholder="+58 414 123-4567"
-              />
+              <div class="flex items-center gap-2">
+                <select [(ngModel)]="codigoTelefono" name="codigoTelefono" class="select select-bordered font-noto-sans w-20">
+                  <option value="0424">0424</option>
+                  <option value="0412">0412</option>
+                  <option value="0414">0414</option>
+                  <option value="0416">0416</option>
+                  <option value="0426">0426</option>
+                </select>
+                <input
+                  type="tel"
+                  class="input input-bordered font-noto-sans"
+                  [(ngModel)]="telefono"
+                  name="telefono"
+                  pattern="[0-9]{7}"
+                  maxlength="7"
+                  minlength="7"
+                  placeholder="1234567"
+                  required
+                  [ngClass]="{'border-red-500': telefonoError}"
+                  (blur)="validateTelefono()"
+                  inputmode="numeric"
+                  (keypress)="blockNonNumeric($event)"
+                />
+              </div>
+              <div *ngIf="telefonoError" class="block w-full">
+                <span class="text-red-500 text-xs mt-1 block">{{ telefonoError }}</span>
+              </div>
             </div>
 
             <!-- Producto -->
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-noto-sans font-medium">Producto:</span>
+                <span class="label-text font-noto-sans text-gray-900 font-bold">Producto:</span>
               </label>
               <input
                 type="text"
@@ -149,7 +178,7 @@
             <!-- Rango de Total -->
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-noto-sans font-medium">Total Mínimo:</span>
+                <span class="label-text font-noto-sans text-gray-900 font-bold">Total Mínimo:</span>
               </label>
               <input
                 type="number"
@@ -158,13 +187,18 @@
                 placeholder="1000"
                 min="0"
                 step="0.01"
+                [ngClass]="{'border-red-500': totalMinError}"
+                (blur)="validateTotalMin()"
               />
+              <div *ngIf="totalMinError" class="block w-full">
+                <span class="text-red-500 text-xs mt-1 block">{{ totalMinError }}</span>
+              </div>
             </div>
 
             <!-- Fecha Desde -->
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-noto-sans font-medium">Fecha Desde:</span>
+                <span class="label-text font-noto-sans text-gray-900 font-bold">Fecha Desde:</span>
               </label>
               <input
                 type="date"
@@ -176,7 +210,7 @@
             <!-- Fecha Hasta -->
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-noto-sans font-medium">Fecha Hasta:</span>
+                <span class="label-text font-noto-sans text-gray-900 font-bold">Fecha Hasta:</span>
               </label>
               <input
                 type="date"
@@ -188,7 +222,7 @@
             <!-- Total Máximo -->
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-noto-sans font-medium">Total Máximo:</span>
+                <span class="label-text font-noto-sans text-gray-900 font-bold">Total Máximo:</span>
               </label>
               <input
                 type="number"
@@ -197,7 +231,12 @@
                 placeholder="10000"
                 min="0"
                 step="0.01"
+                [ngClass]="{'border-red-500': totalMaxError}"
+                (blur)="validateTotalMax()"
               />
+              <div *ngIf="totalMaxError" class="block w-full">
+                <span class="text-red-500 text-xs mt-1 block">{{ totalMaxError }}</span>
+              </div>
             </div>
           </div>
 
@@ -214,7 +253,7 @@
             <button 
               class="btn btn-primary font-noto-sans"
               (click)="searchByCriteria()"
-              [disabled]="!hasSearchCriteria()"
+              [disabled]="!hasSearchCriteria() || hasFormErrors()"
             >
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>

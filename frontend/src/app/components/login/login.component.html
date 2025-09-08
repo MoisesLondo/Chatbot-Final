@@ -38,7 +38,10 @@
   </div>
 </dialog>
 
-    <button class="login-btn" type="submit">Entrar</button>
+    <button class="login-btn" type="submit" [disabled]="isLoadingFn()">
+      <span *ngIf="isLoadingFn()" class="loading loading-spinner loading-sm"></span>
+      Entrar
+    </button>
     
   </form>
   

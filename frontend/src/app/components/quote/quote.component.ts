@@ -66,6 +66,16 @@ protected readonly isLoading = signal(false);
     vendedor: ''
   };
 
+  // Validation error properties
+  cedulaRifError: string = '';
+  emailError: string = '';
+  telefonoError: string = '';
+  totalMinError: string = '';
+  totalMaxError: string = '';
+
+  codigoTelefono: string = '0414';
+  telefono: string = '';
+
   private readonly http = inject(HttpClient);
 
   // Set search type and clear previous results
@@ -228,4 +238,94 @@ fetchCotizacion() {
           error: (err) => console.error('Error triggering DOCX generation:', err)
         });
   }
+
+  // Validate Cédula/RIF
+validateCedulaRif() {
+  const value = this.searchCriteria.cedula_rif?.trim();
+  if (!value) {
+    this.cedulaRifError = '';
+    return;
+  }
+  // Venezuelan Cédula/RIF regex
+  const rifRegex = /^(V|E|J|G|P)-?\d{6,10}$/i;
+  if (!rifRegex.test(value)) {
+    this.cedulaRifError = 'Formato inválido. Ejemplo: V-12345678';
+  } else {
+    this.cedulaRifError = '';
+  }
+}
+
+// Validate Email
+validateEmail() {
+  const value = this.searchCriteria.cliente_email?.trim();
+  if (!value) {
+    this.emailError = '';
+    return;
+  }
+  const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+  if (!emailRegex.test(value)) {
+    this.emailError = 'Email inválido.';
+  } else {
+    this.emailError = '';
+  }
+}
+
+// Validate Teléfono
+validateTelefono() {
+  const value = this.telefono?.trim();
+  this.searchCriteria.cliente_telefono = value;
+  if (!value) {
+    this.telefonoError = '';
+    return;
+  }
+  if (!/^[0-9]{7}$/.test(value)) {
+    this.telefonoError = 'Debe contener exactamente 7 dígitos.';
+  } else {
+    this.telefonoError = '';
+  }
+}
+
+// Validate Total Min
+validateTotalMin() {
+  const value = this.searchCriteria.total_min;
+  if (value !== null && value < 0) {
+    this.totalMinError = 'Debe ser mayor o igual a 0.';
+  } else {
+    this.totalMinError = '';
+  }
+}
+
+// Validate Total Max
+validateTotalMax() {
+  const value = this.searchCriteria.total_max;
+  if (value !== null && value < 0) {
+    this.totalMaxError = 'Debe ser mayor o igual a 0.';
+  } else {
+    this.totalMaxError = '';
+  }
+}
+
+// Check if any form error exists
+hasFormErrors(): boolean {
+  return !!(
+    this.cedulaRifError ||
+    this.emailError ||
+    this.telefonoError ||
+    this.totalMinError ||
+    this.totalMaxError
+  );
+}
+
+// Prevent non-numeric input in phone field
+blockNonNumeric(event: KeyboardEvent) {
+  const charCode = event.key.charCodeAt(0);
+  // Only allow numbers (0-9)
+  if (charCode < 48 || charCode > 57) {
+    event.preventDefault();
+  }
+}
+ngOnInit(): void {
+  // Sync telefono with searchCriteria.cliente_telefono on init
+  this.telefono = this.searchCriteria.cliente_telefono || '';
+}
 }

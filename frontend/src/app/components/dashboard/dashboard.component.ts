@@ -1,10 +1,13 @@
-import { ChangeDetectionStrategy, Component, OnInit, ChangeDetectorRef, AfterViewInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, ChangeDetectorRef, AfterViewInit, signal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Chart, registerables } from 'chart.js';
+import { forkJoin } from 'rxjs';
+import { finalize } from 'rxjs/operators';
+import { LoadingService } from '../../services/loading.service';
 
 Chart.register(...registerables);
 
@@ -17,12 +20,12 @@ interface Lead {
 }
 
 interface Stats {
-  totalLeads: number;
-  totalQuotes: number;
-  most_active_seller: string;
-  most_quoted_product: string;
-  avgTicket?: number;
-  totalClients?: number;
+  totalLeads?: number; // <--- Añade '?'
+  totalQuotes?: number; // <--- Añade '?'
+  most_active_seller?: string; // <--- Añade '?'
+  most_quoted_product?: string; // <--- Añade '?'
+  avgTicket?: number; // <--- Añade '?'
+  totalClients?: number; // <--- Añade '?'
 }
 
 @Component({
@@ -34,7 +37,8 @@ interface Stats {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardComponent implements OnInit, AfterViewInit {
-
+isLoading = signal(true);
+statsLoaded = signal(false);
   userName: string = '';
   userRole: string = '';
   selectedPeriod: string = 'month'; // default para admin
@@ -55,21 +59,58 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     private router: Router,
     private authService: AuthService,
     private http: HttpClient,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit(): void {
-    const user = this.authService.getUserData();
-    if (user) {
-      this.userName = user.sub;
-      this.userRole = user.role;
-    } else {
-      this.router.navigate(['/login']);
-    }
-
-    this.loadStats();
-    this.loadLeads();
+  const user = this.authService.getUserData();
+  if (user) {
+    this.userName = user.sub;
+    this.userRole = user.role;
+  } else {
+    this.router.navigate(['/login']);
+    return; // Salimos si no hay usuario
   }
+  this.loadDashboardData(); // Nos aseguramos que el loader esté activo
+
+  forkJoin({
+    stats: this.loadStats(),
+    leads: this.loadLeads()
+  }).pipe(
+    finalize(() => {
+      this.isLoading.set(false); // Desactiva el loader al final (éxito o error)
+      this.cdr.markForCheck();  // Notifica a Angular para que actualice la vista
+    })
+  ).subscribe({
+    next: (responses) => {
+      // Procesamos la respuesta de las stats
+      const statsData = responses.stats;
+      this.stats.totalLeads = statsData.totalLeads;
+      this.stats.totalQuotes = statsData.totalQuotes;
+      this.stats.most_active_seller = statsData.mostActiveSeller;
+      this.stats.most_quoted_product = statsData.mostQuotedProduct;
+      this.stats.avgTicket = statsData.avgTicket || 0;
+      this.stats.totalClients = statsData.totalClients || 0;
+      console.log('Estadísticas cargadas:', this.stats);
+
+      // Procesamos la respuesta de los leads
+      const leadsData = responses.leads;
+      this.leads = leadsData.map(lead => ({
+        id: lead.id,
+        name: lead.name,
+        email: lead.email,
+        phone: lead.phone,
+        date: new Date(lead.date)
+      }));
+      console.log('Leads cargados:', this.leads);
+    },
+    error: (err) => {
+      console.error('Error cargando datos del dashboard', err);
+      // Aquí podrías mostrar un mensaje de error en la UI
+    }
+  });
+}
 
   ngAfterViewInit(): void {
     setTimeout(() => {
@@ -77,42 +118,14 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     }, 300);
   }
 
-  loadStats(): void {
-    this.http.get<any>('http://localhost:8000/stats').subscribe({
-      next: (data) => {
-        this.stats.totalLeads = data.totalLeads;
-        this.stats.totalQuotes = data.totalQuotes;
-        this.stats.most_active_seller = data.mostActiveSeller;
-        this.stats.most_quoted_product = data.mostQuotedProduct;
-        this.stats.avgTicket = data.avgTicket || 0;
-        this.stats.totalClients = data.totalClients || 0;
-        this.cdr.markForCheck();
-        console.log('Estadísticas cargadas:', this.stats);
-      },
-      error: (err) => {
-        console.error('Error cargando estadísticas', err);
-      }
-    });
-  }
+  loadStats() {
+  return this.http.get<any>('http://localhost:8000/stats');
+}
 
-  loadLeads(): void {
-    this.http.get<any[]>('http://localhost:8000/leads').subscribe({
-      next: (data) => {
-        this.leads = data.map(lead => ({
-          id: lead.id,
-          name: lead.name,
-          email: lead.email,
-          phone: lead.phone,
-          date: new Date(lead.date)
-        }));
-        console.log('Leads cargados:', this.leads);
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        console.error('Error cargando leads', err);
-      }
-    });
-  }
+
+  loadLeads() {
+  return this.http.get<any[]>('http://localhost:8000/leads');
+}
 
   // Inicializa todos los gráficos del dashboard
   initCharts(): void {
@@ -214,4 +227,55 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   logout(): void {
     this.router.navigate(['/login']);
   }
+
+  loadDashboardData(): void {
+  this.loadingService.show();
+  this.statsLoaded.set(false);
+
+  forkJoin({
+    stats: this.loadStats(),
+    leads: this.loadLeads() // Este método retorna this.http.get<any[]>('...')
+  }).pipe(
+    finalize(() => {
+      this.loadingService.hide();
+      this.cdr.markForCheck();
+    })
+  ).subscribe({
+    next: (responses) => {
+      // ... Lógica para las stats ...
+      const statsData = responses.stats;
+      this.stats.totalLeads = statsData.totalLeads;
+      this.stats.totalQuotes = statsData.totalQuotes;
+      this.stats.most_active_seller = statsData.mostActiveSeller;
+      this.stats.most_quoted_product = statsData.mostQuotedProduct;
+      this.stats.avgTicket = statsData.avgTicket || 0;
+      this.stats.totalClients = statsData.totalClients || 0;
+      this.statsLoaded.set(true);
+      this.stats.totalLeads = statsData.totalLeads;
+      // ... etc ...
+
+      // --- INICIO DE LA SOLUCIÓN ---
+      // Aquí está la clave. 'responses.leads' es la data cruda de la API.
+      const leadsFromApi = responses.leads;
+
+      // Usamos .map() para transformar cada objeto de la API
+      // a la estructura que nuestra interfaz 'Lead' espera.
+      this.leads = leadsFromApi.map(apiLead => {
+        return {
+          id: apiLead.id, // Asegúrate de que 'apiLead.id' exista en la respuesta
+          name: apiLead.name, // o si es 'apiLead.full_name', cámbialo aquí
+          email: apiLead.email,
+          phone: apiLead.phone,
+          date: new Date(apiLead.date) // Convertimos el string de fecha a un objeto Date
+        };
+      });
+      // --- FIN DE LA SOLUCIÓN ---
+
+      console.log('Leads cargados y transformados:', this.leads);
+    },
+    error: (err) => {
+      console.error('Error cargando datos del dashboard', err);
+    }
+  });
+}
 }

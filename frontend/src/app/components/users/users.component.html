@@ -2,28 +2,28 @@
   <div class="container mx-auto max-w-7xl">
     <!-- Header -->
     <div class="mb-8">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-            <span class="text-white font-bold text-lg">M</span>
-          </div>
-          <div>
-            <h1 class="font-montserrat font-bold text-3xl text-gray-900">Gestión de Usuarios</h1>
-            <p class="font-noto-sans text-gray-600">Administra vendedores y usuarios del sistema</p>
-          </div>
-        </div>
-        
-        <button 
-          class="btn btn-primary font-noto-sans"
-          (click)="openCreateUserModal()"
-        >
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-          </svg>
-          Nuevo Usuario
-        </button>
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
+        <span class="text-white font-bold text-lg">M</span>
+      </div>
+      <div>
+        <h1 class="font-montserrat font-bold text-2xl sm:text-3xl text-gray-900">Gestión de Usuarios</h1>
+        <p class="font-noto-sans text-gray-600">Administra vendedores y usuarios del sistema</p>
       </div>
     </div>
+    
+    <button 
+      class="btn btn-primary font-noto-sans w-full sm:w-auto"
+      (click)="openCreateUserModal()"
+    >
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+      </svg>
+      Nuevo Usuario
+    </button>
+  </div>
+</div>
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -31,7 +31,7 @@
         <div class="card-body">
           <div class="flex items-center justify-between">
             <div>
-              <p class="font-noto-sans text-sm text-gray-600">Total Usuarios</p>
+              <p class="font-noto-sans text-sm text-gray-900 font-bold">Total Usuarios</p>
               <p class="font-montserrat font-bold text-2xl text-gray-900">{{ stats().totalUsers }}</p>
             </div>
             <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
@@ -47,7 +47,7 @@
         <div class="card-body">
           <div class="flex items-center justify-between">
             <div>
-              <p class="font-noto-sans text-sm text-gray-600">Usuarios Activos</p>
+              <p class="font-noto-sans text-sm text-gray-900 font-bold">Usuarios Activos</p>
               <p class="font-montserrat font-bold text-2xl text-green-600">{{ stats().activeUsers }}</p>
             </div>
             <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -63,7 +63,7 @@
         <div class="card-body">
           <div class="flex items-center justify-between">
             <div>
-              <p class="font-noto-sans text-sm text-gray-600">Usuarios Inactivos</p>
+              <p class="font-noto-sans text-sm text-gray-900 font-bold">Usuarios Inactivos</p>
               <p class="font-montserrat font-bold text-2xl text-red-600">{{ stats().inactiveUsers }}</p>
             </div>
             <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
@@ -79,7 +79,7 @@
         <div class="card-body">
           <div class="flex items-center justify-between">
             <div>
-              <p class="font-noto-sans text-sm text-gray-600">Vendedores</p>
+              <p class="font-noto-sans text-sm text-gray-900 font-bold">Vendedores</p>
               <p class="font-montserrat font-bold text-2xl text-primary">{{ stats().salesUsers }}</p>
             </div>
             <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
@@ -256,7 +256,7 @@
                               'text-green-600': !user.is_active,
                               'text-red-600': user.is_active
                             }"
-                            (click)="toggleUserStatus(user)"
+                            (click)="promptToggleUserStatus(user)"
                             [title]="user.is_active ? 'Desactivar usuario' : 'Activar usuario'">
                       
                       <ng-container *ngIf="!loadingStatusMap[user.id]; else loading">
@@ -370,13 +370,13 @@
               [(ngModel)]="currentUser.profile.email"
               name="email"
               required
-              placeholder="correo@gmail.com"
-              pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$"
+              placeholder="correo@ejemplo.com"
+              pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$"
               #email="ngModel"
             />
             <div *ngIf="email.invalid && email.touched" class="text-red-600 text-xs mt-1">
               <div *ngIf="email.errors?.['required']">El email es obligatorio.</div>
-              <div *ngIf="email.errors?.['pattern']">Debe ser un correo válido de gmail.com.</div>
+              <div *ngIf="email.errors?.['pattern']">Debe ser un correo válido.</div>
             </div>
           </div>
 
@@ -456,7 +456,7 @@
           </div>
 
           <!-- Teléfono -->
-          <div class="form-control md:col-span-2" *ngIf="currentUser.profile && !isEditMode()">
+          <div class="form-control" *ngIf="currentUser.profile && !isEditMode()">
             <div class="max-w-xs mx-auto">
               <label class="label mb-1 block">
                 <span class="label-text font-noto-sans font-medium text-gray-900">
@@ -479,7 +479,7 @@
                   pattern="[0-9]{7}"
                   maxlength="7"
                   minlength="7"
-                  placeholder="Ej: 0000000"
+                  placeholder="4632499"
                   required
                   #tel="ngModel"
                 />
@@ -512,7 +512,7 @@
                 pattern="[0-9]{7}"
                 maxlength="7"
                 minlength="7"
-                placeholder="Ej: 1234567"
+                placeholder="4632499"
                 #telEdit="ngModel"
               />
             </div>
@@ -542,44 +542,64 @@
 
           <!-- Password opcional (solo editar usuario) -->
           <div class="form-control" *ngIf="isEditMode()">
-            <label class="label">
-              <span class="label-text font-noto-sans font-medium text-gray-900">
-                Nueva Contraseña <span class="label-text font-noto-sans text-xs">Opcional, mínimo 5 caracteres</span>
-              </span>
-            </label>
-            <input
-              type="password"
-              class="input input-bordered font-noto-sans"
-              [(ngModel)]="currentUser.password"
-              name="editPassword"
-              placeholder="Nueva contraseña"
-              minlength="5"
-              maxlength="45"
-              #editPassword="ngModel"
-            />
-            <div *ngIf="editPassword.invalid && editPassword.touched" class="text-red-600 text-xs mt-1">
-              <div *ngIf="editPassword.errors?.['minlength']">Debe tener al menos 10 caracteres.</div>
-              <div *ngIf="editPassword.errors?.['maxlength']">Máximo 45 caracteres.</div>
-            </div>
+          <label class="label">
+            <span class="label-text font-noto-sans font-medium text-gray-900">
+              Nueva Contraseña <span class="label-text font-noto-sans text-xs">Opcional</span>
+            </span>
+          </label>
+          <input
+            type="password"
+            class="input input-bordered font-noto-sans"
+            [(ngModel)]="currentUser.password"
+            name="editPassword"
+            placeholder="Nueva contraseña"
+            minlength="5"
+            #editPassword="ngModel"
+            [ngModelOptions]="{standalone: true}"
+          />
+          <div *ngIf="editPassword.invalid && editPassword.touched" class="text-red-600 text-xs mt-1">
+            <div *ngIf="editPassword.errors?.['minlength']">Debe tener al menos 5 caracteres.</div>
+          </div>
+        </div>
+        
+        <div class="form-control" *ngIf="isEditMode()">
+          <label class="label">
+            <span class="label-text font-noto-sans font-medium text-gray-900">
+              Confirmar Nueva Contraseña
+            </span>
+          </label>
+          <input
+            type="password"
+            class="input input-bordered font-noto-sans"
+            [(ngModel)]="confirmEditPassword"
+            name="confirmEditPassword"
+            placeholder="Repite la nueva contraseña"
+          />
+          <div *ngIf="currentUser.password && confirmEditPassword && currentUser.password !== confirmEditPassword" class="text-red-600 text-xs mt-1">
+            Las contraseñas no coinciden.
           </div>
         </div>
 
+      </div>
+
         <!-- Footer -->
-        <div class="modal-action">
+        <div class="modal-action flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2">
           <div class="w-full text-left mb-2">
             <span class="text-xs text-gray-500 font-noto-sans">
               Los campos marcados con <span class="text-primary">*</span> son obligatorios.
             </span>
           </div>
-          <button type="button" class="btn btn-ghost font-noto-sans" (click)="closeUserModal(userForm)">Cancelar</button>
-          <button
-            type="submit"
-            class="btn btn-primary font-noto-sans"
-            [disabled]="!userForm.form.valid || isLoading() || (currentUser.password !== confirmPassword && !isEditMode())"
-          >
-            <span *ngIf="isLoading()" class="loading loading-spinner loading-sm"></span>
-            {{ isEditMode() ? 'Actualizar' : 'Crear' }} Usuario
-          </button>
+            <button type="button" class="btn btn-ghost font-noto-sans" (click)="closeUserModal(userForm)">Cancelar</button>
+            <button
+              type="submit"
+              class="btn btn-primary font-noto-sans"
+              [disabled]="!userForm.form.valid || isLoading() ||
+                (!isEditMode() && currentUser.password !== confirmPassword) ||
+                (isEditMode() && currentUser.password && currentUser.password !== confirmEditPassword)"
+            >
+              <span *ngIf="isLoading()" class="loading loading-spinner loading-sm"></span>
+              {{ isEditMode() ? 'Actualizar' : 'Crear' }} Usuario
+            </button>
         </div>
       </form>
     </div>
@@ -663,4 +683,45 @@
       </div>
     </div>
   </div>
+  <!-- Confirmar Estado Modal -->
+  <div class="modal" [class.modal-open]="showConfirmModal()">
+  <div class="modal-box w-11/12 max-w-lg">
+    <ng-container *ngIf="userToToggle() as user">
+      <h3 class="font-montserrat font-bold text-lg mb-4 text-gray-900">
+        Confirmar Acción
+      </h3>
+      <p class="font-noto-sans text-gray-700 mb-6">
+        ¿Estás seguro de que deseas
+        <strong [ngClass]="user.is_active ? 'text-red-600' : 'text-green-600'">
+          {{ user.is_active ? 'desactivar' : 'activar' }}
+        </strong>
+        al usuario <strong class="text-primary">{{ user.username }}</strong>?
+      </p>
+      
+      <div class="modal-action">
+        <button 
+          type="button" 
+          class="btn btn-ghost font-noto-sans" 
+          (click)="closeConfirmModal()"
+          [disabled]="loadingStatusMap[user.id]"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn font-noto-sans"
+          [ngClass]="{
+            'btn-success': !user.is_active,
+            'btn-error': user.is_active
+          }"
+          (click)="confirmToggleStatus()"
+          [disabled]="loadingStatusMap[user.id]"
+        >
+          <span *ngIf="loadingStatusMap[user.id]" class="loading loading-spinner loading-sm"></span>
+          Sí, {{ user.is_active ? 'Desactivar' : 'Activar' }}
+        </button>
+      </div>
+    </ng-container>
+  </div>
+</div>
 </section>

@@ -63,6 +63,8 @@ export class UsersComponent {
   protected readonly showViewModal = signal(false);
   protected readonly isEditMode = signal(false);
   protected readonly selectedUser = signal<AuthUser | null>(null);
+  protected readonly showConfirmModal = signal(false);
+  protected readonly userToToggle = signal<AuthUser | null>(null);
   loadingStatusMap: { [userId: string]: boolean } = {};
 
   constructor() {
@@ -80,6 +82,7 @@ export class UsersComponent {
 
   // Campos auxiliares para el formulario de usuario
   confirmPassword = '';
+  confirmEditPassword = '';
   codigoTelefono = '0424';
   telefono = '';
   // Current user for create/edit
@@ -343,28 +346,50 @@ closeUserModal(userForm?: any): void {
     }
   }
 
-toggleUserStatus(user: AuthUser): void {
-  this.loadingStatusMap[user.id] = true; // empezar loader
-  
-  const newStatus = !user.is_active;
-  
-  this.http.patch(`http://127.0.0.1:8000/users/${user.id}/status`, { is_active: newStatus }).subscribe({
-    next: () => {
-      const users = this.users();
-      const index = users.findIndex(u => u.id === user.id);
-      if (index !== -1) {
-        users[index].is_active = newStatus;
-        this.users.set([...users]);
+promptToggleUserStatus(user: AuthUser): void {
+    this.userToToggle.set(user);
+    this.showConfirmModal.set(true);
+  }
+
+  /**
+   * 2. Se llama desde el modal de confirmación.
+   * Ejecuta la lógica original para cambiar el estado.
+   */
+  confirmToggleStatus(): void {
+    const user = this.userToToggle();
+    if (!user) return;
+
+    this.loadingStatusMap[user.id] = true;
+    const newStatus = !user.is_active;
+
+    this.http.patch(`http://127.0.0.1:8000/users/${user.id}/status`, { is_active: newStatus }).subscribe({
+      next: () => {
+        const users = this.users();
+        const index = users.findIndex(u => u.id === user.id);
+        if (index !== -1) {
+          users[index].is_active = newStatus;
+          this.users.set([...users]);
+        }
+        this.closeConfirmModal(); // Cierra el modal al éxito
+      },
+      error: (err) => {
+        console.error('Error toggling user status:', err);
+        this.error.set('Error al cambiar el estado del usuario');
+        this.closeConfirmModal(); // Cierra el modal en caso de error
+      },
+      complete: () => {
+        this.loadingStatusMap[user.id] = false;
       }
-      this.loadingStatusMap[user.id] = false; // terminar loader
-    },
-    error: (err) => {
-      console.error('Error toggling user status:', err);
-      this.error.set('Error al cambiar el estado del usuario');
-      this.loadingStatusMap[user.id] = false; // terminar loader
-    },
-  });
-}
+    });
+  }
+
+  /**
+   * 3. Cierra el modal y limpia el estado.
+   */
+  closeConfirmModal(): void {
+    this.showConfirmModal.set(false);
+    this.userToToggle.set(null);
+  }
 
   getInitials(name: string): string {
     return name

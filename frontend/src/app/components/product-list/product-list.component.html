@@ -2,10 +2,12 @@
   <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7M16 3v4M8 3v4m-5 4h18"/></svg>
   {{ title }}
 </div>
+
 <ul class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-  <li *ngFor="let prod of products" (click)="prod.precio === undefined && onCategoryClick(prod)" [class.cursor-pointer]="prod.precio === undefined"  class="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden hover:scale-[1.01] hover:shadow-lg transition-all duration-200 p-4 flex flex-col gap-2">
+  <li *ngFor="let prod of products" (click)="prod.precio === undefined && onCategoryClick(prod)" [class.cursor-pointer]="prod.precio === undefined" class="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden hover:scale-[1.01] hover:shadow-lg transition-all duration-200 p-4 flex flex-col">
+    
     <ng-container *ngIf="prod.precio !== undefined; else categoriaCard">
-      <div class="flex items-center gap-3">
+      <div class="flex items-start gap-3">
         <div class="flex-shrink-0">
           <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center border-2 border-blue-200">
             <div class="w-8 h-8 bg-blue-300 rounded text-white font-bold text-base flex items-center justify-center">
@@ -13,30 +15,36 @@
             </div>
           </div>
         </div>
+        
         <div class="flex-1 min-w-0">
-          <div class="flex items-center justify-between mb-1">
+          <div class="sm:flex sm:items-start sm:justify-between">
             <h3 class="text-base font-bold text-slate-800 whitespace-normal">{{ prod.nombre }}</h3>
-            <span class="text-green-600 font-bold text-lg">${{ prod.precio }}</span>
+            <span class="block sm:inline text-green-600 font-bold text-lg mt-1 sm:mt-0 sm:ml-2">${{ prod.precio }}</span>
           </div>
-          <div class="flex items-center gap-2 text-xs text-slate-500 mb-1">
+
+          <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500 my-2">
             <span class="bg-slate-100 px-2 py-0.5 rounded font-medium">{{ prod.categoria }}</span>
             <span class="font-mono bg-blue-50 px-2 py-0.5 rounded ">{{ prod.codigo }}</span>
           </div>
-          <div class="flex items-center gap-2 mt-1">
-            <span class="text-xs text-slate-500">Stock:</span>
-            <span class="font-semibold text-slate-800">{{ prod.stock }}</span>
-            <button (click)="$event.stopPropagation(); openProductModal(prod)" class="ml-auto flex items-center gap-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors duration-200 text-xs z-10 cursor-pointer">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mx-auto my-auto block">
-                <path d="M7.2998 5H22L20 12H8.37675M21 16H9L7 3H4M4 8H2M5 11H2M6 14H2M10 20C10 20.5523 9.55228 21 9 21C8.44772 21 8 20.5523 8 20C8 19.4477 8.44772 19 9 19C9.55228 19 10 19.4477 10 20ZM21 20C21 20.5523 20.5523 21 20 21C19.4477 21 19 20.5523 19 20C19 19.4477 19.4477 19 20 19C20.5523 19 21 19.4477 21 20Z" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Agregar
-            </button>
-          </div>
         </div>
       </div>
+
+      <div class="mt-auto pt-3 flex flex-col sm:flex-row sm:items-center gap-2">
+        <div>
+          <span class="text-xs text-slate-500">Stock:</span>
+          <span class="font-semibold text-slate-800">{{ prod.stock }}</span>
+        </div>
+        <button (click)="$event.stopPropagation(); openProductModal(prod)" class="w-full sm:w-auto sm:ml-auto flex items-center justify-center gap-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 text-sm font-semibold z-10 cursor-pointer">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
+            <path d="M7.2998 5H22L20 12H8.37675M21 16H9L7 3H4M4 8H2M5 11H2M6 14H2M10 20C10 20.5523 9.55228 21 9 21C8.44772 21 8 20.5523 8 20C8 19.4477 8.44772 19 9 19C9.55228 19 10 19.4477 10 20ZM21 20C21 20.5523 20.5523 21 20 21C19.4477 21 19 20.5523 19 20C19 19.4477 19.4477 19 20 19C20.5523 19 21 19.4477 21 20Z" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Agregar
+        </button>
+      </div>
     </ng-container>
+
     <ng-template #categoriaCard>
-      <div class="flex items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+      <div class="flex items-center gap-3 p-2 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg h-full">
         <div class="w-10 h-10 bg-gradient-to-br from-blue-200 to-purple-200 rounded flex items-center justify-center border-2 border-blue-100">
           <span class="text-blue-700 font-bold text-lg">{{ prod.nombre ? prod.nombre.substring(0,2).toUpperCase() : '?' }}</span>
         </div>
@@ -45,5 +53,3 @@
     </ng-template>
   </li>
 </ul>
-
-

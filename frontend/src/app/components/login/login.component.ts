@@ -16,26 +16,34 @@ export class LoginComponent {
   protected username = '';
   protected password = '';
   protected readonly error = signal(false);
-  errorMessage: string | null = null
+  protected readonly isLoading = signal(false);
+  errorMessage: string | null = null;
 
   constructor(private router: Router, private authService: AuthService, private cdr: ChangeDetectorRef) {}
 
-login() {
-  this.authService.login(this.username, this.password).subscribe({
-    next: (res) => {
-      if (res) {
-        this.errorMessage = null; 
-        this.router.navigate(['/dashboard']);
+  login() {
+    this.isLoading.set(true);
+    this.authService.login(this.username, this.password).subscribe({
+      next: (res) => {
+        this.isLoading.set(false);
+        if (res) {
+          this.errorMessage = null;
+          this.router.navigate(['/dashboard']);
+        }
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        this.errorMessage = err.message;
+        this.cdr.detectChanges();
       }
-    },
-    error: (err) => {
-      this.errorMessage = err.message;
-      this.cdr.detectChanges();
-    }
-  });
-}
+    });
+  }
 
   loginError() {
     return this.error();
+  }
+
+  isLoadingFn() {
+    return this.isLoading();
   }
 }

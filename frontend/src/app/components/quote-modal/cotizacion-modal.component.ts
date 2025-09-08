@@ -122,7 +122,6 @@ export class CotizacionModalComponent {
   ngOnInit() {
     // Load all states on init
     this.estados = estadosVenezuela[0].map((e: any) => e.estado);
-    console.log(this.estados);
   }
 
   onEstadoChange() {

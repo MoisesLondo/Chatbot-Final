@@ -37,13 +37,11 @@ import { CartComponent } from '../cart/cart.component';
   styleUrls: ['./chat.component.css'],
 })
 export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, OnDestroy {
-  onAdminAction() {
-    // Aquí va la lógica especial para admin/vendedor
-    alert('Función especial solo para admin/vendedor');
-  }
+  
   private shouldScrollToBottom = false;
   @ViewChild(CartComponent) cartComponent!: CartComponent;
   showCart = false;
+  private notificationSound = new Audio('/sounds/happy-message-ping-351298.mp3');
   private sessionId: string;
   cartItemCount = 0;
   animateCartIcon = false;
@@ -259,6 +257,11 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
 
     this.chat.askToBot(payload).subscribe({
       next: res => {
+        this.notificationSound.play().then(() => {
+          console.log('Audio de notificación reproducido correctamente.');
+        }).catch(error => {
+          console.warn("La reproducción de audio fue bloqueada o falló: ", error);
+        });
         if (res.response) {
           const safeResponse = res.response || '';
 
@@ -398,5 +401,6 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
       this.botErrorSubscription.unsubscribe();
     }
   }
+
 
 }

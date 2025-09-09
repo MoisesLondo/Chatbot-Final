@@ -72,51 +72,79 @@ statsLoaded = signal(false);
     this.router.navigate(['/login']);
     return; // Salimos si no hay usuario
   }
-  this.loadDashboardData(); // Nos aseguramos que el loader esté activo
 
-  forkJoin({
-    stats: this.loadStats(),
-    leads: this.loadLeads()
-  }).pipe(
-    finalize(() => {
-      this.isLoading.set(false); // Desactiva el loader al final (éxito o error)
-      this.cdr.markForCheck();  // Notifica a Angular para que actualice la vista
-    })
-  ).subscribe({
-    next: (responses) => {
-      // Procesamos la respuesta de las stats
-      const statsData = responses.stats;
-      this.stats.totalLeads = statsData.totalLeads;
-      this.stats.totalQuotes = statsData.totalQuotes;
-      this.stats.most_active_seller = statsData.mostActiveSeller;
-      this.stats.most_quoted_product = statsData.mostQuotedProduct;
-      this.stats.avgTicket = statsData.avgTicket || 0;
-      this.stats.totalClients = statsData.totalClients || 0;
-      console.log('Estadísticas cargadas:', this.stats);
+  if (this.userRole === 'vendedor') {
+    this.isLoading.set(true);
+    // Llama a los endpoints del vendedor
+    forkJoin({
+      stats: this.loadSellerStats(),
+      leads: this.loadSellerLeads()
+    }).pipe(
+      finalize(() => {
+        this.isLoading.set(false);
+        this.cdr.markForCheck();
+      })
+    ).subscribe({
+      next: (responses) => {
+  // Adaptar stats
+  const statsData = responses.stats;
+  this.stats.totalQuotes = statsData.totalQuotes;
+  this.stats.totalLeads = statsData.totalLeads;
+  this.stats.avgTicket = Math.round(statsData.avgTicket * 100) / 100;
+  this.stats.totalClients = statsData.totalClients;
+  (this.stats as any).quotesOverTime = statsData.quotesOverTime;
+  (this.stats as any).topProducts = statsData.topProducts;
 
-      // Procesamos la respuesta de los leads
-      const leadsData = responses.leads;
-      this.leads = leadsData.map(lead => ({
-        id: lead.id,
-        name: lead.name,
-        email: lead.email,
-        phone: lead.phone,
-        date: new Date(lead.date)
-      }));
-      console.log('Leads cargados:', this.leads);
-    },
-    error: (err) => {
-      console.error('Error cargando datos del dashboard', err);
-      // Aquí podrías mostrar un mensaje de error en la UI
-    }
-  });
+  // Adaptar leads
+  this.leads = responses.leads.map(lead => ({
+    id: 0,
+    name: lead.name,
+    email: lead.email,
+    phone: lead.phone,
+    date: new Date(lead.date)
+  }));
+
+  // ¡Renderiza los charts justo después de asignar los datos!
+  this.initCharts();
+},
+      error: (err) => {
+        console.error('Error cargando datos del vendedor', err);
+      }
+    });
+  } else {
+    // ... Lógica admin como ya tienes implementada ...
+    this.loadDashboardData();
+  }
 }
 
   ngAfterViewInit(): void {
-    setTimeout(() => {
-      this.initCharts();
-    }, 300);
+this.destroyCharts();
+
+  if (this.userRole === 'vendedor') {
+    // Cotizaciones en el tiempo
+    const labels = (this.stats as any).quotesOverTime?.map((q: { month: any; }) => q.month) || [];
+    const data = (this.stats as any).quotesOverTime?.map((q: { quotes: any; }) => q.quotes) || [];
+    this.createChart('sellerQuotesOverTimeChart', 'line', {
+      labels,
+      datasets: [{
+        label: 'Tus Cotizaciones',
+        data
+      }]
+    });
+
+    // Productos más cotizados
+    const prodLabels = (this.stats as any).topProducts?.map((p: { name: any; }) => p.name) || [];
+    const prodData = (this.stats as any).topProducts?.map((p: { count: any; }) => p.count) || [];
+    this.createChart('sellerTopProductsChart', 'bar', {
+      labels: prodLabels,
+      datasets: [{
+        label: 'Productos Cotizados',
+        data: prodData
+      }]
+    });
   }
+  // ... lógica admin ...
+}
 
   loadStats() {
   return this.http.get<any>('http://localhost:8000/stats');
@@ -132,6 +160,7 @@ statsLoaded = signal(false);
     this.destroyCharts();
 
     if (this.userRole === 'admin') {
+      // ...admin charts como antes...
       this.createChart('quotesBySellerChart', 'bar', {
         labels: ['Juan', 'Ana', 'Pedro'],
         datasets: [{
@@ -179,19 +208,26 @@ statsLoaded = signal(false);
       });
 
     } else if (this.userRole === 'vendedor') {
+      const quotesOverTime = ((this.stats as any).quotesOverTime || []).slice();
+      quotesOverTime.sort((a: any, b: any) => a.month.localeCompare(b.month));
+      const labelsQuotes = quotesOverTime.map((q: any) => q.month);
+      const dataQuotes = quotesOverTime.map((q: any) => q.quotes);
       this.createChart('sellerQuotesOverTimeChart', 'line', {
-        labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
+        labels: labelsQuotes,
         datasets: [{
           label: 'Tus Cotizaciones',
-          data: [3, 6, 4, 8]
+          data: dataQuotes
         }]
       });
 
+      const topProducts = (this.stats as any).topProducts || [];
+      const labelsProducts = topProducts.map((p: any) => p.name);
+      const dataProducts = topProducts.map((p: any) => p.count);
       this.createChart('sellerTopProductsChart', 'bar', {
-        labels: ['Varilla', 'Tubo', 'Perfil'],
+        labels: labelsProducts,
         datasets: [{
           label: 'Productos Cotizados',
-          data: [5, 2, 7]
+          data: dataProducts
         }]
       });
     }
@@ -273,4 +309,19 @@ statsLoaded = signal(false);
     }
   });
 }
+
+
+  loadSellerStats() {
+    const token = this.authService.getToken();
+    const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
+    return this.http.get<any>('http://localhost:8000/seller/dashboard', headers ? { headers } : {});
+  }
+
+  loadSellerLeads() {
+    const token = this.authService.getToken();
+    const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
+    return this.http.get<any[]>('http://localhost:8000/seller/leads', headers ? { headers } : {});
+  }
+
 }
+

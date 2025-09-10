@@ -5,9 +5,44 @@ import { AuthService } from '../../services/auth.service';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Chart, registerables } from 'chart.js';
-import { forkJoin } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { forkJoin, of } from 'rxjs';
+import { catchError, finalize } from 'rxjs/operators';
 import { LoadingService } from '../../services/loading.service';
+import { HttpHeaders } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Resolve } from '@angular/router';
+
+
+@Injectable({ providedIn: 'root' })
+export class DashboardResolver implements Resolve<any> {
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) {}
+
+  resolve() {
+    const user = this.authService.getUserData();
+    const role = user?.role || 'vendedor';
+    const token = this.authService.getToken();
+    const headers = token ? { headers: new HttpHeaders().set('Authorization', `Bearer ${token}`) } : {};
+
+    if (role === 'admin') {
+      return forkJoin({
+        stats: this.http.get('http://localhost:8000/admin/dashboard', headers),
+        leads: this.http.get('http://localhost:8000/admin/leads', headers)
+      }).pipe(
+        catchError(() => of({ stats: {}, leads: [] }))
+      );
+    } else {
+      return forkJoin({
+        stats: this.http.get('http://localhost:8000/seller/dashboard', headers),
+        leads: this.http.get('http://localhost:8000/seller/leads', headers)
+      }).pipe(
+        catchError(() => of({ stats: {}, leads: [] }))
+      );
+    }
+  }
+}
 
 Chart.register(...registerables);
 
@@ -52,7 +87,7 @@ statsLoaded = signal(false);
     avgTicket: 0,
     totalClients: 0
   };
-
+private adminStatsAllPeriods: any = {};
   private charts: Chart[] = [];
 
   constructor(
@@ -60,7 +95,7 @@ statsLoaded = signal(false);
     private authService: AuthService,
     private http: HttpClient,
     private cdr: ChangeDetectorRef,
-    private loadingService: LoadingService
+    public loadingService: LoadingService
   ) {}
 
   ngOnInit(): void {
@@ -75,7 +110,7 @@ statsLoaded = signal(false);
 
   if (this.userRole === 'vendedor') {
     this.isLoading.set(true);
-    // Llama a los endpoints del vendedor
+    this.loadingService.show();
     forkJoin({
       stats: this.loadSellerStats(),
       leads: this.loadSellerLeads()
@@ -83,37 +118,67 @@ statsLoaded = signal(false);
       finalize(() => {
         this.isLoading.set(false);
         this.cdr.markForCheck();
+        this.loadingService.hide();
       })
     ).subscribe({
       next: (responses) => {
-  // Adaptar stats
-  const statsData = responses.stats;
-  this.stats.totalQuotes = statsData.totalQuotes;
-  this.stats.totalLeads = statsData.totalLeads;
-  this.stats.avgTicket = Math.round(statsData.avgTicket * 100) / 100;
-  this.stats.totalClients = statsData.totalClients;
-  (this.stats as any).quotesOverTime = statsData.quotesOverTime;
-  (this.stats as any).topProducts = statsData.topProducts;
+        // Adaptar stats
+        const statsData = responses.stats;
+        this.stats.totalQuotes = statsData.totalQuotes;
+        this.stats.totalLeads = statsData.totalLeads;
+        this.stats.avgTicket = Math.round(statsData.avgTicket * 100) / 100;
+        this.stats.totalClients = statsData.totalClients;
+        (this.stats as any).quotesOverTime = statsData.quotesOverTime;
+        (this.stats as any).topProducts = statsData.topProducts;
 
-  // Adaptar leads
-  this.leads = responses.leads.map(lead => ({
-    id: 0,
-    name: lead.name,
-    email: lead.email,
-    phone: lead.phone,
-    date: new Date(lead.date)
-  }));
+        // Adaptar leads
+        this.leads = responses.leads.map(lead => ({
+          id: 0,
+          name: lead.name,
+          email: lead.email,
+          phone: lead.phone,
+          date: new Date(lead.date)
+        }));
 
-  // ¡Renderiza los charts justo después de asignar los datos!
-  this.initCharts();
-},
+        // ¡Renderiza los charts justo después de asignar los datos!
+        this.initCharts();
+      },
       error: (err) => {
+        this.loadingService.hide();
         console.error('Error cargando datos del vendedor', err);
       }
     });
   } else {
-    // ... Lógica admin como ya tienes implementada ...
-    this.loadDashboardData();
+    if (this.userRole === 'admin') {
+      this.isLoading.set(true);
+      this.loadingService.show();
+      // Cargar todos los stats de todos los periodos solo una vez
+      this.loadAdminStats('all').toPromise().then(statsResponse => {
+        this.adminStatsAllPeriods = statsResponse;
+        this.updateAdminDashboardPeriod();
+      }).catch(err => {
+        this.loadingService.hide();
+        console.error('Error cargando dashboard admin', err);
+      }).finally(() => {
+        this.isLoading.set(false);
+        this.cdr.markForCheck();
+        this.loadingService.hide();
+      });
+
+      // Cargar leads recientes solo una vez
+      this.loadAdminLeads().toPromise().then(leadsResponse => {
+        this.leads = (leadsResponse || []).map((lead: any) => ({
+          id: 0,
+          name: lead.name,
+          email: lead.email,
+          phone: lead.phone,
+          date: new Date(lead.date)
+        }));
+      }).catch(err => {
+        this.loadingService.hide();
+        console.error('Error cargando leads admin', err);
+      });
+    }
   }
 }
 
@@ -146,66 +211,59 @@ this.destroyCharts();
   // ... lógica admin ...
 }
 
-  loadStats() {
-  return this.http.get<any>('http://localhost:8000/stats');
-}
 
-
-  loadLeads() {
-  return this.http.get<any[]>('http://localhost:8000/leads');
-}
 
   // Inicializa todos los gráficos del dashboard
   initCharts(): void {
     this.destroyCharts();
 
     if (this.userRole === 'admin') {
-      // ...admin charts como antes...
-      this.createChart('quotesBySellerChart', 'bar', {
-        labels: ['Juan', 'Ana', 'Pedro'],
-        datasets: [{
-          label: 'Cotizaciones',
-          data: [12, 19, 8]
-        }],
-        options: {
-          responsive: true,
-          maintainAspectRatio: false
-        }
-      });
+    // Cotizaciones por vendedor
+    const quotesBySeller = (this.stats as any).quotesBySeller || [];
+    const sellerLabels = quotesBySeller.map((q: any) => q.seller);
+    const sellerData = quotesBySeller.map((q: any) => q.quotes);
+    this.createChart('quotesBySellerChart', 'bar', {
+      labels: sellerLabels,
+      datasets: [{
+        label: 'Cotizaciones',
+        data: sellerData
+      }]
+    });
 
-      this.createChart('topProductsChart', 'pie', {
-        labels: ['Varilla', 'Cemento', 'Lámina'],
-        datasets: [{
-          data: [30, 50, 20]
-        }],
-        options: {
-          responsive: true,
-          maintainAspectRatio: false
-        }
-      });
+    // Top productos cotizados
+    const topProducts = (this.stats as any).topProducts || [];
+    const prodLabels = topProducts.map((p: any) => p.name);
+    const prodData = topProducts.map((p: any) => p.count);
+    this.createChart('topProductsChart', 'pie', {
+      labels: prodLabels,
+      datasets: [{
+        data: prodData
+      }]
+    });
 
-      this.createChart('quotesOverTimeChart', 'line', {
-        labels: ['Ene', 'Feb', 'Mar', 'Abr'],
-        datasets: [{
-          label: 'Cotizaciones',
-          data: [10, 15, 20, 18]
-        }],
-        options: {
-          responsive: true,
-          maintainAspectRatio: false  
-        }
-      });
+    // Evolución de cotizaciones
+    const quotesOverTime = ((this.stats as any).quotesOverTime || []).slice();
+      quotesOverTime.sort((a: any, b: any) => a.month.localeCompare(b.month));
+    const timeLabels = quotesOverTime.map((q: any) => q.month);
+    const timeData = quotesOverTime.map((q: any) => q.quotes);
+    this.createChart('quotesOverTimeChart', 'line', {
+      labels: timeLabels,
+      datasets: [{
+        label: 'Cotizaciones',
+        data: timeData
+      }]
+    });
 
-      this.createChart('channelComparisonChart', 'doughnut', {
-        labels: ['Chatbot', 'Vendedores'],
-        datasets: [{
-          data: [45, 55]
-        }],
-        options: {
-          responsive: true,
-          maintainAspectRatio: false  
-        }
-      });
+    // Chatbot vs Vendedores
+    const channelComparison = (this.stats as any).channelComparison || [];
+    const channelLabels = channelComparison.map((c: any) => c.channel);
+    const channelData = channelComparison.map((c: any) => c.count);
+    this.createChart('channelComparisonChart', 'doughnut', {
+      labels: channelLabels,
+      datasets: [{
+        data: channelData
+      }]
+    });
 
     } else if (this.userRole === 'vendedor') {
       const quotesOverTime = ((this.stats as any).quotesOverTime || []).slice();
@@ -252,64 +310,28 @@ this.destroyCharts();
     this.charts = [];
   }
 
-  viewLead(leadId: number): void {
-    this.router.navigate(['/leads', leadId]);
-  }
-
-  editLead(leadId: number): void {
-    this.router.navigate(['/leads', leadId, 'edit']);
-  }
-
   logout(): void {
     this.router.navigate(['/login']);
   }
 
-  loadDashboardData(): void {
-  this.loadingService.show();
-  this.statsLoaded.set(false);
 
-  forkJoin({
-    stats: this.loadStats(),
-    leads: this.loadLeads() // Este método retorna this.http.get<any[]>('...')
-  }).pipe(
-    finalize(() => {
-      this.loadingService.hide();
-      this.cdr.markForCheck();
-    })
-  ).subscribe({
-    next: (responses) => {
-      // ... Lógica para las stats ...
-      const statsData = responses.stats;
-      this.stats.totalLeads = statsData.totalLeads;
-      this.stats.totalQuotes = statsData.totalQuotes;
-      this.stats.most_active_seller = statsData.mostActiveSeller;
-      this.stats.most_quoted_product = statsData.mostQuotedProduct;
-      this.stats.avgTicket = statsData.avgTicket || 0;
-      this.stats.totalClients = statsData.totalClients || 0;
-      this.statsLoaded.set(true);
-      this.stats.totalLeads = statsData.totalLeads;
-      const leadsFromApi = responses.leads;
 
-      
-      this.leads = leadsFromApi.map(apiLead => {
-        return {
-          id: apiLead.id, 
-          name: apiLead.name, 
-          email: apiLead.email,
-          phone: apiLead.phone,
-          date: new Date(apiLead.date) 
-        };
-      });
-      
+updateAdminDashboardPeriod(): void {
+  const period = this.selectedPeriod || 'month';
+  const statsData = this.adminStatsAllPeriods[period] || {};
 
-      console.log('Leads cargados y transformados:', this.leads);
-    },
-    error: (err) => {
-      console.error('Error cargando datos del dashboard', err);
-    }
-  });
+  this.stats.totalLeads = statsData.totalLeads;
+  this.stats.totalQuotes = statsData.totalQuotes;
+  this.stats.most_quoted_product = statsData.most_quoted_product;
+  this.stats.most_active_seller = statsData.most_active_seller;
+
+  (this.stats as any).quotesBySeller = statsData.quotesBySeller || [];
+  (this.stats as any).topProducts = statsData.topProducts || [];
+  (this.stats as any).quotesOverTime = statsData.quotesOverTime || [];
+  (this.stats as any).channelComparison = statsData.channelComparison || [];
+
+  this.initCharts();
 }
-
 
   loadSellerStats() {
     const token = this.authService.getToken();
@@ -323,5 +345,23 @@ this.destroyCharts();
     return this.http.get<any[]>('http://localhost:8000/seller/leads', headers ? { headers } : {});
   }
 
+
+  loadAdminStats(period: string) {
+  const token = this.authService.getToken();
+  const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+  return this.http.get<any>('http://localhost:8000/admin/dashboard', { headers });
+}
+
+loadAdminLeads() {
+  const token = this.authService.getToken();
+  const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+  return this.http.get<any>('http://localhost:8000/admin/leads', { headers });
+}
+
+onPeriodChange(): void {
+  if (this.userRole === 'admin') {
+    this.updateAdminDashboardPeriod();
+  }
+}
 }
 

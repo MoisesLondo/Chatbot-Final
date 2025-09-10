@@ -14,7 +14,7 @@
 
   <!-- Selector de periodo -->
   <div class="flex justify-end mb-4">
-    <select [(ngModel)]="selectedPeriod" class="select select-bordered w-full max-w-xs">
+    <select [(ngModel)]="selectedPeriod" (change)="onPeriodChange()" class="select select-bordered w-full max-w-xs">
       <option value="week">Última Semana</option>
       <option value="month">Último Mes</option>
       <option value="year">Último Año</option>

@@ -26,19 +26,27 @@
         </div>
         <span class="text-sm text-green-600 font-bold whitespace-nowrap">${{ item.product.precio }} c/u</span>
         <span class="text-xs text-slate-700">Total: ${{ (item.product.precio * item.quantity) | number:'1.2-2' }}</span>
-  <button (click)="openDeleteModal(item)" class="mt-2 px-2 py-1 text-xs bg-red-200 text-red-700 rounded hover:bg-red-300 transition-colors duration-150">Eliminar</button>
+  <button (click)="openDeleteModal(item)" class="mt-2 px-2 py-1 text-xs bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold flex items-center gap-2"> <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>Eliminar</button>
   <!-- Modal de confirmación de borrado -->
   <div *ngIf="showDeleteModal" class="cart-delete-modal-backdrop">
-    <div class="bg-white rounded-lg shadow-lg w-full max-w-sm p-6 relative animate-fade-in">
-      <button type="button" (click)="closeDeleteModal()" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
-      <h2 class="text-xl font-bold mb-4 text-blue-700">Confirmar eliminación</h2>
-      <p class="text-slate-700 text-center mb-4">¿Seguro que deseas eliminar <span class="font-semibold text-red-700">{{ itemToDelete?.product?.nombre || 'este producto' }}</span> del carrito?</p>
-      <div class="flex gap-4 justify-center">
-        <button (click)="confirmDelete()" class="px-4 py-2 rounded-lg bg-red-200 text-red-700 font-semibold hover:bg-red-300 transition-colors">Eliminar</button>
-        <button (click)="closeDeleteModal()" class="px-4 py-2 rounded-lg bg-blue-100 text-blue-700 font-semibold hover:bg-blue-200 transition-colors">Cancelar</button>
-      </div>
+    <div class="absolute inset-0 bg-black/40 transition-all duration-300"></div>
+    <div class="bg-white rounded-lg w-full max-w-sm p-8 relative animate-fade-in text-center">
+        <button type="button" (click)="closeDeleteModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-3xl leading-none">&times;</button>
+        <h2 class="text-3xl font-bold text-slate-800 mb-4">Confirmar Eliminación</h2>
+        <p class="text-slate-700 text-lg mb-6">
+            ¿Seguro que deseas eliminar <strong class="text-red-700">{{ itemToDelete?.product?.nombre || 'este producto' }}</strong> del carrito?
+        </p>
+        <div class="flex gap-4 justify-center">
+            <button (click)="closeDeleteModal()" class=" btn px-6 py-3 bg-slate-100 text-slate-800 rounded-lg hover:bg-slate-200 transition-colors font-semibold text-lg">
+                Cancelar
+            </button>
+            <button (click)="confirmDelete()" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold flex items-center gap-2 text-lg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                Eliminar
+            </button>
+        </div>
     </div>
-  </div>
+</div>
       </div>
     </li>
   </ul>
@@ -59,7 +67,7 @@
     <button (click)="cotizar()" class="btn btn-primary bg-primary w-full mt-2 text-base font-semibold py-2 rounded-lg shadow hover:bg-blue-800 transition-colors duration-150 text-white">
       Cotizar
     </button>
-    <button (click)="clearCart()" class="w-full mt-2 text-base font-semibold py-2 rounded-lg shadow bg-red-100 text-red-700 hover:bg-red-200 transition-colors duration-150">
+    <button (click)="clearCart()" class="btn w-full mt-2 text-base font-semibold py-2 rounded-lg shadow bg-slate-100 text-slate-800 hover:bg-slate-200 transition-colors">
       Vaciar carrito
     </button>
   </div>

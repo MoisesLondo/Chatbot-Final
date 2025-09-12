@@ -11,13 +11,13 @@ def test_generar_cotizacion():
         "products": [
             {
                 "pCod": "03-010-0001",
-                "prodName": "ALAMBRON EST 4MMX6MTS",
+                "prodName": "alambrón EST 4MMX6MTS",
                 "qty": 12,
                 "uPrice": 1.06
             },
             {
                 "pCod": "03-010-0002",
-                "prodName": "ALAMBRON EST 5MMX6MTS",
+                "prodName": "alambrón EST 5MMX6MTS",
                 "qty": 5,
                 "uPrice": 2.50
             }

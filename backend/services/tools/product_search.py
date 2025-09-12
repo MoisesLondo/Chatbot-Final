@@ -37,7 +37,7 @@ def search(query: str, top_k: int = 10, mas_baratos: bool = False, mas_caros: bo
 
     categorias_conocidas = [
         "láminas galvanizadas",
-        "tubo redondo ventilacion",
+        "tubo redondo ventilación",
         "pletinas",
         "rieles perfiles y rejillas",
         "alambrón",

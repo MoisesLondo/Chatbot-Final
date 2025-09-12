@@ -93,7 +93,7 @@
           </thead>
           <tbody class="font-noto-sans">
             <tr *ngFor="let lead of leads">
-              <td class="font-medium">{{ lead.name }}</td>
+              <td class="font-medium">{{ lead.name | titlecase }}</td>
               <td>{{ lead.email }}</td>
               <td>{{ lead.phone }}</td>
               <td>{{ lead.date | date:'short' }}</td>

@@ -502,7 +502,7 @@
               <tbody class="font-noto-sans">
                 <tr *ngFor="let cot of cotizacionesList()">
                   <td class="font-mono text-sm">{{ cot.id }}</td>
-                  <td class="font-medium">{{ cot.nombre_cliente }}</td>
+                  <td class="font-medium">{{ cot.nombre_cliente | titlecase }}</td>
                   <td>{{ cot.cedula_rif }}</td>
                   <td>{{ cot.cliente_email }}</td>
                   <td>{{ cot.cliente_telefono }}</td>

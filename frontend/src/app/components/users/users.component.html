@@ -194,7 +194,7 @@
                 
                 <td>
                   <div>
-                    <div class="font-medium">{{ user.profile?.full_name || 'Sin nombre' }}</div>
+                    <div class="font-medium">{{ user.profile?.full_name | titlecase }}</div>
                     <div class="text-sm text-gray-500">{{ user.profile?.email || 'Sin email' }}</div>
                   </div>
                 </td>

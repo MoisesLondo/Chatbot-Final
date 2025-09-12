@@ -210,7 +210,7 @@ openCreateUserModal(): void {
       ...user, 
       profile: {
         id: user.profile?.id,
-        full_name: user.profile?.full_name ?? '',
+        full_name: user.profile?.full_name ? user.profile.full_name.split(' ').map((name: string) => name.charAt(0).toUpperCase() + name.slice(1)).join(' ') : '',
         email: user.profile?.email ?? '',
         tel: user.profile?.tel ?? ''
       }
@@ -300,7 +300,8 @@ closeUserModal(userForm?: any): void {
             users[index] = {
               ...updatedUser,
               profile: {
-                full_name: updatedUser.profile.full_name || '',
+                // capitalizar el nombre completo del usuario, incluyendo el apellido, reconocelo por el espacio
+                full_name: updatedUser.profile.full_name ? updatedUser.profile.full_name.split(' ').map((name: string) => name.charAt(0).toUpperCase() + name.slice(1)).join(' ') : '',
                 email: updatedUser.profile.email || '',
                 tel: updatedUser.profile.tel || ''
               }

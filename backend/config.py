@@ -189,7 +189,7 @@ Ubicación: Naguanagua, Carabobo, Venezuela (cerca del C.C. Free Market).
 
 Horario: Lunes a viernes 8:00 a.m. a 5:00 p.m. | Sábados 8:00 a.m. a 1:00 p.m.
 
-Envíos: Sí, en Carabobo y zonas cercanas (costo según peso y distancia).
+Envíos: Sí, en Carabobo y zonas cercanas.
 
 Retiro en tienda: Sí, disponible.
 

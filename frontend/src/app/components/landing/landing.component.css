@@ -11,16 +11,33 @@
 }
 
 .landing-container {
+  position: relative; /* Clave para que el ::after funcione */
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: linear-gradient(to right, rgb(255, 255, 255, 0.6), rgba(255, 255, 255, 0.9)), 
+  /* Mantenemos tu fondo original */
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.95)), 
               url('../../../assets/Imagen_productos_final.jpg') no-repeat center/cover;
   padding: 0;
 }
 
+/* El pseudo-elemento que crea el degradado en la parte inferior */
+.landing-container::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 150px; /* La altura del degradado, puedes ajustarla */
+  background: linear-gradient(to top, white, rgba(255, 255, 255, 0));
+  z-index: 1; /* Se asegura que esté por encima del fondo pero debajo del contenido */
+}
+
+/* Necesitamos asegurar que tu contenido principal esté por encima del degradado */
 .landing-main {
+  position: relative; /* O cualquier valor que no sea 'static' */
+  z-index: 2;
   flex: 1 0 auto;
   display: flex;
   flex-direction: column;

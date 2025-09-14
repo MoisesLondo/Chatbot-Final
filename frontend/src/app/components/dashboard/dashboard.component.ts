@@ -1,17 +1,18 @@
-import { ChangeDetectionStrategy, Component, OnInit, ChangeDetectorRef, AfterViewInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, ChangeDetectorRef, signal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Chart, registerables } from 'chart.js';
+import ChartDataLabels, { Context } from 'chartjs-plugin-datalabels';
 import { forkJoin, of } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { LoadingService } from '../../services/loading.service';
-import { HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Resolve } from '@angular/router';
 
+Chart.register(...registerables, ChartDataLabels);
 
 @Injectable({ providedIn: 'root' })
 export class DashboardResolver implements Resolve<any> {
@@ -22,7 +23,7 @@ export class DashboardResolver implements Resolve<any> {
 
   resolve() {
     const user = this.authService.getUserData();
-    const role = user?.role || 'vendedor';
+    const role = user?.role || 'Vendedor';
     const token = this.authService.getToken();
     const headers = token ? { headers: new HttpHeaders().set('Authorization', `Bearer ${token}`) } : {};
 
@@ -44,8 +45,6 @@ export class DashboardResolver implements Resolve<any> {
   }
 }
 
-Chart.register(...registerables);
-
 interface Lead {
   id: number;
   name: string;
@@ -55,12 +54,12 @@ interface Lead {
 }
 
 interface Stats {
-  totalLeads?: number; // <--- Añade '?'
-  totalQuotes?: number; // <--- Añade '?'
-  most_active_seller?: string; // <--- Añade '?'
-  most_quoted_product?: string; // <--- Añade '?'
-  avgTicket?: number; // <--- Añade '?'
-  totalClients?: number; // <--- Añade '?'
+  totalLeads?: number;
+  totalQuotes?: number;
+  most_active_seller?: string;
+  most_quoted_product?: string;
+  avgTicket?: number;
+  totalClients?: number;
 }
 
 @Component({
@@ -71,12 +70,12 @@ interface Stats {
   styleUrls: ['./dashboard.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DashboardComponent implements OnInit, AfterViewInit {
-isLoading = signal(true);
-statsLoaded = signal(false);
+export class DashboardComponent implements OnInit {
+  isLoading = signal(true);
+  statsLoaded = signal(false);
   userName: string = '';
   userRole: string = '';
-  selectedPeriod: string = 'month'; // default para admin
+  selectedPeriod: string = 'month';
 
   leads: Lead[] = [];
   stats: Stats = {
@@ -87,7 +86,7 @@ statsLoaded = signal(false);
     avgTicket: 0,
     totalClients: 0
   };
-private adminStatsAllPeriods: any = {};
+  private adminStatsAllPeriods: any = {};
   private charts: Chart[] = [];
 
   constructor(
@@ -99,65 +98,53 @@ private adminStatsAllPeriods: any = {};
   ) {}
 
   ngOnInit(): void {
-  const user = this.authService.getUserData();
-  if (user) {
-    this.userName = user.sub;
-    this.userRole = user.role;
-  } else {
-    this.router.navigate(['/login']);
-    return; // Salimos si no hay usuario
-  }
+    const user = this.authService.getUserData();
+    if (user) {
+      this.userName = user.sub;
+      this.userRole = user.role;
+    } else {
+      this.router.navigate(['/login']);
+      return;
+    }
 
-  if (this.userRole === 'vendedor') {
-    this.isLoading.set(true);
-    this.loadingService.show();
-    forkJoin({
-      stats: this.loadSellerStats(),
-      leads: this.loadSellerLeads()
-    }).pipe(
-      finalize(() => {
-        this.isLoading.set(false);
-        this.cdr.markForCheck();
-        this.loadingService.hide();
-      })
-    ).subscribe({
-      next: (responses) => {
-        // Adaptar stats
-        const statsData = responses.stats;
-        this.stats.totalQuotes = statsData.totalQuotes;
-        this.stats.totalLeads = statsData.totalLeads;
-        this.stats.avgTicket = Math.round(statsData.avgTicket * 100) / 100;
-        this.stats.totalClients = statsData.totalClients;
-        (this.stats as any).quotesOverTime = statsData.quotesOverTime;
-        (this.stats as any).topProducts = statsData.topProducts;
-
-        // Adaptar leads
-        this.leads = responses.leads.map(lead => ({
-          id: 0,
-          name: lead.name,
-          email: lead.email,
-          phone: lead.phone,
-          date: new Date(lead.date)
-        }));
-
-        // ¡Renderiza los charts justo después de asignar los datos!
-        this.initCharts();
-      },
-      error: (err) => {
-        this.loadingService.hide();
-        console.error('Error cargando datos del vendedor', err);
-      }
-    });
-  } else {
-    if (this.userRole === 'admin') {
+    if (this.userRole === 'Vendedor') {
       this.isLoading.set(true);
       this.loadingService.show();
-      // Cargar todos los stats de todos los periodos solo una vez
+      forkJoin({
+        stats: this.loadSellerStats(),
+        leads: this.loadSellerLeads()
+      }).pipe(
+        finalize(() => {
+          this.isLoading.set(false);
+          this.cdr.markForCheck();
+          this.loadingService.hide();
+        })
+      ).subscribe({
+        next: (responses) => {
+          const statsData = responses.stats;
+          this.stats.totalQuotes = statsData.totalQuotes;
+          this.stats.totalLeads = statsData.totalLeads;
+          this.stats.avgTicket = Math.round(statsData.avgTicket * 100) / 100;
+          this.stats.totalClients = statsData.totalClients;
+          (this.stats as any).quotesOverTime = statsData.quotesOverTime;
+          (this.stats as any).topProducts = statsData.topProducts;
+          this.leads = responses.leads.map((lead: any) => ({
+            id: 0, name: lead.name, email: lead.email, phone: lead.phone, date: new Date(lead.date)
+          }));
+          this.initCharts();
+        },
+        error: (err) => {
+          this.loadingService.hide();
+          console.error('Error cargando datos del Vendedor', err);
+        }
+      });
+    } else if (this.userRole === 'admin') {
+      this.isLoading.set(true);
+      this.loadingService.show();
       this.loadAdminStats('all').toPromise().then(statsResponse => {
         this.adminStatsAllPeriods = statsResponse;
         this.updateAdminDashboardPeriod();
       }).catch(err => {
-        this.loadingService.hide();
         console.error('Error cargando dashboard admin', err);
       }).finally(() => {
         this.isLoading.set(false);
@@ -165,141 +152,153 @@ private adminStatsAllPeriods: any = {};
         this.loadingService.hide();
       });
 
-      // Cargar leads recientes solo una vez
       this.loadAdminLeads().toPromise().then(leadsResponse => {
         this.leads = (leadsResponse || []).map((lead: any) => ({
-          id: 0,
-          name: lead.name,
-          email: lead.email,
-          phone: lead.phone,
-          date: new Date(lead.date)
+          id: 0, name: lead.name, email: lead.email, phone: lead.phone, date: new Date(lead.date)
         }));
       }).catch(err => {
-        this.loadingService.hide();
         console.error('Error cargando leads admin', err);
       });
     }
   }
-}
 
-  ngAfterViewInit(): void {
-this.destroyCharts();
-
-  if (this.userRole === 'vendedor') {
-    // Cotizaciones en el tiempo
-    const labels = (this.stats as any).quotesOverTime?.map((q: { month: any; }) => q.month) || [];
-    const data = (this.stats as any).quotesOverTime?.map((q: { quotes: any; }) => q.quotes) || [];
-    this.createChart('sellerQuotesOverTimeChart', 'line', {
-      labels,
-      datasets: [{
-        label: 'Tus Cotizaciones',
-        data
-      }]
-    });
-
-    // Productos más cotizados
-    const prodLabels = (this.stats as any).topProducts?.map((p: { name: any; }) => p.name) || [];
-    const prodData = (this.stats as any).topProducts?.map((p: { count: any; }) => p.count) || [];
-    this.createChart('sellerTopProductsChart', 'bar', {
-      labels: prodLabels,
-      datasets: [{
-        label: 'Productos Cotizados',
-        data: prodData
-      }]
-    });
-  }
-  // ... lógica admin ...
-}
-
-
-
-  // Inicializa todos los gráficos del dashboard
   initCharts(): void {
     this.destroyCharts();
 
     if (this.userRole === 'admin') {
-    // Cotizaciones por vendedor
-    const quotesBySeller = (this.stats as any).quotesBySeller || [];
-    const sellerLabels = quotesBySeller.map((q: any) => q.seller);
-    const sellerData = quotesBySeller.map((q: any) => q.quotes);
-    this.createChart('quotesBySellerChart', 'bar', {
-      labels: sellerLabels,
-      datasets: [{
-        label: 'Cotizaciones',
-        data: sellerData
-      }]
-    });
-
-    // Top productos cotizados
-    const topProducts = (this.stats as any).topProducts || [];
-    const prodLabels = topProducts.map((p: any) => p.name);
-    const prodData = topProducts.map((p: any) => p.count);
-    this.createChart('topProductsChart', 'pie', {
-      labels: prodLabels,
-      datasets: [{
-        data: prodData
-      }]
-    });
-
-    // Evolución de cotizaciones
-    const quotesOverTime = ((this.stats as any).quotesOverTime || []).slice();
-      quotesOverTime.sort((a: any, b: any) => a.month.localeCompare(b.month));
-    const timeLabels = quotesOverTime.map((q: any) => q.month);
-    const timeData = quotesOverTime.map((q: any) => q.quotes);
-    this.createChart('quotesOverTimeChart', 'line', {
-      labels: timeLabels,
-      datasets: [{
-        label: 'Cotizaciones',
-        data: timeData
-      }]
-    });
-
-    // Chatbot vs Vendedores
-    const channelComparison = (this.stats as any).channelComparison || [];
-    const channelLabels = channelComparison.map((c: any) => c.channel);
-    const channelData = channelComparison.map((c: any) => c.count);
-    this.createChart('channelComparisonChart', 'doughnut', {
-      labels: channelLabels,
-      datasets: [{
-        data: channelData
-      }]
-    });
-
-    } else if (this.userRole === 'vendedor') {
-      const quotesOverTime = ((this.stats as any).quotesOverTime || []).slice();
-      quotesOverTime.sort((a: any, b: any) => a.month.localeCompare(b.month));
-      const labelsQuotes = quotesOverTime.map((q: any) => q.month);
-      const dataQuotes = quotesOverTime.map((q: any) => q.quotes);
-      this.createChart('sellerQuotesOverTimeChart', 'line', {
-        labels: labelsQuotes,
-        datasets: [{
-          label: 'Tus Cotizaciones',
-          data: dataQuotes
-        }]
+      const quotesBySeller = (this.stats as any).quotesBySeller || [];
+      this.createChart('quotesBySellerChart', 'bar', {
+        labels: quotesBySeller.map((q: any) => q.seller),
+        datasets: [{ label: 'Cotizaciones', data: quotesBySeller.map((q: any) => q.quotes) }]
       });
 
       const topProducts = (this.stats as any).topProducts || [];
-      const labelsProducts = topProducts.map((p: any) => p.name);
-      const dataProducts = topProducts.map((p: any) => p.count);
-      this.createChart('sellerTopProductsChart', 'bar', {
-        labels: labelsProducts,
-        datasets: [{
-          label: 'Productos Cotizados',
-          data: dataProducts
-        }]
+      this.createChart('topProductsChart', 'pie', {
+        labels: topProducts.map((p: any) => p.name),
+        datasets: [{ data: topProducts.map((p: any) => p.count) }]
+      }, 'default');
+
+      const channelComparison = (this.stats as any).channelComparison || [];
+      const channelLabels = channelComparison.map((c: any) => c.channel)
+        .map((label: string) => label.toLowerCase() === 'vendedor' ? 'Vendedores' : label);
+      this.createChart('channelComparisonChart', 'doughnut', {
+        labels: channelLabels,
+        datasets: [{ data: channelComparison.map((c: any) => c.count) }]
+      }, 'default');
+      
+      const quotesOverTime = (this.stats as any).quotesOverTime || [];
+      const quotesOverTimeLabels = quotesOverTime.map((q: any) => {
+        if (this.selectedPeriod === 'month') {
+          return q.month;
+        }
+        const date = new Date(q.month);
+        if (isNaN(date.getTime())) {
+          return q.month;
+        }
+        return date.toLocaleDateString('es-VE');
+      });
+      this.createChart('quotesOverTimeChart', 'line', {
+          labels: quotesOverTimeLabels,
+          datasets: [{ label: 'Cotizaciones', data: quotesOverTime.map((q: any) => q.quotes) }]
+      });
+
+    } else if (this.userRole === 'Vendedor') {
+      const topProducts = (this.stats as any).topProducts || [];
+      this.createChart('sellerTopProductsChart', 'pie', {
+        labels: topProducts.map((p: any) => p.name),
+        datasets: [{ data: topProducts.map((p: any) => p.count) }]
+      }, 'default');
+
+      const quotesOverTime = (this.stats as any).quotesOverTime || [];
+      this.createChart('sellerQuotesOverTimeChart', 'line', {
+        labels: quotesOverTime.map((q: any) => q.month),
+        datasets: [{ label: 'Tus Cotizaciones', data: quotesOverTime.map((q: any) => q.quotes) }]
       });
     }
   }
 
-  private createChart(elementId: string, type: any, data: any): void {
+  private createChart(elementId: string, type: any, data: any, configType: 'default' | 'custom' = 'custom'): void {
     const ctx = document.getElementById(elementId) as HTMLCanvasElement;
     if (!ctx) return;
+
+    let pluginsConfig: any;
+
+    if (configType === 'custom') {
+      pluginsConfig = {
+        tooltip: { enabled: false },
+        datalabels: {
+          display: true,
+          align: 'center',
+          color: 'white',
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          borderRadius: 4,
+          font: { weight: 'bold' },
+          padding: 6,
+          textAlign: 'center',
+          formatter: (value: number, context: Context) => {
+            if (!value) return null;
+            return value;
+          }
+        }
+      };
+    } else {
+      pluginsConfig = {
+        tooltip: { enabled: true },
+        datalabels: {
+          display: false,
+        }
+      };
+    }
+
+    // Ejes para Evolución de Cotizaciones y Cotizaciones por Vendedor
+    let axisOptions = {};
+    if (elementId === 'quotesOverTimeChart' || elementId === 'sellerQuotesOverTimeChart') {
+      axisOptions = {
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Fecha',
+              font: { weight: 'bold', size: 16 }
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Cotizaciones',
+              font: { weight: 'bold', size: 16 }
+            }
+          }
+        }
+      };
+    } else if (elementId === 'quotesBySellerChart') {
+      axisOptions = {
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Vendedores',
+              font: { weight: 'bold', size: 16 }
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Cotizaciones',
+              font: { weight: 'bold', size: 16 }
+            }
+          }
+        }
+      };
+    }
     const chart = new Chart(ctx, {
       type,
       data,
       options: {
         responsive: true,
-        maintainAspectRatio: false
+        maintainAspectRatio: false,
+        plugins: pluginsConfig,
+        ...axisOptions
       }
     });
     this.charts.push(chart);
@@ -314,24 +313,19 @@ this.destroyCharts();
     this.router.navigate(['/login']);
   }
 
-
-
-updateAdminDashboardPeriod(): void {
-  const period = this.selectedPeriod || 'month';
-  const statsData = this.adminStatsAllPeriods[period] || {};
-
-  this.stats.totalLeads = statsData.totalLeads;
-  this.stats.totalQuotes = statsData.totalQuotes;
-  this.stats.most_quoted_product = statsData.most_quoted_product;
-  this.stats.most_active_seller = statsData.most_active_seller;
-
-  (this.stats as any).quotesBySeller = statsData.quotesBySeller || [];
-  (this.stats as any).topProducts = statsData.topProducts || [];
-  (this.stats as any).quotesOverTime = statsData.quotesOverTime || [];
-  (this.stats as any).channelComparison = statsData.channelComparison || [];
-
-  this.initCharts();
-}
+  updateAdminDashboardPeriod(): void {
+    const period = this.selectedPeriod || 'month';
+    const statsData = this.adminStatsAllPeriods[period] || {};
+    this.stats.totalLeads = statsData.totalLeads;
+    this.stats.totalQuotes = statsData.totalQuotes;
+    this.stats.most_quoted_product = statsData.most_quoted_product;
+    this.stats.most_active_seller = statsData.most_active_seller;
+    (this.stats as any).quotesBySeller = statsData.quotesBySeller || [];
+    (this.stats as any).topProducts = statsData.topProducts || [];
+    (this.stats as any).quotesOverTime = statsData.quotesOverTime || [];
+    (this.stats as any).channelComparison = statsData.channelComparison || [];
+    this.initCharts();
+  }
 
   loadSellerStats() {
     const token = this.authService.getToken();
@@ -345,23 +339,21 @@ updateAdminDashboardPeriod(): void {
     return this.http.get<any[]>('http://localhost:8000/seller/leads', headers ? { headers } : {});
   }
 
-
   loadAdminStats(period: string) {
-  const token = this.authService.getToken();
-  const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-  return this.http.get<any>('http://localhost:8000/admin/dashboard', { headers });
-}
+    const token = this.authService.getToken();
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<any>('http://localhost:8000/admin/dashboard', { headers });
+  }
 
-loadAdminLeads() {
-  const token = this.authService.getToken();
-  const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-  return this.http.get<any>('http://localhost:8000/admin/leads', { headers });
-}
+  loadAdminLeads() {
+    const token = this.authService.getToken();
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<any>('http://localhost:8000/admin/leads', { headers });
+  }
 
-onPeriodChange(): void {
-  if (this.userRole === 'admin') {
-    this.updateAdminDashboardPeriod();
+  onPeriodChange(): void {
+    if (this.userRole === 'admin') {
+      this.updateAdminDashboardPeriod();
+    }
   }
 }
-}
-

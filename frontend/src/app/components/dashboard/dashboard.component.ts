@@ -23,7 +23,7 @@ export class DashboardResolver implements Resolve<any> {
 
   resolve() {
     const user = this.authService.getUserData();
-    const role = user?.role || 'Vendedor';
+    const role = user?.role || 'vendedor';
     const token = this.authService.getToken();
     const headers = token ? { headers: new HttpHeaders().set('Authorization', `Bearer ${token}`) } : {};
 
@@ -107,7 +107,7 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    if (this.userRole === 'Vendedor') {
+    if (this.userRole === 'vendedor') {
       this.isLoading.set(true);
       this.loadingService.show();
       forkJoin({
@@ -180,7 +180,11 @@ export class DashboardComponent implements OnInit {
 
       const channelComparison = (this.stats as any).channelComparison || [];
       const channelLabels = channelComparison.map((c: any) => c.channel)
-        .map((label: string) => label.toLowerCase() === 'vendedor' ? 'Vendedores' : label);
+        .map((label: string) => label.toLowerCase() === 'vendedor' ? 'Vendedores' : label).map((label: string) => {
+          if (label.toLowerCase() === 'chatbot') return 'Chatbot';
+          return label.charAt(0).toUpperCase() + label.slice(1);
+        });
+
       this.createChart('channelComparisonChart', 'doughnut', {
         labels: channelLabels,
         datasets: [{ data: channelComparison.map((c: any) => c.count) }]
@@ -202,7 +206,7 @@ export class DashboardComponent implements OnInit {
           datasets: [{ label: 'Cotizaciones', data: quotesOverTime.map((q: any) => q.quotes) }]
       });
 
-    } else if (this.userRole === 'Vendedor') {
+    } else if (this.userRole === 'vendedor') {
       const topProducts = (this.stats as any).topProducts || [];
       this.createChart('sellerTopProductsChart', 'pie', {
         labels: topProducts.map((p: any) => p.name),

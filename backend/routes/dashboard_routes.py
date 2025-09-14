@@ -37,7 +37,7 @@ def get_seller_dashboard_stats(
 
             # Leads/clientes potenciales del vendedor en el mes actual (por cotizaciones nuevas)
             cur.execute("""
-                SELECT COUNT(DISTINCT cliente_email) AS total_leads
+                SELECT COUNT(DISTINCT cliente_id) AS total_leads
                 FROM cotizacion
                 WHERE created_by_vendedor_id = %s
                   AND date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE)
@@ -55,7 +55,7 @@ def get_seller_dashboard_stats(
 
             # Total de clientes atendidos por el vendedor (clientes únicos en todas sus cotizaciones)
             cur.execute("""
-                SELECT COUNT(DISTINCT cliente_email) AS total_clients
+                SELECT COUNT(DISTINCT cliente_id) AS total_clients
                 FROM cotizacion
                 WHERE created_by_vendedor_id = %s
             """, (vendedor_id,))
@@ -159,7 +159,7 @@ def get_admin_dashboard_stats():
             for period, date_filter in filters.items():
                 # Total clientes potenciales (leads)
                 cur.execute(f"""
-                    SELECT COUNT(DISTINCT cliente_email) AS total_leads
+                    SELECT COUNT(DISTINCT cliente_id) AS total_leads
                     FROM cotizacion
                     WHERE {date_filter}
                 """)
@@ -218,7 +218,7 @@ def get_admin_dashboard_stats():
                     WHERE {date_filter}
                     GROUP BY dc.nombre_producto
                     ORDER BY count DESC
-                    LIMIT 10
+                    LIMIT 6
                 """)
                 top_products = cur.fetchall()
 

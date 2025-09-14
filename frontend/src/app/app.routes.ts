@@ -9,6 +9,7 @@ import { authGuard } from './guards/auth.guard';
 import { QuoteComponent } from './components/quote/quote.component';
 import { UsersComponent } from './components/users/users.component';
 import { usersResolver } from './components/users/users.resolver';
+import { AdminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent },
@@ -28,10 +29,11 @@ export const routes: Routes = [
       // Rutas solo para admin
       { 
         path: 'users', component: UsersComponent,
+        // canActivate: [AdminGuard], // Descomenta cuando tengas el guard
         resolve: {
       users: usersResolver
     }
-        // canActivate: [AdminGuard] // Descomenta cuando tengas el guard
+        
       },
 
     ],

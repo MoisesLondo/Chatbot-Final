@@ -7,12 +7,12 @@
         <div class="flex gap-3 mb-3">
           <div class="w-1/2">
             <label class="block text-gray-700 font-semibold mb-1">Nombre</label>
-            <input [(ngModel)]="nombre" name="nombre" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" placeholder="Andrés" (blur)="validateNombre()" [ngClass]="{'border-red-500': nombreError}" />
+            <input [(ngModel)]="nombre" name="nombre" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" placeholder="Andrés" (blur)="validateNombre()"[ngClass]="{'border-red-500': nombreError}"  (keypress)="onNameKeyPress($event)"/>
             <span *ngIf="nombreError" class="text-red-600 text-xs mt-1 block">{{ nombreError }}</span>
           </div>
           <div class="w-1/2">
             <label class="block text-gray-700 font-semibold mb-1">Apellido</label>
-            <input [(ngModel)]="apellido" name="apellido" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" placeholder="Pérez" (blur)="validateApellido()" [ngClass]="{'border-red-500': apellidoError}" />
+            <input [(ngModel)]="apellido" name="apellido" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" placeholder="Pérez" (blur)="validateApellido()" [ngClass]="{'border-red-500': apellidoError}"(keypress)="onNameKeyPress($event)"/>
             <span *ngIf="apellidoError" class="text-red-600 text-xs mt-1 block">{{ apellidoError }}</span>
           </div>
         </div>
@@ -129,15 +129,62 @@
       </div>
 
       <div *ngIf="step === 3">
-        <div class="mb-3">
-          <label class="block text-gray-700 font-semibold mb-1">Productos a cotizar</label>
-          <div [innerHTML]="productosHtml" class="border rounded px-3 py-2 bg-gray-50"></div>
+
+  <h2 class="text-xl font-bold text-gray-800 mb-4">Confirmar productos a cotizar</h2>
+  
+  <div class="max-h-64 overflow-y-auto pr-2 mb-6 border-t border-b py-4">
+    <ul class="flex flex-col gap-3">
+      
+      <li *ngFor="let item of productosParaMostrar" class="flex items-center justify-between gap-4 bg-slate-50 rounded-lg p-3 shadow-sm">
+
+        <div class="flex flex-col flex-1 min-w-0">
+          <span class="font-semibold text-slate-800 break-words">
+            {{ item.product.nombre }}
+          </span>
+          <span class="text-xs text-slate-500">{{ item.product.categoria }}</span>
         </div>
-        <div class="flex justify-end mt-6 gap-2">
-          <button type="button" (click)="step = 2" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700">Atrás</button>
-          <button type="submit" class="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-semibold">Enviar</button>
+
+        <div class="flex flex-col items-end flex-shrink-0">
+          <span class="text-sm font-bold text-slate-700">
+            Cantidad: {{ item.quantity }}
+          </span>
+          <span class="text-xs text-green-600 font-semibold">
+            Total: ${{ (item.product.precio * item.quantity) | number:'1.2-2' }}
+          </span>
         </div>
-      </div>
+
+      </li>
+    </ul>
+    <div class="mt-6 p-4 bg-slate-50 rounded-lg border">
+  <h3 class="text-lg font-semibold text-slate-800 mb-3">Resumen de la Cotización</h3>
+  
+  <div class="space-y-2 text-slate-600">
+    <div class="flex justify-between items-center">
+      <span>Subtotal:</span>
+      <span class="font-medium">{{ subtotal | currency:'$':'symbol':'1.2-2' }}</span>
+    </div>
+    
+    <div class="flex justify-between items-center">
+      <span>IVA (16%):</span>
+      <span class="font-medium">{{ iva | currency:'$':'symbol':'1.2-2' }}</span>
+    </div>
+    
+    <hr class="my-2 border-t border-slate-200">
+    
+    <div class="flex justify-between items-center text-slate-900">
+      <span class="text-lg font-bold">Total a Pagar:</span>
+      <span class="text-lg font-bold">{{ total | currency:'$':'symbol':'1.2-2' }}</span>
+    </div>
+  </div>
+</div>
+  </div>
+
+  <div class="flex justify-end mt-6 gap-2">
+    <button type="button" (click)="step = 2" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium">Atrás</button>
+    <button type="submit" class="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-semibold">Enviar Cotización</button>
+  </div>
+
+</div>
     </form>
   </div>
 </div>

@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { estadosVenezuela } from '../../../types/venezuela';
+import { CartService, CartItem } from '../../services';
 
 @Component({
   selector: 'app-cotizacion-modal',
@@ -11,6 +12,14 @@ import { estadosVenezuela } from '../../../types/venezuela';
   imports: [FormsModule, CommonModule]
 })
 export class CotizacionModalComponent {
+
+  constructor(private cartService: CartService) {
+    }
+
+    subtotal: number = 0;
+  iva: number = 0;
+  total: number = 0;
+  public productosParaMostrar: CartItem[] = [];
   estadoError: string | null = null;
   municipioError: string | null = null;
   parroquiaError: string | null = null;
@@ -47,6 +56,13 @@ export class CotizacionModalComponent {
     this.validateParroquia();
     if (!this.direccionError && !this.urbanizacionError && !this.estadoError && !this.municipioError && !this.parroquiaError && this.calle && this.urbanizacion && this.municipio && this.estado && this.parroquia) {
       this.step = 3;
+    }
+  }
+  onNameKeyPress(event: KeyboardEvent) {
+    const key = event.key;
+    const regex = /^[a-zA-ZÀ-ÿ\s]*$/; // Letras y espacios, incluyendo acentos
+    if (!regex.test(key) && key.length === 1) {
+      event.preventDefault();
     }
   }
   onCedulaKeyPress(event: KeyboardEvent) {
@@ -111,6 +127,10 @@ export class CotizacionModalComponent {
   ngOnInit() {
     // Load all states on init
     this.estados = estadosVenezuela[0].map((e: any) => e.estado);
+    this.productosParaMostrar = this.cartService.getCart();
+    this.subtotal = this.cartService.getTotalPrice();
+    this.iva = this.cartService.getIVA();
+    this.total = this.cartService.getTotalConIVA();
   }
 
   onEstadoChange() {

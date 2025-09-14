@@ -141,6 +141,15 @@ private botErrorSource = new Subject<string>();
     return this.items.reduce((acc, item) => acc + item.product.precio * item.quantity, 0);
   }
 
+  getIVA(tasa: number = 0.16): number {
+    return this.getTotalPrice() * tasa;
+  }
+
+  getTotalConIVA(tasa: number = 0.16): number {
+    const subtotal = this.getTotalPrice();
+    return subtotal + (subtotal * tasa);
+  }
+
   processAgregarCarritoMessage(message: string): void {
     if (!message.includes('[AGREGAR_CARRITO]')) return;
     const content = message.replace('[AGREGAR_CARRITO]', '').trim();

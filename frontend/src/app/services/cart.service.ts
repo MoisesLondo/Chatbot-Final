@@ -12,6 +12,7 @@ export interface Product {
   imagen?: string;
   categoria: string;
   stock?: number;
+  unidad?: string;
 }
 
 export interface CartItem {
@@ -163,15 +164,16 @@ private botErrorSource = new Subject<string>();
     while ((match = liRegex.exec(content)) !== null) {
       found = true;
       const line = match[1];
-      // Nuevo regex para extraer codigo si está presente
-      const prodMatch = line.match(/(.+?) \(Cantidad: (\d+), precio: ([\d.]+), stock: (\d+)(?:, codigo: ([^)]+))?\)/);
+      // Regex para extraer unidad si está presente
+      const prodMatch = line.match(/(.+?) \(Cantidad: (\d+), precio: ([\d.]+), stock: (\d+)(?:, codigo: ([^,]+))?(?:, unidad: ([^)]+))?\)/);
       if (prodMatch) {
         const nombre = prodMatch[1].trim();
         const cantidad = parseInt(prodMatch[2], 10);
         const precio = parseFloat(prodMatch[3]);
         const stock = parseInt(prodMatch[4], 10);
         const codigo = prodMatch[5] ? prodMatch[5].trim() : nombre;
-        const product: Product = { id: '', codigo, nombre, precio, categoria: '', stock };
+        const unidad = prodMatch[6] ? prodMatch[6].trim() : undefined;
+        const product: Product = { id: '', codigo, nombre, precio, categoria: '', stock, unidad };
         productos.push({ product, quantity: cantidad });
       }
     }
@@ -179,14 +181,15 @@ private botErrorSource = new Subject<string>();
     if (!found) {
       const lines = content.split('\n').map(l => l.trim()).filter(l => l);
       lines.forEach(line => {
-        const prodMatch = line.match(/(.+?) \(Cantidad: (\d+), precio: ([\d.]+), stock: (\d+)(?:, codigo: ([^)]+))?\)/);
+        const prodMatch = line.match(/(.+?) \(Cantidad: (\d+), precio: ([\d.]+), stock: (\d+)(?:, codigo: ([^,]+))?(?:, unidad: ([^)]+))?\)/);
         if (prodMatch) {
           const nombre = prodMatch[1].trim();
           const cantidad = parseInt(prodMatch[2], 10);
           const precio = parseFloat(prodMatch[3]);
           const stock = parseInt(prodMatch[4], 10);
           const codigo = prodMatch[5] ? prodMatch[5].trim() : nombre;
-          const product: Product = { id: '', codigo, nombre, precio, categoria: '', stock };
+          const unidad = prodMatch[6] ? prodMatch[6].trim() : undefined;
+          const product: Product = { id: '', codigo, nombre, precio, categoria: '', stock, unidad };
           productos.push({ product, quantity: cantidad });
         }
       });

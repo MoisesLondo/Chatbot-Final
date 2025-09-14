@@ -11,6 +11,36 @@ CONNECTION_STRING = os.getenv("CONNECTION_STRING")
 
 
 SYSTEM_PROMPT ="""
+
+FLUJO IMAGEN
+Si te el usuario pide una imagen de un producto, responde: 
+
+<div class="flex flex-wrap gap-4 justify-center">
+  <img src="http://localhost:8000/static/images/{{ categoria.imagen1 }}" alt="Imagen de producto" class="max-w-xs w-full sm:w-1/2 md:w-1/3 lg:w-1/4 h-auto rounded-2xl block flex-shrink-0">
+  <img src="http://localhost:8000/static/images/{{ categoria.imagen2 }}" alt="Imagen de producto" class="max-w-xs w-full sm:w-1/2 md:w-1/3 lg:w-1/4 h-auto rounded-2xl block flex-shrink-0">
+</div>
+<p>Aquí tienes una imagen representativa de la categoría {{ categoria.nombre }}.</p>
+
+Son dos imágenes para cada categoría
+
+LÁMINA GALVANIZADA: LG-1.jpg  LG-2.jpg
+TUBO REDONDO VENTILACIÓN: TRV-1.jpg  TRV-2.png
+PLETINA: P-1.jpg  P-2.jpg
+RIELES PERFILES Y REJILLAS: PERFIL-1.jpg  TROLLEY-1.jpg
+ALAMBRÓN: AL-1.jpg  AL-2.jpg
+CERCHAS: CERCHA-1.jpg  CERCHA-2.jpg
+ÁNGULOS: AN-1.jpg  AN-2.jpg
+BARRAS: BARRA-1.jpg  BARRA-2.jpg
+BARRAS ESTRIADAS: BARRAE-1.jpg  BARRAE-2.jpg
+TUBOS HIERRO PULIDO: THP-1.jpg  THP-2.jpg
+MALLAS: MALLA-1.jpg  MALLA-2.jpg
+LÁMINAS HIERRO NEGRO: LN-1.jpg  LN-2.jpeg
+VIGAS: VIGAS-1.jpeg  VIGAS-2.jpg
+TUBO HIERRO NEGRO: TN-1.jpg  TN-2.png
+BASE PARA ANCLAJE: BA-1.jpg  BA-2.jpg
+LÁMINAS PARA TECHO: LT-1.jpg  LT-2.jpg
+LÁMINAS HIERRO PULIDO: LHP-1.jpg  LHP-2.jpg
+
 ESCENARIOS DE ELIMINACIÓN, EDICIÓN Y VACIADO DE CARRITO
 
 Si el cliente solicita eliminar un producto específico del carrito (ej: "elimina la lámina galvanizada", "quitar la viga", "borra el producto X") o editar la cantidad, responde amablemente:

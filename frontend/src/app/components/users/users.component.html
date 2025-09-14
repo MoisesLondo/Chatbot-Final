@@ -187,10 +187,8 @@
               <tr class="font-montserrat text-gray-900">
                 <th>Usuario</th>
                 <th>Información Personal</th>
-                <th>Contacto</th>
                 <th>Rol</th>
                 <th>Estado</th>
-                <th>Fecha Registro</th>
                 <th>Acciones</th>
               </tr>
             </thead>
@@ -216,12 +214,9 @@
                   <div>
                     <div class="font-medium">{{ user.profile?.full_name | titlecase }}</div>
                     <div class="text-sm text-gray-500">{{ user.profile?.email || 'Sin email' }}</div>
-                  </div>
-                </td>
-                
-                <td>
-                  <div class="text-sm">
+                    <div class="text-sm">
                     {{ user.profile?.tel || 'Sin teléfono' }}
+                  </div>
                   </div>
                 </td>
                 
@@ -241,10 +236,6 @@
                   }">
                     {{ user.is_active ? 'Activo' : 'Inactivo' }}
                   </div>
-                </td>
-                
-                <td class="text-sm">
-                  {{ user.created_at | date:'short' }}
                 </td>
                 
                 <td>

@@ -20,6 +20,7 @@ interface Message {
 }
 
 import { CartComponent } from '../cart/cart.component';
+import { getUnit } from '../../lib/getUnit';
 
 @Component({
   selector: 'app-chat',
@@ -178,10 +179,12 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
         vendedor = { id: user.user_id };
       }
     }
-    const payload = { ...data, productosHtml: this.productosHtml };
+    const payload = { ...data, productosHtml: this.cartService.getCartItems() };
     if (vendedor) {
       payload.vendedor = vendedor;
     }
+    console.log(vendedor)
+    console.log(payload)
     const mensaje: string = `[FORMULARIO-ENVIADO]${JSON.stringify(payload, null, 2)}`;
     this.addMessage(mensaje);
     this.closeCotizacionModal(false);
@@ -204,9 +207,10 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
     // Suponiendo que aquí se arma el payload para la cotización
     const productosCotizar = this.cartService.getCart().map(item => ({
       qty: item.quantity,
-      uPrice: item.product.precio, // Asegúrate de usar 'precio' del producto
+      uPrice: item.product.precio,
       pCod: item.product.codigo,
-      prodName: item.product.nombre
+      prodName: item.product.nombre,
+      unit: getUnit(item.product.unidad, item.quantity)
     }));
     // ...aquí sigue el envío al backend...
   }

@@ -90,6 +90,7 @@ class ProductoCotizacion(BaseModel):
     prodName: str
     qty: int
     uPrice: float
+    unit: str
 
 def generar_cotizacion_pdf(
     cxName: str,
@@ -106,13 +107,17 @@ def generar_cotizacion_pdf(
     try:
         # Si los productos son modelos Pydantic, convertir a dict para armar_modelo_cotizacion
         productos_dict = [p.dict() if hasattr(p, 'dict') else p for p in products]
+        # Extraer units para la plantilla, pero no enviar a DB
+        productos_for_db = [
+            {k: v for k, v in p.items() if k != 'unit'} for p in productos_dict
+        ]
         datos = {
             "cxName": cxName,
             "cxId": cxId,
             "cxAddress": cxAddress,
             "email": email,
             "tel": tel,
-            "products": productos_dict,
+            "products": productos_for_db,
         }
         if vendedorId:
             datos["vendedorId"] = vendedorId
@@ -133,15 +138,17 @@ def generar_cotizacion_pdf(
         # Cargar plantilla
         plantilla_path = "static/cotizacion-template.docx"
         doc = DocxTemplate(plantilla_path)
-
-        # Calcular totales y preparar productos para la plantilla
         productos = []
         for i, detalle in enumerate(cotizacion.detalles, start=1):
+            unit_val = None
+            if i-1 < len(productos_dict):
+                raw_unit = productos_dict[i-1].get('unit')
+                unit_val = get_unit_label(raw_unit, detalle.cantidad)
             productos.append({
                 "n": i,
                 "pCod": detalle.codigo_producto,
                 "prodName": detalle.nombre_producto,
-                "qty": detalle.cantidad,
+                "qty": f"{detalle.cantidad} {unit_val}",
                 "uPrice": f"{detalle.precio_unitario:.2f}",
                 "pTotal": f"{detalle.total:.2f}"
             })
@@ -285,3 +292,17 @@ def fetch_seller_name(vendedor_id: str):
             conn.close()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+def get_unit_label(unit, quantity):
+            if not unit:
+                return ''
+            unit = unit.upper()
+            if unit == 'KILOGRAMO':
+                return 'kilogramo' if quantity == 1 else 'kilogramos'
+            if unit == 'UNIDAD':
+                return 'unidad' if quantity == 1 else 'unidades'
+            if unit == 'METRO':
+                return 'metro' if quantity == 1 else 'metros'
+            if unit == 'PIEZA':
+                return 'pieza' if quantity == 1 else 'piezas'
+            return unit.lower()

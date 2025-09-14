@@ -291,6 +291,7 @@ REGLAS DE BÚSQUEDA Y USO DE INVENTARIO
                         "  - 'prodName': Nombre del producto (string). "
                         "  - 'qty': Cantidad del producto (entero). "
                         "  - 'uPrice': Precio unitario del producto (número flotante). "
+                        "  - 'unit': Unidad del producto (string). "
                         "El agente DEBE extraer estos datos del historial de la conversación y pasarlos en el formato de diccionario Python adecuado como el argumento 'datos_cotizacion'. "
                         "Solo invoca esta herramienta cuando TODOS los datos de la cotización están completos y confirmados por el usuario, incluyendo los códigos y precios unitarios de los productos."
 

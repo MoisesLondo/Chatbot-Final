@@ -26,71 +26,91 @@
 </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-      <div class="card bg-base-100 shadow-xl">
-        <div class="card-body">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="font-noto-sans text-sm text-gray-900 font-bold">Total Usuarios</p>
-              <p class="font-montserrat font-bold text-2xl text-gray-900">{{ stats().totalUsers }}</p>
-            </div>
-            <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-              </svg>
+   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center justify-between">
+              <div class="flex-1">
+                <div class="h-10 flex items-start">
+                  <p class="text-sm text-gray-700 font-semibold leading-tight">Total Usuarios</p>
+                </div>
+                <p class="font-bold text-2xl text-gray-900 mt-1">{{stats().totalUsers}}</p>
+              </div>
+              <div class="w-10 h-10 md:w-12 md:h-12 bg-red-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+                  ></path>
+                </svg>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div class="card bg-base-100 shadow-xl">
-        <div class="card-body">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="font-noto-sans text-sm text-gray-900 font-bold">Usuarios Activos</p>
-              <p class="font-montserrat font-bold text-2xl text-green-600">{{ stats().activeUsers }}</p>
-            </div>
-            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center justify-between">
+              <div class="flex-1">
+                <div class="h-10 flex items-start">
+                  <p class="text-sm text-gray-700 font-semibold leading-tight">Usuarios Activos</p>
+                </div>
+                <p class="font-bold text-2xl text-green-600 mt-1">{{stats().activeUsers}}</p>
+              </div>
+              <div class="w-10 h-10 md:w-12 md:h-12 bg-green-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div class="card bg-base-100 shadow-xl">
-        <div class="card-body">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="font-noto-sans text-sm text-gray-900 font-bold">Usuarios Inactivos</p>
-              <p class="font-montserrat font-bold text-2xl text-red-600">{{ stats().inactiveUsers }}</p>
-            </div>
-            <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center justify-between">
+              <div class="flex-1">
+                <div class="h-10 flex items-start">
+                  <p class="text-sm text-gray-700 font-semibold leading-tight">Usuarios Inactivos</p>
+                </div>
+                <p class="font-bold text-2xl text-red-600 mt-1">{{stats().inactiveUsers}}</p>
+              </div>
+              <div class="w-10 h-10 md:w-12 md:h-12 bg-red-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div class="card bg-base-100 shadow-xl">
-        <div class="card-body">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="font-noto-sans text-sm text-gray-900 font-bold">Vendedores</p>
-              <p class="font-montserrat font-bold text-2xl text-primary">{{ stats().salesUsers }}</p>
-            </div>
-            <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-              </svg>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center justify-between">
+              <div class="flex-1">
+                <div class="h-10 flex items-start">
+                  <p class="text-sm text-gray-700 font-semibold leading-tight">Vendedores</p>
+                </div>
+                <p class="font-bold text-2xl text-red-500 mt-1">{{stats().salesUsers}}</p>
+              </div>
+              <div class="w-10 h-10 md:w-12 md:h-12 bg-red-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                  ></path>
+                </svg>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
 
     <!-- Filters and Search -->
     <!-- <div class="card bg-base-100 shadow-xl mb-8">

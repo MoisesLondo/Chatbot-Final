@@ -113,7 +113,7 @@ def search(query: str, top_k: int = 10, mas_baratos: bool = False, mas_caros: bo
 
     params.append(top_k)
     sql = f"""
-        SELECT id, codigo, nombre, categoria, precio_minorista, cantidad_disponible
+        SELECT id, codigo, nombre, categoria, precio_minorista, cantidad_disponible, unidad
         FROM "producto"
         WHERE {where_sql}
         {order_by}
@@ -132,6 +132,7 @@ def search(query: str, top_k: int = 10, mas_baratos: bool = False, mas_caros: bo
             "nombre": r[2],
             "categoria": r[3],
             "precio_minorista": r[4],
-            "cantidad_disponible": r[5]
+            "cantidad_disponible": r[5],
+            "unidad": r[6]
         } for r in results
     ]

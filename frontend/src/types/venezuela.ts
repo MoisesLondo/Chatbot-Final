@@ -1005,11 +1005,6 @@ export const estadosVenezuela = [
     ]
   },
   {
-    "estado": "Dependencias Federales",
-    "iso_3166-2": "VE-W",
-    "municipios": []
-  },
-  {
     "estado": "Distrito Capital",
     "iso_3166-2": "VE-A",
     "municipios": [

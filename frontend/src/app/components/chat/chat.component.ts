@@ -164,7 +164,7 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
     this.showCotizacionModal = false;
     this.productosHtml = '';
     if (cancelado) {
-      this.messages.push(this.buildMsg('Formulario cancelado por el usuario.', 'bot'));
+      this.messages.push(this.buildMsg('¡Vaya! Necesito que completes tus datos para generar tu cotización. Estaré aquí para cuando desees continuar 😊🙏.', 'bot'));
       this.shouldScrollToBottom = true;
     }
   }

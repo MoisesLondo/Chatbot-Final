@@ -104,7 +104,9 @@
                       </ng-container>
                       <ng-container *ngIf="msg.sender === 'bot'">
                         <span *ngIf="msg.text.includes('/static/temp/')">
-                          <a [href]="getStaticTempUrl(msg.text)" target="_blank">Descargar cotización</a>
+                          ¡Gracias! Haz clic aquí para descargar
+                          <a [href]="getStaticTempUrl(msg.text)" target="_blank" class="text-red-500 underline">tu cotización</a>
+                          Si necesitas algo más, solo dime. ¡Espero que vuelvas pronto! ❤️😊
                         </span>
                         <!-- Solo muestra el <p> si hay lista de productos, oculta el array JSON -->
                         <span *ngIf="!msg.text.includes('/static/temp/') && extractVisualList(msg.text).items.length === 0" [innerHTML]="msg.text"></span>

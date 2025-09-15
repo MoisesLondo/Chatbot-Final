@@ -135,8 +135,12 @@ export class DashboardComponent implements OnInit {
         },
         error: (err) => {
           this.loadingService.hide();
-          console.error('Error cargando datos del Vendedor', err);
-        }
+  if (err.status === 401) {
+    this.router.navigate(['/login']);
+    return;
+  }
+  console.error('Error cargando datos del Vendedor', err);
+}
       });
     } else if (this.userRole === 'admin') {
       this.isLoading.set(true);

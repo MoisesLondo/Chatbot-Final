@@ -319,14 +319,14 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
             this.messages.push(this.buildMsg(res.response, 'bot', true));
           }
         } else {
-          this.messages.push(this.buildMsg('No se recibió respuesta del bot.', 'bot'));
+          this.messages.push(this.buildMsg('Disculpa, no puedo darte una respuesta en este momento, por favor inténtalo más tarde.', 'bot'));
         }
         this.isLoadingBotResponse = false;
         this.shouldScrollToBottom = true;
       },
       error: err => {
         console.error(err);
-        this.messages.push(this.buildMsg('Error al obtener respuesta del bot.', 'bot'));
+        this.messages.push(this.buildMsg('Disculpa, estoy teniendo problemas de señal, por favor comunícate más tarde.', 'bot'));
         this.isLoadingBotResponse = false;
         this.shouldScrollToBottom = true;
       }

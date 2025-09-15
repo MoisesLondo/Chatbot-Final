@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { estadosVenezuela } from '../../../types/venezuela';
 import { CartService, CartItem } from '../../services';
@@ -11,7 +11,7 @@ import { CartService, CartItem } from '../../services';
   standalone: true,
   imports: [FormsModule, CommonModule]
 })
-export class CotizacionModalComponent {
+export class CotizacionModalComponent implements OnChanges {
 
   constructor(private cartService: CartService) {
     }
@@ -261,5 +261,21 @@ export class CotizacionModalComponent {
       default:
         return unit ? unit.toLowerCase() : '';
     }
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    // Verificamos si la propiedad 'show' ha cambiado y si su valor actual es 'true'
+    if (changes['show'] && changes['show'].currentValue === true) {
+      this.actualizarResumen();
+      this.step = 1; // Opcional: Reinicia al primer paso cada vez que se abre.
+    }
+  }
+
+  actualizarResumen() {
+    console.log('Actualizando resumen de cotización...'); 
+    this.productosParaMostrar = this.cartService.getCart();
+    this.subtotal = this.cartService.getTotalPrice();
+    this.iva = this.cartService.getIVA();
+    this.total = this.cartService.getTotalConIVA();
   }
 }

@@ -422,6 +422,7 @@
                   <th>Código</th>
                   <th>Producto</th>
                   <th class="text-center">Cantidad</th>
+                  <th class="text-center">U. Medida</th>
                   <th class="text-right">Precio Unitario</th>
                   <th class="text-right">Total</th>
                 </tr>
@@ -432,6 +433,7 @@
                   <td class="font-mono text-sm">{{ detalle.codigo_producto }}</td>
                   <td class="font-medium">{{ detalle.nombre_producto }}</td>
                   <td class="text-center">{{ detalle.cantidad }}</td>
+                  <td class="text-center">{{ detalle.unidad }}</td>
                   <td class="text-right">{{ detalle.precio_unitario | currency:'USD':'symbol':'1.2-2' }}</td>
                   <td class="text-right font-medium">{{ detalle.total | currency:'USD':'symbol':'1.2-2' }}</td>
                 </tr>

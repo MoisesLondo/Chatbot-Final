@@ -228,7 +228,7 @@ export class CotizacionModalComponent implements OnChanges {
     const telefonoCompleto = `${this.codigoTelefono}-${this.telefono}`;
     this.submit.emit({
       nombre: `${this.nombre} ${this.apellido}`,
-      cedula: this.cedula,
+      cedula: `${this.tipoDocumento}-${this.cedula}`,
       direccion,
       email: this.email,
       telefono: telefonoCompleto,
@@ -264,10 +264,9 @@ export class CotizacionModalComponent implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    // Verificamos si la propiedad 'show' ha cambiado y si su valor actual es 'true'
     if (changes['show'] && changes['show'].currentValue === true) {
       this.actualizarResumen();
-      this.step = 1; // Opcional: Reinicia al primer paso cada vez que se abre.
+      this.step = 1;
     }
   }
 

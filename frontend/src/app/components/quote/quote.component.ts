@@ -171,8 +171,9 @@ fetchCotizacion() {
 
   // New multiple criteria search
   searchByCriteria() {
-    this.isLoading.set(true);
-    if (!this.hasSearchCriteria()) return;
+      this.isLoading.set(true);
+  if (!this.hasSearchCriteria()) return;
+  this.currentPage = 1;
 
     // Build query parameters
     const params = new URLSearchParams();
@@ -231,8 +232,10 @@ fetchCotizacion() {
       this.searchCriteria.total_min !== null ||
       this.searchCriteria.total_max !== null ||
       this.searchCriteria.fecha_desde ||
-      this.searchCriteria.fecha_hasta
+      this.searchCriteria.fecha_hasta ||
+      this.searchCriteria.cedula_rif && !this.cedulaRifError
     );
+    
   }
 
   // Clear search criteria
@@ -274,46 +277,50 @@ fetchCotizacion() {
   }
 
   // Actualiza el modelo y valida Cédula/RIF
-  updateCedulaRif() {
-    const tipo = this.cedulaRifTipo;
-    const numero = this.cedulaRifNumero.trim();
-    if (!numero) {
-      this.searchCriteria.cedula_rif = '';
-      this.cedulaRifError = '';
-      return;
-    }
-    // Validación específica para cada tipo
-    let rifRegex;
-    let minDigits = 7;
-    if (tipo === 'J') {
-      rifRegex = /^J-\d{9,10}$/i;
-      minDigits = 9;
-    } else if (tipo === 'V') {
-      rifRegex = /^V-\d{7,8}$/i;
-      minDigits = 7;
-    } else if (tipo === 'E') {
-      rifRegex = /^E-\d{7,8}$/i;
-      minDigits = 7;
-    } else {
-      rifRegex = /^(V|E|J)-\d{6,10}$/i;
-      minDigits = 6;
-    }
-    const value = `${tipo}-${numero}`;
-    this.searchCriteria.cedula_rif = value;
-    if (!rifRegex.test(value) || numero.length < minDigits) {
-      if (tipo === 'J') {
-        this.cedulaRifError = 'El RIF debe tener al menos 9 dígitos. Ejemplo: J-297507121';
-      } else if (tipo === 'V') {
-        this.cedulaRifError = 'Formato inválido. Ejemplo: V-12345678';
-      } else if (tipo === 'E') {
-        this.cedulaRifError = 'Formato inválido. Ejemplo: E-12345678';
-      } else {
-        this.cedulaRifError = 'Formato inválido.';
-      }
-    } else {
-      this.cedulaRifError = '';
-    }
+updateCedulaRif() {
+  const tipo = this.cedulaRifTipo;
+  const numero = this.cedulaRifNumero.trim();
+  if (!numero) {
+    this.searchCriteria.cedula_rif = '';
+    this.cedulaRifError = '';
+    return;
   }
+  let rifRegex;
+  let minDigits = 7;
+  let value = '';
+  if (tipo === 'J') {
+    rifRegex = /^J-\d{9,10}$/i;
+    minDigits = 9;
+    value = `J-${numero}`;
+  } else if (tipo === 'V') {
+    rifRegex = /^V-\d{7,8}$/i;
+    minDigits = 7;
+    value = `V-${numero}`;
+  } else if (tipo === 'E') {
+    rifRegex = /^E-\d{7,8}$/i;
+    minDigits = 7;
+    value = `E-${numero}`;
+  } else {
+    // Sin prefijo, solo números (mínimo 6 dígitos)
+    rifRegex = /^\d{6,10}$/;
+    minDigits = 6;
+    value = numero;
+  }
+  this.searchCriteria.cedula_rif = value;
+  if (!rifRegex.test(value) || numero.length < minDigits) {
+    if (tipo === 'J') {
+      this.cedulaRifError = 'El RIF debe tener al menos 9 dígitos. Ejemplo: J-297507121';
+    } else if (tipo === 'V') {
+      this.cedulaRifError = 'Formato inválido. Ejemplo: V-12345678';
+    } else if (tipo === 'E') {
+      this.cedulaRifError = 'Formato inválido. Ejemplo: E-12345678';
+    } else {
+      this.cedulaRifError = 'Formato inválido. Ejemplo: 12345678';
+    }
+  } else {
+    this.cedulaRifError = '';
+  }
+}
 
 // Validate Email
 validateEmail() {
@@ -387,5 +394,22 @@ blockNonNumeric(event: KeyboardEvent) {
 ngOnInit(): void {
   // Sync telefono with searchCriteria.cliente_telefono on init
   this.telefono = this.searchCriteria.cliente_telefono || '';
+}
+
+pageSize = 20;
+currentPage = 1;
+
+get paginatedCotizaciones() {
+  const start = (this.currentPage - 1) * this.pageSize;
+  return this.cotizacionesList().slice(start, start + this.pageSize);
+}
+
+get totalPages() {
+  return Math.ceil(this.cotizacionesList().length / this.pageSize) || 1;
+}
+
+goToPage(page: number) {
+  if (page < 1 || page > this.totalPages) return;
+  this.currentPage = page;
 }
 }

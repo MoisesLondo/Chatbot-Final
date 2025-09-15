@@ -225,7 +225,7 @@ Cuando uses InventarioBusqueda, devuelve los productos en JSON puro:
 }}
 ]
 
-Y siempre acompáñalo de un mensaje en <p> preguntando si desea incluir alguno en la cotización y que tambien si lo prefiere puede agregarlo manualmente.
+Y siempre acompáñalo de un mensaje en <p> preguntando si desea incluir alguno en la cotización y explicando que puede agregarlo manualmente.
 
 Si vas responder con una lista de productos pero sin usar InventarioBusqueda, usa el mismo formato JSON y la misma estructura de <p>.
 

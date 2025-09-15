@@ -627,7 +627,7 @@
           </div>
           <div>
             <h4 class="font-montserrat font-semibold text-xl">
-              {{ selectedUser()?.profile?.full_name || 'Sin nombre' }}
+              {{ selectedUser()?.profile?.full_name ? (selectedUser()?.profile?.full_name | titlecase) : 'Sin nombre' }}
             </h4>
             <p class="font-noto-sans text-gray-600">{{ selectedUser()?.username }}</p>
           </div>

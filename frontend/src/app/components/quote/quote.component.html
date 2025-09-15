@@ -72,7 +72,7 @@
         </div>
 
         <!-- Advanced Search -->
-        <div (keyup.enter)="searchByCriteria()" *ngIf="searchType() === 'criteria'" >
+        <div *ngIf="searchType() === 'criteria'" >
           <h2 class="card-title font-montserrat text-xl text-gray-900 mb-4">
             <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
@@ -225,6 +225,7 @@
                 type="date"
                 class="input input-bordered font-noto-sans"
                 [(ngModel)]="searchCriteria.fecha_desde"
+                [max]="today"
               />
             </div>
 
@@ -237,6 +238,7 @@
                 type="date"
                 class="input input-bordered font-noto-sans"
                 [(ngModel)]="searchCriteria.fecha_hasta"
+                [max]="today"
               />
             </div>
 
@@ -301,7 +303,7 @@
 <div class="flex items-center space-x-2">
 
   <div class="badge badge-primary font-noto-sans">
-    {{ cotizacion()?.fecha_creacion ? (cotizacion()?.fecha_creacion | date:'medium') : 'Fecha no disponible' }}
+    {{ cotizacion()?.fecha_creacion ? (cotizacion()?.fecha_creacion | date:'dd/MM/yyyy HH:mm a':'es') : 'Fecha no disponible' }}
   </div>
 </div>
               
@@ -506,7 +508,7 @@
                   <td>{{ cot.cedula_rif }}</td>
                   <td>{{ cot.cliente_email }}</td>
                   <td>{{ cot.cliente_telefono }}</td>
-                  <td>{{ cot.created_at | date:'short' }}</td>
+                  <td>{{ cot.created_at | date:'dd/MM/yyyy HH:mm a':'es' }}</td>
                   <td class="text-right font-medium">{{ cot.total | currency:'USD':'symbol':'1.2-2' }}</td>
                   <td>
                     <div class="flex space-x-2">

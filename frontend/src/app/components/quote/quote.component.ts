@@ -23,6 +23,8 @@ interface StatusSearch {
   vendedor: string;
 }
 
+
+
 @Component({
   selector: 'app-quote',
   standalone: true,
@@ -32,6 +34,7 @@ interface StatusSearch {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class QuoteComponent {
+  today = new Date().toISOString().split('T')[0];
   // Solo permite números en Total Mínimo
   onTotalMinInput(event: Event) {
     const input = event.target as HTMLInputElement;

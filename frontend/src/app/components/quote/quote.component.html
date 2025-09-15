@@ -102,8 +102,7 @@
                   [placeholder]="cedulaRifTipo === 'J' ? '297507121' : (cedulaRifTipo === 'V' ? '29750712' : '84750712')"
                   maxlength="10"
                   [ngClass]="{'border-red-500': cedulaRifError}"
-                  (input)="onCedulaRifInput($event)"
-                  (blur)="updateCedulaRif()"
+                  (input)="onCedulaRifInput($event); updateCedulaRif()"
                   (keypress)="blockNonNumeric($event)"
                 />
               </div>
@@ -134,7 +133,7 @@
                 [(ngModel)]="searchCriteria.cliente_email"
                 placeholder="cliente@email.com"
                 [ngClass]="{'border-red-500': emailError}"
-                (blur)="validateEmail()"
+                (input)="validateEmail()"
               />
               <div *ngIf="emailError" class="block w-full">
                 <span class="text-red-500 text-xs mt-1 block">{{ emailError }}</span>
@@ -171,7 +170,7 @@
                   placeholder="4632499"
                   required
                   [ngClass]="{'border-red-500': telefonoError}"
-                  (blur)="validateTelefono()"
+                  (input)="validateTelefono()"
                   inputmode="numeric"
                   (keypress)="blockNonNumeric($event)"
                 />

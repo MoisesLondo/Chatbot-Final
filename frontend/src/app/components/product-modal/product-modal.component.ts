@@ -58,13 +58,23 @@ export class ProductModalComponent implements OnChanges {
   }
 
   onQuantityInput(): void {
+    // Mostrar advertencia si el usuario escribe 0
+    if (this.quantity === 0) {
+      this.error = 'La cantidad mínima es 0.5.';
+      return;
+    }
     // Siempre forzar múltiplos de 0.5
     if (this.quantity < 0.5) {
-      this.quantity = 0.5;
-    } else {
-      // Redondear al múltiplo de 0.5 más cercano
-      this.quantity = Math.round(this.quantity * 2) / 2;
+      this.error = 'La cantidad mínima es 0.5.';
+      return;
     }
+    // Solo acepta múltiplos de 0.5
+    if ((this.quantity * 10) % 5 !== 0) {
+      this.error = 'Solo puedes agregar múltiplos de 0.5.';
+      return;
+    }
+    // Si todo está bien, limpiar el error
+    this.error = '';
   }
 
   getUnit(unit: string, quantity: number): string {

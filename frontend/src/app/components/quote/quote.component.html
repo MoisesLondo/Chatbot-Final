@@ -104,21 +104,9 @@
                   maxlength="10"
                   [ngClass]="{'border-red-500': cedulaRifError}"
                   (input)="onCedulaRifInput($event); updateCedulaRif()"
+                  (blur)="updateCedulaRif()"
                   (keypress)="blockNonNumeric($event)"
                 />
-                type="text"
-                inputmode="numeric"
-                pattern="[0-9]*"
-                class="input input-bordered font-noto-sans flex-1"
-                [(ngModel)]="cedulaRifNumero"
-                name="cedulaRifNumero"
-                [placeholder]="cedulaRifTipo === 'J' ? '297507121' : (cedulaRifTipo === 'V' ? '29750712' : '84750712')"
-                maxlength="10"
-                [ngClass]="{'border-red-500': cedulaRifError}"
-                (input)="onCedulaRifInput($event); updateCedulaRif()"
-                (blur)="updateCedulaRif()"
-                (keypress)="blockNonNumeric($event)"
-              />
               </div>
               <span *ngIf="cedulaRifError" class="text-red-500 text-xs mt-1">{{ cedulaRifError }}</span>
             </div>

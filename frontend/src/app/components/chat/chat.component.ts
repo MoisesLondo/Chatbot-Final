@@ -274,7 +274,6 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
         if (res.response) {
           const safeResponse = res.response || '';
 
-          // Detectar [AGREGAR_CARRITO] y extraer productos
           if (safeResponse.includes('[AGREGAR_CARRITO]')) {
             this.cartService.processAgregarCarritoMessage(safeResponse);
             this.messages.push(this.buildMsg('¡Listo! Los productos han sido agregados a tu carrito. Si necesitas algo más, con gusto te ayudo.', 'bot'));
@@ -287,6 +286,18 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
             }
           } else if (safeResponse.includes('[VACIAR_CARRITO]')) {
             this.cartService.clearCart();
+            if (this.showCart && this.cartComponent) {
+              this.cartComponent.items = [];
+              if (typeof this.cartComponent.calcularTotales === 'function') {
+                this.cartComponent.calcularTotales();
+              }
+            }
+            this.notyf.success({
+              message: 'Carrito vaciado correctamente.',
+              duration: 4000,
+              dismissible: true,
+              position: { x: 'right', y: 'top' }
+            });
             this.messages.push(this.buildMsg('Todos los productos han sido eliminados de tu carrito. Si deseas agregar otros productos, házmelo saber.', 'bot'));
           } else if (safeResponse.includes('[ABRIR_FORMULARIO_COTIZACION]')) {
             // Construir productosHtml desde el carrito actual
@@ -360,13 +371,14 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
     if (sender === 'user' && e.content.includes('[FORMULARIO-ENVIADO]')) {
       return this.buildMsg('Mensaje Enviado', 'user');
     }
-    // Ocultar [ABRIR_FORMULARIO_COTIZACION] en el historial
     if (sender === 'user' && e.content.includes('[ABRIR_FORMULARIO_COTIZACION]')) {
       return { text: '', sender };
     }
-    // Mostrar mensaje amigable si el bot envía [AGREGAR_CARRITO]
     if (sender === 'bot' && e.content.includes('[AGREGAR_CARRITO]')) {
       return this.buildMsg('¡Listo! Los productos han sido agregados a tu carrito. Si necesitas algo más, con gusto te ayudo.', 'bot');
+    }
+    if (sender === 'bot' && e.content.includes('[VACIAR_CARRITO]')) {
+      return this.buildMsg('Todos los productos han sido eliminados de tu carrito. Si deseas agregar otros productos, házmelo saber.', 'bot');
     }
     return this.buildMsg(e.content, sender, sender === 'bot');
   };

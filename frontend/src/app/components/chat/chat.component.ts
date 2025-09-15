@@ -277,17 +277,17 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
           // Detectar [AGREGAR_CARRITO] y extraer productos
           if (safeResponse.includes('[AGREGAR_CARRITO]')) {
             this.cartService.processAgregarCarritoMessage(safeResponse);
-            this.messages.push(this.buildMsg('Agregando los productos a tu carrito. Te notificaremos si se agregaron correctamente o si hubo algún problema.', 'bot'));
+            this.messages.push(this.buildMsg('¡Listo! Los productos han sido agregados a tu carrito. Si necesitas algo más, con gusto te ayudo.', 'bot'));
           } else if (safeResponse.includes('[ELIMINAR_DEL_CARRITO]')) {
             // Espera formato: [ELIMINAR_DEL_CARRITO]CODIGO_PRODUCTO
             const match = safeResponse.match(/\[ELIMINAR_DEL_CARRITO\](\S+)/);
             if (match && match[1]) {
               this.cartService.removeProduct(match[1]);
-              this.messages.push(this.buildMsg('Producto eliminado del carrito correctamente.', 'bot'));
+              this.messages.push(this.buildMsg('¡Listo! Producto eliminado de tu carrito correctamente. ¿Deseas agregar otro producto?', 'bot'));
             }
           } else if (safeResponse.includes('[VACIAR_CARRITO]')) {
             this.cartService.clearCart();
-            this.messages.push(this.buildMsg('Todos los productos han sido eliminados del carrito.', 'bot'));
+            this.messages.push(this.buildMsg('Todos los productos han sido eliminados de tu carrito. Si deseas agregar otros productos, házmelo saber.', 'bot'));
           } else if (safeResponse.includes('[ABRIR_FORMULARIO_COTIZACION]')) {
             // Construir productosHtml desde el carrito actual
             const cartProducts = this.cartService.getCartItems();
@@ -304,7 +304,7 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
               this.messages.push(this.buildMsg('Por favor, completa el formulario de cotización.', 'bot'));
               this.openCotizacionModal(productosHtml);
             } else {
-              this.notyf.error({message:'No puedes abrir el formulario de cotización con el carrito vacío.',
+              this.notyf.error({message:'Disculpa, no puedes abrir el formulario de cotización con el carrito vacío.',
                 duration: 60000,
                 dismissible: true,
                 position: {
@@ -366,7 +366,7 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
     }
     // Mostrar mensaje amigable si el bot envía [AGREGAR_CARRITO]
     if (sender === 'bot' && e.content.includes('[AGREGAR_CARRITO]')) {
-      return this.buildMsg('Agregando los productos a tu carrito. Te notificaremos si se agregaron correctamente o si hubo algún problema.', 'bot');
+      return this.buildMsg('¡Listo! Los productos han sido agregados a tu carrito. Si necesitas algo más, con gusto te ayudo.', 'bot');
     }
     return this.buildMsg(e.content, sender, sender === 'bot');
   };

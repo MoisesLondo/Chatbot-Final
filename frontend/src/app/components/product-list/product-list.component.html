@@ -3,52 +3,60 @@
   {{ title }}
 </div>
 
-<ul class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-  <li *ngFor="let prod of products" (click)="prod.precio === undefined && onCategoryClick(prod)" [class.cursor-pointer]="prod.precio === undefined" class="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden hover:scale-[1.01] hover:shadow-lg transition-all duration-200 p-4 flex flex-col">
+<ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+  <li *ngFor="let prod of products" (click)="prod.precio === undefined && onCategoryClick(prod)" [class.cursor-pointer]="prod.precio === undefined" class="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden hover:scale-[1.01] hover:shadow-lg transition-all duration-200 p-3 sm:p-4 flex flex-col min-w-0 w-full">
     
     <ng-container *ngIf="prod.precio !== undefined; else categoriaCard">
-      <div class="flex items-start gap-3">
+      <!-- Improved responsive layout with better spacing and text handling -->
+      <div class="flex items-start gap-2 sm:gap-3 mb-3">
         <div class="flex-shrink-0">
-          <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center border-2 border-blue-200">
-            <div class="w-8 h-8 bg-blue-300 rounded text-white font-bold text-base flex items-center justify-center">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center border-2 border-blue-200">
+            <div class="w-6 h-6 sm:w-8 sm:h-8 bg-blue-300 rounded text-white font-bold text-xs sm:text-base flex items-center justify-center">
               {{ prod.nombre ? prod.nombre.substring(0,2).toUpperCase() : '?' }}
             </div>
           </div>
         </div>
         
-        <div class="flex-1 min-w-0">
-          <div class="sm:flex sm:items-start sm:justify-between">
-            <h3 class="text-base font-bold text-slate-800 whitespace-normal">{{ prod.nombre }}</h3>
-            <span class="block sm:inline text-green-600 font-bold text-lg mt-1 sm:mt-0 sm:ml-2">${{ prod.precio }}</span>
+        <div class="flex-1 min-w-0 overflow-hidden">
+          <!-- Better responsive text sizing and spacing -->
+          <div class="mb-2">
+            <h3 class="font-bold text-slate-800 text-sm sm:text-base leading-tight line-clamp-2 mb-1" [title]="prod.nombre">{{ prod.nombre }}</h3>
+            <span class="text-green-600 font-bold text-base sm:text-lg">${{ prod.precio }}</span>
           </div>
 
-          <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500 my-2">
-            <span class="bg-slate-100 px-2 py-0.5 rounded font-medium">{{ prod.categoria }}</span>
-            <span class="font-mono bg-blue-50 px-2 py-0.5 rounded ">{{ prod.codigo }}</span>
+          <!-- Improved responsive badges with better wrapping -->
+          <div class="flex flex-wrap items-center gap-1 sm:gap-2 text-xs">
+            <span class="bg-slate-100 px-2 py-1 rounded font-medium text-xs truncate max-w-[120px] sm:max-w-none" [title]="prod.categoria">{{ prod.categoria }}</span>
+            <span class="font-mono bg-blue-50 px-2 py-1 rounded text-xs">{{ prod.codigo }}</span>
           </div>
         </div>
       </div>
 
-      <div class="mt-auto pt-3 flex flex-col sm:flex-row sm:items-center gap-2">
-        <div>
-          <span class="text-xs text-slate-500">Stock:</span>
-          <span class="font-semibold text-slate-800">{{ prod.stock }} {{ getUnit(prod.unidad, prod.stock) }}</span>
+      <!-- Better responsive footer with improved button sizing -->
+      <div class="mt-auto pt-2 sm:pt-3">
+        <div class="flex items-center justify-between mb-2 sm:mb-3">
+          <div class="text-xs sm:text-sm">
+            <span class="text-slate-500">Stock: </span>
+            <span class="font-semibold text-slate-800">{{ prod.stock }} {{ getUnit(prod.unidad, prod.stock) }}</span>
+          </div>
         </div>
-        <button (click)="$event.stopPropagation(); openProductModal(prod)" class="w-full sm:w-auto sm:ml-auto flex items-center justify-center gap-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 text-sm font-semibold z-10 cursor-pointer">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
+        
+        <button (click)="$event.stopPropagation(); openProductModal(prod)" class="w-full flex items-center justify-center gap-1 sm:gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 text-xs sm:text-sm font-semibold z-10 cursor-pointer">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0">
             <path d="M7.2998 5H22L20 12H8.37675M21 16H9L7 3H4M4 8H2M5 11H2M6 14H2M10 20C10 20.5523 9.55228 21 9 21C8.44772 21 8 20.5523 8 20C8 19.4477 8.44772 19 9 19C9.55228 19 10 19.4477 10 20ZM21 20C21 20.5523 20.5523 21 20 21C19.4477 21 19 20.5523 19 20C19 19.4477 19.4477 19 20 19C20.5523 19 21 19.4477 21 20Z" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          Agregar
+          <span class="truncate">Agregar</span>
         </button>
       </div>
     </ng-container>
 
     <ng-template #categoriaCard>
-      <div class="flex items-center gap-3 p-2 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg h-full">
-        <div class="w-10 h-10 bg-gradient-to-br from-blue-200 to-purple-200 rounded flex items-center justify-center border-2 border-blue-100">
-          <span class="text-blue-700 font-bold text-lg">{{ prod.nombre ? prod.nombre.substring(0,2).toUpperCase() : '?' }}</span>
+      <!-- Improved category card responsive design -->
+      <div class="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg h-full min-h-[60px] sm:min-h-[80px]">
+        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-200 to-purple-200 rounded flex items-center justify-center border-2 border-blue-100 flex-shrink-0">
+          <span class="text-blue-700 font-bold text-sm sm:text-lg">{{ prod.nombre ? prod.nombre.substring(0,2).toUpperCase() : '?' }}</span>
         </div>
-        <span class="font-semibold text-slate-800 text-base truncate">{{ prod.nombre | titlecase }}</span>
+        <span class="font-semibold text-slate-800 text-sm sm:text-base line-clamp-2 leading-tight" [title]="prod.nombre | titlecase">{{ prod.nombre | titlecase }}</span>
       </div>
     </ng-template>
   </li>

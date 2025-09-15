@@ -28,8 +28,13 @@ export class ProductModalComponent implements OnChanges {
   onConfirm(): void {
     if (!this.product) return;
 
-    if (this.quantity < 1) {
-      this.error = 'La cantidad debe ser al menos 1.';
+    if (this.quantity < 0.5) {
+      this.error = 'La cantidad mínima es 0.5.';
+      return;
+    }
+    // Solo acepta múltiplos de 0.5
+    if ((this.quantity * 10) % 5 !== 0) {
+      this.error = 'Solo puedes agregar múltiplos de 0.5.';
       return;
     }
     if (this.quantity > this.product.stock) {
@@ -53,15 +58,12 @@ export class ProductModalComponent implements OnChanges {
   }
 
   onQuantityInput(): void {
-    // Si el stock es decimal, no hacemos nada y permitimos cualquier valor.
-    if (this.isDecimalStock()) {
-      return;
-    }
-
-    // Si el stock es entero y el valor actual tiene decimales...
-    if (this.quantity && !Number.isInteger(this.quantity)) {
-      // ...lo redondeamos hacia abajo para eliminar el decimal.
-      this.quantity = Math.floor(this.quantity);
+    // Siempre forzar múltiplos de 0.5
+    if (this.quantity < 0.5) {
+      this.quantity = 0.5;
+    } else {
+      // Redondear al múltiplo de 0.5 más cercano
+      this.quantity = Math.round(this.quantity * 2) / 2;
     }
   }
 

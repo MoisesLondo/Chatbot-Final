@@ -34,8 +34,7 @@
               type="number"
               id="quantity"
               [(ngModel)]="quantity"
-              (input)="onQuantityInput()" [step]="isDecimalStock() ? '0.1' : '1'"
-              [min]="isDecimalStock() ? '0.1' : '1'"
+              (input)="onQuantityInput()" (change)="onQuantityInput()" step="0.5" min="0.5"
               [max]="product.stock"
               class="w-32 text-center p-2 border-2 rounded-md focus:ring-blue-500 focus:border-blue-500 transition"
             />

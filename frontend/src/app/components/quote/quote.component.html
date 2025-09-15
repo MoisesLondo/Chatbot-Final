@@ -72,7 +72,7 @@
         </div>
 
         <!-- Advanced Search -->
-        <div *ngIf="searchType() === 'criteria'" >
+        <div *ngIf="searchType() === 'criteria'" (keyup.enter)="searchByCriteria()">
           <h2 class="card-title font-montserrat text-xl text-gray-900 mb-4">
             <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
@@ -482,79 +482,82 @@
     </div>
 
     <!-- Multiple Quotes Results (when searching by criteria or status) -->
-    <div *ngIf="cotizacionesList().length > 0 && searchType() === 'criteria' && !isLoading()">
-      <div class="card bg-base-100 shadow-xl">
-        <div class="card-body">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="card-title font-montserrat text-xl text-gray-900">
-              Resultados de Búsqueda ({{ cotizacionesList().length }} cotizaciones encontradas)
-            </h2>
-          </div>
-          
-          <div class="overflow-x-auto">
-            <table class="table table-zebra w-full">
-              <thead>
-                <tr class="font-montserrat">
-                  <th>ID</th>
-                  <th>Cliente</th>
-                  <th>Cédula/RIF</th>
-                  <th>Email</th>
-                  <th>Teléfono</th>
-                  <th>Fecha</th>
-                  <th class="text-right">Total</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody class="font-noto-sans">
-                <tr *ngFor="let cot of cotizacionesList()">
-                  <td class="font-mono text-sm">{{ cot.id }}</td>
-                  <td class="font-medium">{{ cot.nombre_cliente | titlecase }}</td>
-                  <td>{{ cot.cedula_rif }}</td>
-                  <td>{{ cot.cliente_email }}</td>
-                  <td>{{ cot.cliente_telefono }}</td>
-                  <td>{{ cot.created_at | date:'dd/MM/yyyy HH:mm a':'es' }}</td>
-                  <td class="text-right font-medium">{{ cot.total | currency:'USD':'symbol':'1.2-2' }}</td>
-                  <td>
-                    <div class="flex space-x-2">
-                      <button 
-                        class="btn btn-ghost btn-xs"
-                        (click)="viewQuoteDetails(cot.id)"
-                        title="Ver detalles"
-                      >
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                        </svg>
-                      </button>
-                      
-                      <button 
-                        class="btn btn-success btn-xs"
-                        (click)="downloadQuotePDF(cot.id)"
-                        title="Descargar PDF"
-                      >
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                      </button>
-                      
-                      <!-- <button 
-                        class="btn btn-secondary btn-xs"
-                        (click)="downloadQuoteDOCX(cot.id)"
-                        title="Descargar DOCX"
-                      >
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                      </button> -->
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+<div *ngIf="cotizacionesList().length > 0 && searchType() === 'criteria' && !isLoading()">
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="card-title font-montserrat text-xl text-gray-900">
+          Resultados de Búsqueda ({{ cotizacionesList().length }} cotizaciones encontradas)
+        </h2>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="table table-zebra w-full">
+          <thead>
+            <tr class="font-montserrat">
+              <th>ID</th>
+              <th>Cliente</th>
+              <th>Cédula/RIF</th>
+              <th>Email</th>
+              <th>Teléfono</th>
+              <th>Fecha</th>
+              <th class="text-right">Total</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="font-noto-sans">
+            <tr *ngFor="let cot of paginatedCotizaciones">
+              <td class="font-mono text-sm">{{ cot.id }}</td>
+              <td class="font-medium">{{ cot.nombre_cliente | titlecase }}</td>
+              <td>{{ cot.cedula_rif }}</td>
+              <td>{{ cot.cliente_email }}</td>
+              <td>{{ cot.cliente_telefono }}</td>
+              <td>{{ cot.created_at | date:'dd/MM/yyyy HH:mm a':'es' }}</td>
+              <td class="text-right font-medium">{{ cot.total | currency:'USD':'symbol':'1.2-2' }}</td>
+              <td>
+                <div class="flex space-x-2">
+                  <button 
+                    class="btn btn-ghost btn-xs"
+                    (click)="viewQuoteDetails(cot.id)"
+                    title="Ver detalles"
+                  >
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                  </button>
+                  
+                  <button 
+                    class="btn btn-success btn-xs"
+                    (click)="downloadQuotePDF(cot.id)"
+                    title="Descargar PDF"
+                  >
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      <div class="flex justify-center items-center gap-2 mt-6">
+        <button class="btn btn-xs" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+          Anterior
+        </button>
+        <span class="font-noto-sans text-sm px-2">
+          Página {{ currentPage }} de {{ totalPages }}
+        </span>
+        <button class="btn btn-xs" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+          Siguiente
+        </button>
       </div>
     </div>
+  </div>
+</div>
 
 <!-- Loading State -->
 @if (isLoading()) {

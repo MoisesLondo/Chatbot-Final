@@ -171,8 +171,9 @@ fetchCotizacion() {
 
   // New multiple criteria search
   searchByCriteria() {
-    this.isLoading.set(true);
-    if (!this.hasSearchCriteria()) return;
+      this.isLoading.set(true);
+  if (!this.hasSearchCriteria()) return;
+  this.currentPage = 1;
 
     // Build query parameters
     const params = new URLSearchParams();
@@ -393,5 +394,22 @@ blockNonNumeric(event: KeyboardEvent) {
 ngOnInit(): void {
   // Sync telefono with searchCriteria.cliente_telefono on init
   this.telefono = this.searchCriteria.cliente_telefono || '';
+}
+
+pageSize = 20;
+currentPage = 1;
+
+get paginatedCotizaciones() {
+  const start = (this.currentPage - 1) * this.pageSize;
+  return this.cotizacionesList().slice(start, start + this.pageSize);
+}
+
+get totalPages() {
+  return Math.ceil(this.cotizacionesList().length / this.pageSize) || 1;
+}
+
+goToPage(page: number) {
+  if (page < 1 || page > this.totalPages) return;
+  this.currentPage = page;
 }
 }

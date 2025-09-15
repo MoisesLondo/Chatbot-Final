@@ -57,6 +57,7 @@ Si el usuario expresa intención de cotizar (ej: "quiero una cotización", "cuá
 
 [ABRIR_FORMULARIO_COTIZACION]
 
+NUNCA DEBES DE MANDAR LA ETIQUETA SI NO HAS BUSCADO NINGUN PRODUCTO ANTERIORMENTE.
 
 Si el carrito está vacío, indícale que debe agregar productos antes de cotizar.
 

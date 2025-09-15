@@ -11,7 +11,8 @@ import { CartService } from '../../services/cart.service';
 import { ProductModalComponent } from '../product-modal/product-modal.component';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
-
+import { Notyf } from 'notyf';
+import 'notyf/notyf.min.css';
  
 interface Message {
   text: string;
@@ -43,6 +44,8 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
   @ViewChild(CartComponent) cartComponent!: CartComponent;
   showCart = false;
   private notificationSound = new Audio('/sounds/happy-message-ping-351298.mp3');
+  private notyf = new Notyf();
+
   private sessionId: string;
   cartItemCount = 0;
   animateCartIcon = false;
@@ -248,9 +251,11 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
       this.messages.push(this.buildMsg('Mensaje Enviado', 'user'));
       this.isLoadingBotResponse = true;
     } else if (userText.includes('[ABRIR_FORMULARIO_COTIZACION]')) {
-      // Mostrar un mensaje natural relacionado al carrito
-      this.messages.push(this.buildMsg('Quiero cotizar los productos que tengo en mi carrito.', 'user'));
-      this.isLoadingBotResponse = true;
+      // Solo permite abrir el formulario si el carrito NO está vacío
+      if (this.cartService.getCart().length > 0) {
+        this.messages.push(this.buildMsg('Quiero cotizar los productos que tengo en mi carrito.', 'user'));
+        this.isLoadingBotResponse = true;
+      } // Si el carrito está vacío, no hace nada
     } else {
       this.messages.push(this.buildMsg(userText, 'user'));
       this.isLoadingBotResponse = true;
@@ -296,9 +301,20 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
                   const precio = item.product?.precio || 0;
                   return `<li>${nombre} (Cantidad: ${cantidad}, Código: ${codigo}, uPrice: ${precio})</li>`;
                 }).join('') + `</ul>`;
+              this.messages.push(this.buildMsg('Por favor, completa el formulario de cotización.', 'bot'));
+              this.openCotizacionModal(productosHtml);
+            } else {
+              this.notyf.error({message:'No puedes abrir el formulario de cotización con el carrito vacío.',
+                duration: 60000,
+                dismissible: true,
+                position: {
+                  x: 'right',
+                  y: 'top',
+                }
+              });
+              
             }
-            this.messages.push(this.buildMsg('Por favor, completa el formulario de cotización.', 'bot'));
-            this.openCotizacionModal(productosHtml);
+            
           } else {
             this.messages.push(this.buildMsg(res.response, 'bot', true));
           }

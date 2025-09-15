@@ -65,16 +65,6 @@ private botErrorSource = new Subject<string>();
   }
 
   addProduct(product: Product, quantity: number = 1) {
-    // Validar múltiplos de 0.5
-    if ((quantity * 10) % 5 !== 0) {
-      this.notyf.error({
-        message: `Solo puedes agregar múltiplos de 0.5 para ${product.nombre}.`,
-        duration: 6000,
-        dismissible: true,
-        position: { x: 'right', y: 'top' },
-      });
-      return false;
-    }
     // Validar stock
     if (product.stock !== undefined && quantity > product.stock) {
       this.notyf.error({
@@ -175,12 +165,12 @@ private botErrorSource = new Subject<string>();
       found = true;
       const line = match[1];
       // Regex para extraer unidad si está presente
-      const prodMatch = line.match(/(.+?) \(Cantidad: (\d+), precio: ([\d.]+), stock: (\d+)(?:, codigo: ([^,]+))?(?:, unidad: ([^)]+))?\)/);
+      const prodMatch = line.match(/(.+?) \(Cantidad: ([\d.]+), precio: ([\d.]+), stock: ([\d.]+)(?:, codigo: ([^,]+))?(?:, unidad: ([^)]+))?\)/);
       if (prodMatch) {
         const nombre = prodMatch[1].trim();
-        const cantidad = parseInt(prodMatch[2], 10);
+        const cantidad = parseFloat(prodMatch[2]);
         const precio = parseFloat(prodMatch[3]);
-        const stock = parseInt(prodMatch[4], 10);
+        const stock = parseFloat(prodMatch[4]);
         const codigo = prodMatch[5] ? prodMatch[5].trim() : nombre;
         const unidad = prodMatch[6] ? prodMatch[6].trim() : undefined;
         const product: Product = { id: '', codigo, nombre, precio, categoria: '', stock, unidad };
@@ -191,12 +181,12 @@ private botErrorSource = new Subject<string>();
     if (!found) {
       const lines = content.split('\n').map(l => l.trim()).filter(l => l);
       lines.forEach(line => {
-        const prodMatch = line.match(/(.+?) \(Cantidad: (\d+), precio: ([\d.]+), stock: (\d+)(?:, codigo: ([^,]+))?(?:, unidad: ([^)]+))?\)/);
+  const prodMatch = line.match(/(.+?) \(Cantidad: ([\d.]+), precio: ([\d.]+), stock: ([\d.]+)(?:, codigo: ([^,]+))?(?:, unidad: ([^)]+))?\)/);
         if (prodMatch) {
           const nombre = prodMatch[1].trim();
-          const cantidad = parseInt(prodMatch[2], 10);
-          const precio = parseFloat(prodMatch[3]);
-          const stock = parseInt(prodMatch[4], 10);
+    const cantidad = parseFloat(prodMatch[2]);
+    const precio = parseFloat(prodMatch[3]);
+    const stock = parseFloat(prodMatch[4]);
           const codigo = prodMatch[5] ? prodMatch[5].trim() : nombre;
           const unidad = prodMatch[6] ? prodMatch[6].trim() : undefined;
           const product: Product = { id: '', codigo, nombre, precio, categoria: '', stock, unidad };

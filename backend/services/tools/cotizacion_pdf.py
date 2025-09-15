@@ -23,6 +23,7 @@ def armar_modelo_cotizacion(datos: dict) -> CotizacionCreate:
             codigo_producto=prod["pCod"],
             nombre_producto=prod["prodName"],
             cantidad=prod["qty"],
+            unidad=prod["unit"],
             precio_unitario=prod["uPrice"],
             total=prod["qty"] * prod["uPrice"],
         )
@@ -75,14 +76,14 @@ def generar_creation_date():
     Genera la fecha de creación de la cotización.
     """
     from datetime import datetime
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return datetime.now().strftime("%d-%m-%Y %H:%M:%S")
 
 def generar_expiration_date():
     """
     Genera la fecha de expiración de la cotización (30 días después de la creación).
     """
     from datetime import datetime, timedelta
-    return (datetime.now() + timedelta(days=15)).strftime("%Y-%m-%d %H:%M:%S")
+    return (datetime.now() + timedelta(days=15)).strftime("%d-%m-%Y %H:%M:%S")
 
 
 class ProductoCotizacion(BaseModel):
@@ -107,17 +108,13 @@ def generar_cotizacion_pdf(
     try:
         # Si los productos son modelos Pydantic, convertir a dict para armar_modelo_cotizacion
         productos_dict = [p.dict() if hasattr(p, 'dict') else p for p in products]
-        # Extraer units para la plantilla, pero no enviar a DB
-        productos_for_db = [
-            {k: v for k, v in p.items() if k != 'unit'} for p in productos_dict
-        ]
         datos = {
             "cxName": cxName,
             "cxId": cxId,
             "cxAddress": cxAddress,
             "email": email,
             "tel": tel,
-            "products": productos_for_db,
+            "products": productos_dict,
         }
         if vendedorId:
             datos["vendedorId"] = vendedorId
@@ -139,16 +136,14 @@ def generar_cotizacion_pdf(
         plantilla_path = "static/cotizacion-template.docx"
         doc = DocxTemplate(plantilla_path)
         productos = []
+        productos = []
         for i, detalle in enumerate(cotizacion.detalles, start=1):
-            unit_val = None
-            if i-1 < len(productos_dict):
-                raw_unit = productos_dict[i-1].get('unit')
-                unit_val = get_unit_label(raw_unit, detalle.cantidad)
             productos.append({
                 "n": i,
                 "pCod": detalle.codigo_producto,
                 "prodName": detalle.nombre_producto,
-                "qty": f"{detalle.cantidad} {unit_val}",
+                "qty": detalle.cantidad,
+                "unit": detalle.unidad,
                 "uPrice": f"{detalle.precio_unitario:.2f}",
                 "pTotal": f"{detalle.total:.2f}"
             })
@@ -266,16 +261,20 @@ def generar_ruta_pdf(cotizacion: CotizacionCreate) -> str:
             return f"http://localhost:8000/static/temp/{cotizacion.id}.pdf"
 
         # Generar el archivo DOCX primero
-        temp_docx = generar_ruta_docx(cotizacion).replace("http://localhost:8000", "")
+        temp_docx_url = generar_ruta_docx(cotizacion)
+        temp_docx = temp_docx_url.replace("http://localhost:8000", "")
+        temp_docx = os.path.join(os.getcwd(), temp_docx.lstrip("/").replace("/", os.sep))
 
-        # Convertir a PDF (requiere docx2pdf y MS Word en Windows)
+        import pythoncom
         try:
+            pythoncom.CoInitialize()
+            from docx2pdf import convert
             convert(temp_docx, temp_pdf)
+            pythoncom.CoUninitialize()
             return f"http://localhost:8000/static/temp/{cotizacion.id}.pdf"
         except Exception as e:
             print(f"Error al convertir a PDF: {e}")
-            return f"http://localhost:8000{temp_docx}"  # Devuelve el DOCX si falla la conversión
-
+            return f"http://localhost:8000/static/temp/{cotizacion.id}.docx"  # Devuelve el DOCX si falla la conversión
     except Exception as e:
         print(f"Error al generar el archivo PDF: {e}")
         raise

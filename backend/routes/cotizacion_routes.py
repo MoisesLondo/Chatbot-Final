@@ -77,6 +77,7 @@ def descargar_cotizacion_pdf(cotizacion_id: str):
                 nombre_producto=detalle["nombre_producto"],
                 cantidad=int(detalle["cantidad"]),
                 precio_unitario=float(detalle["precio_unitario"]),
+                unidad=detalle["unidad"],
                 total=float(detalle["total"]),
             ))
         

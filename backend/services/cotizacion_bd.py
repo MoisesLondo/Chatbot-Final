@@ -79,6 +79,7 @@ def guardar_cotizacion(cotizacion: CotizacionCreate):
             print("created_by_vendedor_id:", cotizacion.created_by_vendedor_id)
             print("cliente_email:", cotizacion.cliente_email)
             print("cliente_telefono:", cotizacion.cliente_telefono)
+            print("Detalles:", cotizacion.detalles)
             # Insertar cotización
             cur.execute("""
                 INSERT INTO cotizacion (
@@ -107,13 +108,13 @@ def guardar_cotizacion(cotizacion: CotizacionCreate):
             for detalle in cotizacion.detalles:
                 cur.execute("""
                     INSERT INTO detalle_cotizacion (
-                        id, cotizacion_id, codigo_producto, nombre_producto, cantidad, precio_unitario, total
+                        id, cotizacion_id, codigo_producto, nombre_producto, cantidad, precio_unitario, total, unidad
                     ) VALUES (
-                        gen_random_uuid(), %s, %s, %s, %s, %s, %s
+                        gen_random_uuid(), %s, %s, %s, %s, %s, %s, %s
                     )
                 """, (
                     cotizacion_id, detalle.codigo_producto, detalle.nombre_producto,
-                    detalle.cantidad, detalle.precio_unitario, detalle.total
+                    detalle.cantidad, detalle.precio_unitario, detalle.total, detalle.unidad
                 ))
 
             conn.commit()

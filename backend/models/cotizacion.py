@@ -12,6 +12,7 @@ class DetalleCotizacion(BaseModel):
     nombre_producto: str
     cantidad: int
     precio_unitario: float
+    unidad: str
     total: float
 
 class Cotizacion(BaseModel):
@@ -44,6 +45,7 @@ class DetalleCotizacionCreate(BaseModel):
     codigo_producto: str
     nombre_producto: str
     cantidad: int
+    unidad: str
     precio_unitario: float
     total: float
 

@@ -65,6 +65,28 @@ private botErrorSource = new Subject<string>();
   }
 
   addProduct(product: Product, quantity: number = 1) {
+    // Validar cantidad mínima
+    if (quantity < 0.5) {
+      this.notyf.error({
+        message: `La cantidad mínima es 0.5 para ${product.nombre}.`,
+        duration: 6000,
+        dismissible: true,
+        position: { x: 'right', y: 'top' },
+      });
+      return false;
+    }
+    // Validar múltiplos de 0.5 solo para unidades distintas de KILOGRAMO/METRO
+    if (product.unidad !== 'KILOGRAMO' && product.unidad !== 'METRO') {
+      if ((quantity * 10) % 5 !== 0) {
+        this.notyf.error({
+          message: `Solo puedes agregar múltiplos de 0.5 para ${product.nombre}.`,
+          duration: 6000,
+          dismissible: true,
+          position: { x: 'right', y: 'top' },
+        });
+        return false;
+      }
+    }
     // Validar stock
     if (product.stock !== undefined && quantity > product.stock) {
       this.notyf.error({

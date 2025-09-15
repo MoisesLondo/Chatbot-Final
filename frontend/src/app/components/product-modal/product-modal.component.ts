@@ -32,10 +32,12 @@ export class ProductModalComponent implements OnChanges {
       this.error = 'La cantidad mínima es 0.5.';
       return;
     }
-    // Solo acepta múltiplos de 0.5
-    if ((this.quantity * 10) % 5 !== 0) {
-      this.error = 'Solo puedes agregar múltiplos de 0.5.';
-      return;
+    // Permitir cualquier decimal para KILOGRAMO y METRO
+    if (this.product.unidad !== 'KILOGRAMO' && this.product.unidad !== 'METRO') {
+      if ((this.quantity * 10) % 5 !== 0) {
+        this.error = 'Solo puedes agregar múltiplos de 0.5.';
+        return;
+      }
     }
     if (this.quantity > this.product.stock) {
       this.error = 'No hay suficiente stock disponible.';
@@ -63,15 +65,16 @@ export class ProductModalComponent implements OnChanges {
       this.error = 'La cantidad mínima es 0.5.';
       return;
     }
-    // Siempre forzar múltiplos de 0.5
     if (this.quantity < 0.5) {
       this.error = 'La cantidad mínima es 0.5.';
       return;
     }
-    // Solo acepta múltiplos de 0.5
-    if ((this.quantity * 10) % 5 !== 0) {
-      this.error = 'Solo puedes agregar múltiplos de 0.5.';
-      return;
+    // Permitir cualquier decimal para KILOGRAMO y METRO
+    if (this.product && this.product.unidad !== 'KILOGRAMO' && this.product.unidad !== 'METRO') {
+      if ((this.quantity * 10) % 5 !== 0) {
+        this.error = 'Solo puedes agregar múltiplos de 0.5.';
+        return;
+      }
     }
     // Si todo está bien, limpiar el error
     this.error = '';

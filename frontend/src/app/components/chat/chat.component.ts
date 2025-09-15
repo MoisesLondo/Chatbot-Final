@@ -186,11 +186,23 @@ export class ChatComponent implements OnInit, AfterViewInit, AfterViewChecked, O
     if (vendedor) {
       payload.vendedor = vendedor;
     }
-    console.log(vendedor)
-    console.log(payload)
+  
     const mensaje: string = `[FORMULARIO-ENVIADO]${JSON.stringify(payload, null, 2)}`;
     this.addMessage(mensaje);
     this.closeCotizacionModal(false);
+    this.cartService.clearCart();
+    if (this.showCart && this.cartComponent) {
+              this.cartComponent.items = [];
+              if (typeof this.cartComponent.calcularTotales === 'function') {
+                this.cartComponent.calcularTotales();
+              }
+            }
+            this.notyf.success({
+              message: 'Cotización generada correctamente.',
+              duration: 4000,
+              dismissible: true,
+              position: { x: 'right', y: 'top' }
+            });
   }
 
   resetChatHistory(): void {

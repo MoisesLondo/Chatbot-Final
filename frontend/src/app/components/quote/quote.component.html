@@ -88,24 +88,25 @@
               </label>
               <div class="flex gap-2">
                 <select [(ngModel)]="cedulaRifTipo" name="cedulaRifTipo" class="select select-bordered font-noto-sans w-20" (change)="onCedulaRifTipoChange()">
+                  <option value=""></option>
                   <option value="V">V</option>
                   <option value="J">J</option>
                   <option value="E">E</option>
                 </select>
                 <input
-                  type="text"
-                  inputmode="numeric"
-                  pattern="[0-9]*"
-                  class="input input-bordered font-noto-sans flex-1"
-                  [(ngModel)]="cedulaRifNumero"
-                  name="cedulaRifNumero"
-                  [placeholder]="cedulaRifTipo === 'J' ? '297507121' : (cedulaRifTipo === 'V' ? '29750712' : '84750712')"
-                  maxlength="10"
-                  [ngClass]="{'border-red-500': cedulaRifError}"
-                  (input)="onCedulaRifInput($event)"
-                  (blur)="updateCedulaRif()"
-                  (keypress)="blockNonNumeric($event)"
-                />
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                class="input input-bordered font-noto-sans flex-1"
+                [(ngModel)]="cedulaRifNumero"
+                name="cedulaRifNumero"
+                [placeholder]="cedulaRifTipo === 'J' ? '297507121' : (cedulaRifTipo === 'V' ? '29750712' : '84750712')"
+                maxlength="10"
+                [ngClass]="{'border-red-500': cedulaRifError}"
+                (input)="onCedulaRifInput($event); updateCedulaRif()"
+                (blur)="updateCedulaRif()"
+                (keypress)="blockNonNumeric($event)"
+              />
               </div>
               <span *ngIf="cedulaRifError" class="text-red-500 text-xs mt-1">{{ cedulaRifError }}</span>
             </div>
@@ -172,6 +173,7 @@
                   required
                   [ngClass]="{'border-red-500': telefonoError}"
                   (blur)="validateTelefono()"
+                  (input)="validateTelefono()"
                   inputmode="numeric"
                   (keypress)="blockNonNumeric($event)"
                 />

@@ -40,7 +40,11 @@
 
       <main class="flex-1 p-4 sm:p-6">
         <div *ngIf="loadingService.isLoading()" class="loader-overlay">
-          <span class="loading loading-spinner text-primary loading-xl"></span>
+          <div class="flex flex-col items-center justify-center w-full h-full">
+            <span class="loading loading-spinner text-primary" style="width: 64px; height: 64px; font-size: 3rem;"></span>
+            <h2 class="font-montserrat font-bold text-xl text-primary mt-6 mb-2">Cargando sistema...</h2>
+            <p class="font-noto-sans text-gray-600 text-base">Por favor, espera mientras procesamos tu solicitud.</p>
+          </div>
         </div>
         <router-outlet></router-outlet>
       </main>
@@ -88,33 +92,45 @@
           </div>
         </div>
         <ul class="menu p-4 space-y-2">
-          <li>
-            <a routerLink="/dashboard" routerLinkActive="bg-primary text-white" class="text-gray-700 font-noto-sans flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 transition-colors">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2H3a2 2 0 00-2 2v2z"></path></svg>
-              <span>Panel de Control</span>
-            </a>
-          </li>
-          <li *ngIf="userRole === 'admin'">
-            <a routerLink="/users" routerLinkActive="bg-primary text-white" class="text-gray-700 font-noto-sans flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-people" viewBox="0 0 16 16">
-  <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1zm-7.978-1L7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002-.014.002zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0M6.936 9.28a6 6 0 0 0-1.23-.247A7 7 0 0 0 5 9c-4 0-5 3-5 4q0 1 1 1h4.216A2.24 2.24 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816M4.92 10A5.5 5.5 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0m3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4"/>
-</svg>
-              <span>Usuarios</span>
-            </a>
-          </li>
-          <li>
-            <a routerLink="/quote" routerLinkActive="bg-primary text-white" class="text-gray-700 font-noto-sans flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 transition-colors">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
-              <span>Cotizaciones</span>
-            </a>
-          </li>
-          <li>
-            <a routerLink="/chat" target="_blank" routerLinkActive="bg-primary text-white" class="text-gray-700 font-noto-sans flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 transition-colors">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-              <span>Chatbot Megan</span>
-            </a>
-          </li>
-          <li class="my-4"><hr class="border-gray-300"></li>
+          <ng-container *ngIf="userRole === 'superusuario'; else normalMenu">
+            <li>
+              <a routerLink="/users" routerLinkActive="bg-primary text-white" class="text-gray-700 font-noto-sans flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-people" viewBox="0 0 16 16">
+                  <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1zm-7.978-1L7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002-.014.002zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0M6.936 9.28a6 6 0 0 0-1.23-.247A7 7 0 0 0 5 9c-4 0-5 3-5 4q0 1 1 1h4.216A2.24 2.24 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816M4.92 10A5.5 5.5 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0m3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4"/>
+                </svg>
+                <span>Usuarios</span>
+              </a>
+            </li>
+          </ng-container>
+          <ng-template #normalMenu>
+            <li>
+              <a routerLink="/dashboard" routerLinkActive="bg-primary text-white" class="text-gray-700 font-noto-sans flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2H3a2 2 0 00-2 2v2z"></path></svg>
+                <span>Panel de Control</span>
+              </a>
+            </li>
+            <li *ngIf="userRole === 'admin'">
+              <a routerLink="/users" routerLinkActive="bg-primary text-white" class="text-gray-700 font-noto-sans flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-people" viewBox="0 0 16 16">
+                  <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1zm-7.978-1L7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002-.014.002zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0M6.936 9.28a6 6 0 0 0-1.23-.247A7 7 0 0 0 5 9c-4 0-5 3-5 4q0 1 1 1h4.216A2.24 2.24 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816M4.92 10A5.5 5.5 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0m3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4"/>
+                </svg>
+                <span>Usuarios</span>
+              </a>
+            </li>
+            <li>
+              <a routerLink="/quote" routerLinkActive="bg-primary text-white" class="text-gray-700 font-noto-sans flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                <span>Cotizaciones</span>
+              </a>
+            </li>
+            <li>
+              <a routerLink="/chat" target="_blank" routerLinkActive="bg-primary text-white" class="text-gray-700 font-noto-sans flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                <span>Chatbot Megan</span>
+              </a>
+            </li>
+            <li class="my-4"><hr class="border-gray-300"></li>
+          </ng-template>
         </ul>
       </aside>
     </div>

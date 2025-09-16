@@ -44,12 +44,19 @@ export class MainLayoutComponent {
   ngOnInit(): void {
     const user = this.authService.getUserData();
     if (user) {
-      this.userName = user.sub;  
-      this.userRole = user.role;  
+      this.userName = user.sub;
+      this.userRole = user.role;
+      // Si es superusuario y no está en /users, redirigir
+      if (user.role === 'superusuario' && this.router.url !== '/users') {
+        this.router.navigate(['/users']);
+      }
+      // Si NO es superusuario y está en /users, permitir según guard
+      if ((user.role !== 'admin' && user.role !== 'superusuario') && this.router.url === '/users') {
+        this.router.navigate(['/dashboard']);
+      }
     } else {
       this.router.navigate(['/login']);
     }
-
   }
 
 }

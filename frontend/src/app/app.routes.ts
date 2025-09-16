@@ -29,11 +29,10 @@ export const routes: Routes = [
       // Rutas solo para admin
       { 
         path: 'users', component: UsersComponent,
-        // canActivate: [AdminGuard], // Descomenta cuando tengas el guard
+        canActivate: [AdminGuard],
         resolve: {
-      users: usersResolver
-    }
-        
+          users: usersResolver
+        }
       },
 
     ],

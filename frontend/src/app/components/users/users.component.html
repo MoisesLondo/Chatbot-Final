@@ -134,6 +134,7 @@
               (change)="filterUsers()"
             >
               <option value="">Todos los roles</option>
+              <option value="superusuario">Superusuario</option>
               <option value="admin">Administrador</option>
               <option value="vendedor">Vendedor</option>
             </select>
@@ -194,7 +195,7 @@
                     <div class="avatar placeholder">
                       <div class="bg-primary text-white rounded-full w-10 h-10">
                         <span class="flex items-center justify-center mt-2 text-sm font-bold">
-                          {{ getInitials(user.profile?.full_name || user.username) }}
+                          {{ getInitials(user.profile.full_name || user.username) }}
                         </span>
                       </div>
                     </div>
@@ -207,20 +208,21 @@
                 
                 <td>
                   <div>
-                    <div class="font-medium">{{ user.profile?.full_name | titlecase }}</div>
-                    <div class="text-sm text-gray-500">{{ user.profile?.email || 'Sin email' }}</div>
+                    <div class="font-medium">{{ user.profile.full_name | titlecase }}</div>
+                    <div class="text-sm text-gray-500">{{ user.profile.email || 'Sin email' }}</div>
                     <div class="text-sm">
-                    {{ user.profile?.tel || 'Sin teléfono' }}
+                    {{ user.profile.tel || 'Sin teléfono' }}
                   </div>
                   </div>
                 </td>
                 
                 <td>
                   <div class="badge" [ngClass]="{
+                    'badge-primary': user.role === 'superusuario',
                     'badge-secondary': user.role === 'admin',
                     'badge-info': user.role === 'vendedor'
                   }">
-                    {{ user.role === 'admin' ? 'Administrador' : 'Vendedor' }}
+                    {{ user.role === 'superusuario' ? 'Superusuario' : (user.role === 'admin' ? 'Administrador' : 'Vendedor') }}
                   </div>
                 </td>
                 
@@ -247,6 +249,7 @@
                     </button>
                     
                     <button 
+                      *ngIf="!(currentUserRole === 'admin' && user.role === 'superusuario')"
                       class="btn btn-ghost btn-xs"
                       (click)="editUser(user)"
                       title="Editar usuario"
@@ -652,10 +655,11 @@
           <div>
             <label class="font-noto-sans font-medium text-gray-700">Rol:</label>
             <div class="badge" [ngClass]="{
-              'badge-primary': selectedUser()?.role === 'admin',
-              'badge-secondary': selectedUser()?.role === 'vendedor'
+              'badge-primary': selectedUser()?.role === 'superusuario',
+              'badge-secondary': selectedUser()?.role === 'admin',
+              'badge-info': selectedUser()?.role === 'vendedor'
             }">
-              {{ selectedUser()?.role === 'admin' ? 'Administrador' : 'Vendedor' }}
+              {{ selectedUser()?.role === 'superusuario' ? 'Superusuario' : (selectedUser()?.role === 'admin' ? 'Administrador' : 'Vendedor') }}
             </div>
           </div>
           
@@ -681,6 +685,7 @@
           Cerrar
         </button>
         <button 
+          *ngIf="!(currentUserRole === 'admin' && selectedUser()?.role === 'superusuario')"
           class="btn btn-primary font-noto-sans"
           (click)="editUserFromView()"
         >

@@ -16,3 +16,18 @@ Content-Type: application/json
 
 ### obtener info del vendedor
 GET http://127.0.0.1:8000/vendedores_profile/785840b0-7d4e-45de-abb1-d6265b30bab8
+
+### Crear usuario
+POST http://127.0.0.1:8000/register-vendedor
+Content-Type: application/json
+
+{
+  "username": "superusuario",
+  "password": "123456",
+  "role": "superusuario",
+  "profile": {
+    "full_name": "Super Usuario",
+    "email": "superusuario@example.com",
+    "tel": "0414-0430837"
+}
+}

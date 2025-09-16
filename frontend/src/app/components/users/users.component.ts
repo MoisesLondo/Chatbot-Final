@@ -1,9 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed, OnInit } from '@angular/core';
+import { AuthService } from '../../services/auth.service';
 import { HttpClient } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+
+import { getCurrentUserRole } from './role.utils';
 
 interface VendedorProfile {
   id?: number;
@@ -17,7 +20,7 @@ export interface AuthUser {
   username: string;
   password?: string;
   password_hash?: string;
-  role: 'admin' | 'vendedor';
+  role: 'admin' | 'vendedor' | 'superusuario';
   is_active: boolean;
   created_at: string;
   profile: VendedorProfile;
@@ -33,7 +36,7 @@ interface UserStats {
 interface CreateUserRequest {
   username: string;
   password: string;
-  role: 'admin' | 'vendedor';
+  role: 'admin' | 'vendedor' | 'superusuario';
   is_active: boolean;
   profile: {
     full_name: string;
@@ -52,6 +55,16 @@ interface CreateUserRequest {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UsersComponent {
+  private readonly authService = inject(AuthService);
+  public readonly currentUserRole: string | null;
+
+  constructor() {
+    this.route = inject(ActivatedRoute);
+    this.currentUserRole = this.authService.getUserData()?.role || null;
+    this.route.data.subscribe(({ users }) => {
+      this.users.set(users);
+    });
+  }
   private readonly http = inject(HttpClient);
   private readonly route = inject(ActivatedRoute);
 
@@ -67,11 +80,7 @@ export class UsersComponent {
   protected readonly userToToggle = signal<AuthUser | null>(null);
   loadingStatusMap: { [userId: string]: boolean } = {};
 
-  constructor() {
-    this.route.data.subscribe(({ users }) => {
-      this.users.set(users);
-    });
-  }
+
 
 
   
@@ -206,6 +215,12 @@ openCreateUserModal(): void {
 }
 
   editUser(user: AuthUser): void {
+    // Si el usuario actual es admin y el usuario a editar es superusuario, no permitir
+    const currentRole = getCurrentUserRole();
+    if (currentRole === 'admin' && user.role === 'superusuario') {
+      alert('No tienes permiso para editar un superusuario.');
+      return;
+    }
     this.currentUser = { 
       ...user, 
       profile: {

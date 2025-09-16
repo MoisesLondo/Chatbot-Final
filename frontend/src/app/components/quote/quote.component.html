@@ -561,19 +561,14 @@
 
 <!-- Loading State -->
 @if (isLoading()) {
-  <div class="card bg-base-100 shadow-xl">
-    <div class="card-body text-center py-12">
-      <!-- Spinner SVG -->
-      <svg class="animate-spin w-16 h-16 text-primary mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+  <div style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:#fff;z-index:9999;display:flex;align-items:center;justify-content:center;">
+    <div class="flex flex-col items-center justify-center w-full h-full">
+      <svg class="animate-spin w-16 h-16 text-primary mx-auto mb-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
       </svg>
-      <h3 class="font-montserrat font-semibold text-xl text-gray-900 mb-2">
-        Cargando...
-      </h3>
-      <p class="font-noto-sans text-gray-600">
-        Buscando cotizaciones. Por favor, espera.
-      </p>
+      <h2 class="font-montserrat font-bold text-xl text-primary mt-6 mb-2">Cargando sistema...</h2>
+      <p class="font-noto-sans text-gray-600 text-base">Por favor, espera mientras procesamos tu solicitud.</p>
     </div>
   </div>
 }

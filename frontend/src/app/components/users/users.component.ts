@@ -110,30 +110,29 @@ export class UsersComponent {
 
   protected readonly filteredUsers = computed(() => {
     let filtered = this.users();
-    
-    
+    // Si el usuario logueado es admin, ocultar superusuario
+    if (this.currentUserRole === 'admin') {
+      filtered = filtered.filter(user => user.role !== 'superusuario');
+    }
     // Search filter
     const search = this.searchTermSignal().toLowerCase();
     if (search) {
       filtered = filtered.filter(user => 
         user.username.toLowerCase().includes(search) ||
-        user.profile?.full_name?.toLowerCase().includes(search) ||
-        user.profile?.email?.toLowerCase().includes(search)
+        user.profile.full_name.toLowerCase().includes(search) ||
+        user.profile.email.toLowerCase().includes(search)
       );
     }
-
     // Role filter
     const role = this.roleFilterSignal();
     if (role) {
       filtered = filtered.filter(user => user.role === role);
     }
-
     // Status filter
     const status = this.statusFilterSignal();
     if (status !== '') {
       filtered = filtered.filter(user => user.is_active === (status === 'true'));
     }
-
     return filtered;
   });
 

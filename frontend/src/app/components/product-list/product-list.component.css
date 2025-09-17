@@ -1,4 +1,4 @@
-.product-list-title { margin-bottom: 0.5rem; font-weight: 600; color: #374151; font-size: 1.125rem; }
+.product-list-title { margin-bottom: 0.5rem; font-weight: 600; color: #374151; font-size: 1rem; }
 
 /* Added utility classes for better text truncation */
 .line-clamp-2 {
@@ -8,7 +8,11 @@
   overflow: hidden;
 }
 
-/* Ensure proper text wrapping on very small screens */
+/* Ensure proper text wrapping on all screens */
+.text-wrap {
+  white-space: normal;
+  word-break: break-word;
+}
 @media (max-width: 640px) {
   .truncate-mobile {
     overflow: hidden;

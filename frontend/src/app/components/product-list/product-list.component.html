@@ -11,7 +11,7 @@
       <div class="flex items-start gap-2 sm:gap-3 mb-3">
         <div class="flex-shrink-0">
           <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center border-2 border-blue-200">
-            <div class="w-6 h-6 sm:w-8 sm:h-8 bg-blue-300 rounded text-white font-bold text-xs sm:text-base flex items-center justify-center">
+            <div class="w-6 h-6 sm:w-8 sm:h-8 bg-blue-300 rounded text-white font-bold text-xs sm:text-xs flex items-center justify-center">
               {{ prod.nombre ? prod.nombre.substring(0,2).toUpperCase() : '?' }}
             </div>
           </div>
@@ -20,7 +20,7 @@
         <div class="flex-1 min-w-0 overflow-hidden">
           <!-- Better responsive text sizing and spacing -->
           <div class="mb-2">
-            <h3 class="font-bold text-slate-800 text-sm sm:text-base leading-tight line-clamp-2 mb-1" [title]="prod.nombre">{{ prod.nombre }}</h3>
+            <h3 class="font-bold text-slate-800 text-xs leading-tight line-clamp-2 mb-1 text-wrap" [title]="prod.nombre">{{ prod.nombre }}</h3>
             <span class="text-green-600 font-bold text-base sm:text-lg">${{ prod.precio }}</span>
           </div>
 

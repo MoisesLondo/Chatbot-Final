@@ -251,6 +251,11 @@ fetchCotizacion() {
       fecha_desde: '',
       fecha_hasta: ''
     };
+    // Limpiar inputs de teléfono y cédula/rif
+    this.codigoTelefono = '0414';
+    this.telefono = '';
+    this.cedulaRifTipo = 'V';
+    this.cedulaRifNumero = '';
     this.clearResults();
   }
 

@@ -17,6 +17,13 @@
   border: 1px solid #d1d5db;
   border-radius: 4px;
   flex: 1;
+  color: #222; /* texto más oscuro */
+}
+
+/* Placeholder más claro */
+.input::placeholder {
+  color: #b0b0b0;
+  opacity: 1;
 }
 
 .table {
